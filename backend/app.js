@@ -51,15 +51,28 @@ if (process.env.NODE_ENV !== 'production') {
 
 // 获取智能体列表（用于前端渲染）
 app.get('/api/agents/list', (req, res) => {
-  res.json(agents)
-  // 假设 req.user.isAdmin 表示管理员1
-  // if (req.user && req.user.isAdmin) {
-  //   res.json(agents); // 管理员返回全部
-  // } else {
-  //   // 普通用户不返回apiKey
-  //   const safeAgents = agents.map(({ apiKey, ...rest }) => rest);
-  //   res.json(safeAgents);
-  // }
+  let agentsList = agents;
+  // 获取用户名
+  const username = req.query.username;
+  // 读取用户信息
+  let users = [];
+  const usersPath = path.join(__dirname, 'users.json');
+  if (fs.existsSync(usersPath)) {
+    users = JSON.parse(fs.readFileSync(usersPath, 'utf-8'));
+  }
+  const user = users.find(u => u.username === username);
+  // 判断是否管理员
+  const isAdmin = user && user.isAdmin;
+  // 管理员返回全部，普通用户只返回安全字段
+  const safeAgents = agentsList.map(a => isAdmin ? a : {
+    id: a.id,
+    name: a.name,
+    description: a.description,
+    status: a.status,
+    inputs: a.inputs,
+    inputType: a.inputType,
+  });
+  res.json(safeAgents);
 });
 
 // 转发到Dify智能体
@@ -75,8 +88,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
       {
         headers: {
           'Authorization': `Bearer ${agent.apiKey}`,
-          'Content-Type': 'application/json',
-          'Backtest':'backend'
+          'Content-Type': 'application/json'
         }
       }
     );

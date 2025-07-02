@@ -59,15 +59,15 @@ async function invokeAgent(agentId, inputs, query, user) {
     }
   }
   
+  // query可以为空，后端会自动补充为"开始"
   const requestData = {
     inputs: nonFileInputs, // 只包含非文件字段
-    query: query,
+    query: query || '', // 允许为空，后端自动补充
     user: user,
     fileData: fileData // 文件字段单独处理
   };
   
   console.log('【前端】发送的请求数据:', requestData);
-  console.log('【前端】注意：后端会自动在inputs中补充query为"开始"');
   
   try {
     const response = await fetch(`/api/agent/${agentId}/invoke`, {
@@ -203,7 +203,8 @@ async function handleMultipleFileFields() {
 async function testSimpleInvoke() {
   const agentId = 'dream-career';
   const user = 'test-user';
-  const query = '请帮我分析职业规划';
+  // query可以为空，后端会自动补充为"开始"
+  const query = ''; // 测试空query的情况
   
   // 简单的非文件字段测试
   const inputs = {
@@ -213,7 +214,7 @@ async function testSimpleInvoke() {
   };
   
   try {
-    console.log('【测试】开始简单调用测试');
+    console.log('【测试】开始简单调用测试（空query）');
     const result = await invokeAgent(agentId, inputs, query, user);
     console.log('【测试】调用成功:', result);
     return result;

@@ -166,10 +166,10 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     inputs = {};
   }
   
-  // 验证必需参数
+  // 验证必需参数，如果query为空则自动补充
   if (!query) {
-    console.error('【INVOKE】缺少必需的query参数');
-    return res.status(400).json({ error: 'Missing required parameter: query' });
+    console.log('【INVOKE】query参数为空，自动补充为"开始"');
+    query = '开始';
   }
   
   // 确保fileData是对象
@@ -250,17 +250,12 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
   
   // 组装最终请求数据
   const data = {
-    inputs: {
-      ...inputs,
-      query: "开始" // 自动补充query为"开始"
-    },
+    inputs: inputs,
     query: query,
     response_mode: response_mode || 'blocking',
     conversation_id: conversation_id || '',
     user: user || 'auto_test'
   };
-  
-  console.log('【INVOKE】自动补充query后的inputs:', data.inputs);
   
   const headers = {
     'Authorization': `Bearer ${agent.apiKey}`,

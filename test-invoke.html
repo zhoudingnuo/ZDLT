@@ -60,7 +60,6 @@
 </head>
 <body>
     <h1>智能体调用测试 - dream-career</h1>
-    <p style="color: #666; font-style: italic;">注意：后端会自动在inputs中补充query为"开始"</p>
     
     <div class="form-group">
         <label for="prompt">提示词 (prompt):</label>
@@ -90,7 +89,7 @@
     
     <div class="form-group">
         <label for="query">查询内容 (query):</label>
-        <textarea id="query" rows="2" placeholder="请输入查询内容">请帮我分析职业规划</textarea>
+        <textarea id="query" rows="2" placeholder="请输入查询内容（可以为空，后端会自动补充为'开始'）">请帮我分析职业规划</textarea>
     </div>
     
     <div class="form-group">
@@ -100,6 +99,7 @@
     
     <div>
         <button onclick="testSimple()">测试简单调用（无文件）</button>
+        <button onclick="testSimpleEmptyQuery()">测试空query调用</button>
         <button onclick="testWithFile()">测试带文件调用</button>
         <button onclick="clearResult()">清空结果</button>
     </div>
@@ -135,6 +135,33 @@
                 
                 console.log('【测试】开始简单调用');
                 console.log('【测试】输入数据:', { agentId, inputs, query, user });
+                
+                const result = await invokeAgent(agentId, inputs, query, user);
+                showResult(result);
+                
+            } catch (error) {
+                console.error('【测试】调用失败:', error);
+                showResult({
+                    error: error.message,
+                    details: error
+                }, true);
+            }
+        }
+        
+        async function testSimpleEmptyQuery() {
+            try {
+                const agentId = 'dream-career';
+                const user = document.getElementById('user').value || 'test-user';
+                const query = ''; // 空query，测试后端自动补充
+                
+                const inputs = {
+                    prompt: document.getElementById('prompt').value || '我想成为一名软件工程师',
+                    bool: document.getElementById('bool').value,
+                    gender: document.getElementById('gender').value
+                };
+                
+                console.log('【测试】开始空query调用');
+                console.log('【测试】输入数据:', { agentId, inputs, query: '(空)', user });
                 
                 const result = await invokeAgent(agentId, inputs, query, user);
                 showResult(result);

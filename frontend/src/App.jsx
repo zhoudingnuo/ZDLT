@@ -1774,13 +1774,15 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       });
       
       // 使用fetch处理SSE流式响应
-      const response = await fetch(agent.apiUrl, {
+      const response = await fetch('/api/agent/invoke', {
         method: 'POST',
+        body: JSON.stringify({
+          agentId: agent.id,
+          params, // 或 query/inputs等
+        }),
         headers: {
-          'Authorization': `Bearer ${agent.apiKey}`,
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(params)
+        }
       });
 
       if (!response.ok) {

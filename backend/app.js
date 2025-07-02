@@ -276,10 +276,21 @@ async function uploadFileToDify(file, user, agent) {
   
   const FormData = require('form-data');
   const fd = new FormData();
-  // 兼容 Python requests 三元组格式
+  // 打印参数类型
+  const filename = Array.isArray(file.originalFilename) ? file.originalFilename[0] : file.originalFilename;
+  const mimetype = Array.isArray(file.mimetype) ? file.mimetype[0] : file.mimetype;
+  console.log('【DEBUG】fd.append 参数：', {
+    filepath: file.filepath,
+    originalFilename: filename,
+    mimetype: mimetype,
+    type_filename: typeof filename,
+    type_mimetype: typeof mimetype
+  });
+
+  // 强制转字符串，防止意外类型
   fd.append('file', fs.createReadStream(file.filepath), {
-    filename: file.originalFilename,
-    contentType: file.mimetype
+    filename: String(filename),
+    contentType: String(mimetype)
   });
   fd.append('user', user || 'auto_test');
   

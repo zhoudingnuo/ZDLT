@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能体调用测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <h1>智能体调用测试 - dream-career</h1>
+    
+    <div class="form-group">
+        <label for="prompt">提示词 (prompt):</label>
+        <textarea id="prompt" rows="3" placeholder="请输入您的职业规划描述">我想成为一名软件工程师，请帮我分析职业发展路径</textarea>
+    </div>
+    
+    <div class="form-group">
+        <label for="bool">布尔值 (bool):</label>
+        <select id="bool">
+            <option value="true">是</option>
+            <option value="false">否</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label for="gender">性别 (gender):</label>
+        <select id="gender">
+            <option value="male">男</option>
+            <option value="female">女</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label for="image">图片文件 (image):</label>
+        <input type="file" id="image" accept="image/*">
+    </div>
+    
+    <div class="form-group">
+        <label for="query">查询内容 (query):</label>
+        <textarea id="query" rows="2" placeholder="请输入查询内容">请帮我分析职业规划</textarea>
+    </div>
+    
+    <div class="form-group">
+        <label for="user">用户标识 (user):</label>
+        <input type="text" id="user" value="test-user" placeholder="请输入用户标识">
+    </div>
+    
+    <div>
+        <button onclick="testSimple()">测试简单调用（无文件）</button>
+        <button onclick="testWithFile()">测试带文件调用</button>
+        <button onclick="clearResult()">清空结果</button>
+    </div>
+    
+    <div id="result" class="result" style="display: none;"></div>
+    
+    <script src="frontend-file-upload-example.js"></script>
+    <script>
+        function showResult(data, isError = false) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result ' + (isError ? 'error' : 'success');
+            resultDiv.textContent = JSON.stringify(data, null, 2);
+        }
+        
+        function clearResult() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'none';
+            resultDiv.textContent = '';
+        }
+        
+        async function testSimple() {
+            try {
+                const agentId = 'dream-career';
+                const user = document.getElementById('user').value || 'test-user';
+                const query = document.getElementById('query').value || '请帮我分析职业规划';
+                
+                const inputs = {
+                    prompt: document.getElementById('prompt').value || '我想成为一名软件工程师',
+                    bool: document.getElementById('bool').value,
+                    gender: document.getElementById('gender').value
+                };
+                
+                console.log('【测试】开始简单调用');
+                console.log('【测试】输入数据:', { agentId, inputs, query, user });
+                
+                const result = await invokeAgent(agentId, inputs, query, user);
+                showResult(result);
+                
+            } catch (error) {
+                console.error('【测试】调用失败:', error);
+                showResult({
+                    error: error.message,
+                    details: error
+                }, true);
+            }
+        }
+        
+        async function testWithFile() {
+            try {
+                const agentId = 'dream-career';
+                const user = document.getElementById('user').value || 'test-user';
+                const query = document.getElementById('query').value || '请分析我的照片';
+                const imageFile = document.getElementById('image').files[0];
+                
+                if (!imageFile) {
+                    alert('请先选择图片文件');
+                    return;
+                }
+                
+                console.log('【测试】开始带文件调用');
+                
+                // 步骤1: 上传文件
+                console.log('【测试】上传文件:', imageFile.name);
+                const uploadResult = await uploadFileForAgent(agentId, user, 'image', [imageFile]);
+                console.log('【测试】文件上传成功:', uploadResult);
+                
+                // 步骤2: 构建完整数据
+                const inputs = {
+                    prompt: document.getElementById('prompt').value || '分析我的职业照片',
+                    bool: document.getElementById('bool').value,
+                    gender: document.getElementById('gender').value,
+                    image: {
+                        files: uploadResult.files
+                    }
+                };
+                
+                console.log('【测试】构建的输入数据:', inputs);
+                
+                // 步骤3: 调用智能体
+                const result = await invokeAgent(agentId, inputs, query, user);
+                showResult(result);
+                
+            } catch (error) {
+                console.error('【测试】调用失败:', error);
+                showResult({
+                    error: error.message,
+                    details: error
+                }, true);
+            }
+        }
+        
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('【页面】测试页面加载完成');
+            console.log('【页面】可用的测试函数: testSimple(), testWithFile()');
+        });
+    </script>
+</body>
+</html> 

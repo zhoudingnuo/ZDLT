@@ -141,80 +141,112 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
   // 直接从req.body获取数据，不再使用formidable
   const { inputs: rawInputs, query, response_mode, conversation_id, user, fileData } = req.body;
   
-  console.log('【INVOKE】接收到的数据:', {
-    inputs: rawInputs ? Object.keys(rawInputs) : [],
-    query,
-    user,
-    fileData: fileData ? Object.keys(fileData) : []
+  console.log('【INVOKE】接收到的原始数据:', req.body);
+  console.log('【INVOKE】数据类型检查:', {
+    inputs: typeof rawInputs, 'inputs-is-array': Array.isArray(rawInputs),
+    query: typeof query, 'query-value': query,
+    user: typeof user, 'user-value': user,
+    fileData: typeof fileData, 'fileData-is-array': Array.isArray(fileData)
   });
   
+  // 数据验证和修复
   let inputs = {};
   try {
-    inputs = rawInputs || {};
+    // 确保inputs是对象
+    if (rawInputs && typeof rawInputs === 'object' && !Array.isArray(rawInputs)) {
+      inputs = rawInputs;
+    } else if (Array.isArray(rawInputs)) {
+      console.warn('【INVOKE】inputs是数组，转换为空对象');
+      inputs = {};
+    } else {
+      inputs = {};
+    }
   } catch (e) {
     console.error('【INVOKE】inputs解析失败:', e);
     inputs = {};
   }
   
-  // 处理文件上传和拼接 - 前端文件选择方式
-  if (Array.isArray(agent.inputs)) {
-    console.log('【INVOKE】开始处理智能体输入定义:', agent.inputs.length, '个字段');
-    
-    for (const inputDef of agent.inputs) {
-      const key = inputDef.name;
-      console.log('【INVOKE】处理字段:', key, '类型:', inputDef.type);
+  // 验证必需参数
+  if (!query) {
+    console.error('【INVOKE】缺少必需的query参数');
+    return res.status(400).json({ error: 'Missing required parameter: query' });
+  }
+  
+  // 确保fileData是对象
+  let validFileData = {};
+  if (fileData && typeof fileData === 'object' && !Array.isArray(fileData)) {
+    validFileData = fileData;
+  } else if (Array.isArray(fileData)) {
+    console.warn('【INVOKE】fileData是数组，转换为空对象');
+    validFileData = {};
+  }
+  
+  console.log('【INVOKE】处理后的数据:', {
+    inputs: Object.keys(inputs),
+    query,
+    user,
+    fileData: Object.keys(validFileData)
+  });
+  
+      // 处理文件上传和拼接 - 前端文件选择方式
+    if (Array.isArray(agent.inputs)) {
+      console.log('【INVOKE】开始处理智能体输入定义:', agent.inputs.length, '个字段');
       
-      if (
-        inputDef.type === 'file' ||
-        inputDef.type === 'upload' ||
-        (inputDef.type === 'array' && inputDef.itemType === 'file')
-      ) {
-        // 单文件处理
-        if (inputDef.type === 'file' || inputDef.type === 'upload') {
-          console.log('【INVOKE】单文件处理:', key);
-          
-          // 从前端传来的fileData中获取文件信息
-          const fileInfo = fileData && fileData[key];
-          if (fileInfo) {
-            console.log('【INVOKE】找到前端传来的文件:', fileInfo.filename);
-            
-            // 如果前端已经上传了文件，直接使用
-            if (fileInfo.difyFileObject) {
-              inputs[key] = fileInfo.difyFileObject;
-              console.log('【INVOKE】使用前端已上传的文件对象:', key, fileInfo.difyFileObject);
-            } else {
-              console.log('【INVOKE】文件未上传，跳过处理');
-            }
-          } else {
-            console.log('【INVOKE】字段', key, '未找到文件数据');
-          }
-        }
+      for (const inputDef of agent.inputs) {
+        const key = inputDef.name;
+        console.log('【INVOKE】处理字段:', key, '类型:', inputDef.type);
         
-        // 多文件处理
-        if (inputDef.type === 'array' && inputDef.itemType === 'file') {
-          console.log('【INVOKE】多文件处理:', key);
-          
-          const fileArray = fileData && fileData[key];
-          if (Array.isArray(fileArray)) {
-            inputs[key] = [];
-            console.log('【INVOKE】文件数组长度:', fileArray.length);
+        if (
+          inputDef.type === 'file' ||
+          inputDef.type === 'upload' ||
+          (inputDef.type === 'array' && inputDef.itemType === 'file')
+        ) {
+          // 单文件处理
+          if (inputDef.type === 'file' || inputDef.type === 'upload') {
+            console.log('【INVOKE】单文件处理:', key);
             
-            for (const fileInfo of fileArray) {
-              if (fileInfo && fileInfo.difyFileObject) {
-                inputs[key].push(fileInfo.difyFileObject);
-                console.log('【INVOKE】添加文件对象:', fileInfo.difyFileObject);
+            // 从前端传来的fileData中获取文件信息
+            const fileInfo = validFileData && validFileData[key];
+            if (fileInfo) {
+              console.log('【INVOKE】找到前端传来的文件:', fileInfo.filename);
+              
+              // 如果前端已经上传了文件，直接使用
+              if (fileInfo.difyFileObject) {
+                inputs[key] = fileInfo.difyFileObject;
+                console.log('【INVOKE】使用前端已上传的文件对象:', key, fileInfo.difyFileObject);
+              } else {
+                console.log('【INVOKE】文件未上传，跳过处理');
+              }
+            } else {
+              console.log('【INVOKE】字段', key, '未找到文件数据');
+            }
+          }
+          
+          // 多文件处理
+          if (inputDef.type === 'array' && inputDef.itemType === 'file') {
+            console.log('【INVOKE】多文件处理:', key);
+            
+            const fileArray = validFileData && validFileData[key];
+            if (Array.isArray(fileArray)) {
+              inputs[key] = [];
+              console.log('【INVOKE】文件数组长度:', fileArray.length);
+              
+              for (const fileInfo of fileArray) {
+                if (fileInfo && fileInfo.difyFileObject) {
+                  inputs[key].push(fileInfo.difyFileObject);
+                  console.log('【INVOKE】添加文件对象:', fileInfo.difyFileObject);
+                }
               }
             }
           }
-        }
-      } else {
-        // 非文件类型，直接使用字段值
-        if (inputs[key] !== undefined) {
-          console.log('【INVOKE】非文件字段:', key, '值:', inputs[key]);
+        } else {
+          // 非文件类型，直接使用字段值
+          if (inputs[key] !== undefined) {
+            console.log('【INVOKE】非文件字段:', key, '值:', inputs[key]);
+          }
         }
       }
     }
-  }
   
   // 组装最终请求数据
   const data = {

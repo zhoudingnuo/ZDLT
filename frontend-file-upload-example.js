@@ -50,12 +50,23 @@ async function invokeAgent(agentId, inputs, query, user) {
     }
   }
   
+  // 构建非文件字段的inputs
+  const nonFileInputs = {};
+  for (const [key, value] of Object.entries(inputs)) {
+    if (!value || !value.files) {
+      // 非文件字段，直接使用值
+      nonFileInputs[key] = value;
+    }
+  }
+  
   const requestData = {
-    inputs: inputs,
+    inputs: nonFileInputs, // 只包含非文件字段
     query: query,
     user: user,
-    fileData: fileData
+    fileData: fileData // 文件字段单独处理
   };
+  
+  console.log('【前端】发送的请求数据:', requestData);
   
   try {
     const response = await fetch(`/api/agent/${agentId}/invoke`, {
@@ -187,12 +198,78 @@ async function handleMultipleFileFields() {
   }
 }
 
+// 6. 简单测试函数 - 用于调试
+async function testSimpleInvoke() {
+  const agentId = 'dream-career';
+  const user = 'test-user';
+  const query = '请帮我分析职业规划';
+  
+  // 简单的非文件字段测试
+  const inputs = {
+    prompt: '我想成为一名软件工程师',
+    bool: 'true',
+    gender: 'male'
+  };
+  
+  try {
+    console.log('【测试】开始简单调用测试');
+    const result = await invokeAgent(agentId, inputs, query, user);
+    console.log('【测试】调用成功:', result);
+    return result;
+  } catch (error) {
+    console.error('【测试】调用失败:', error);
+    throw error;
+  }
+}
+
+// 7. 带文件的测试函数
+async function testWithFile() {
+  const agentId = 'dream-career';
+  const user = 'test-user';
+  const query = '请分析我的照片';
+  
+  try {
+    // 步骤1: 上传文件
+    const fileInput = document.getElementById('fileInput');
+    if (fileInput.files.length === 0) {
+      alert('请先选择文件');
+      return;
+    }
+    
+    console.log('【测试】开始文件上传');
+    const uploadResult = await uploadFileForAgent(agentId, user, 'image', fileInput.files);
+    console.log('【测试】文件上传成功:', uploadResult);
+    
+    // 步骤2: 构建完整数据
+    const inputs = {
+      prompt: '分析我的职业照片',
+      bool: 'true',
+      gender: 'male',
+      image: {
+        files: uploadResult.files
+      }
+    };
+    
+    // 步骤3: 调用智能体
+    console.log('【测试】开始调用智能体');
+    const result = await invokeAgent(agentId, inputs, query, user);
+    console.log('【测试】智能体响应:', result);
+    return result;
+    
+  } catch (error) {
+    console.error('【测试】处理失败:', error);
+    throw error;
+  }
+}
+
 // 导出函数供其他模块使用
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     uploadFileForAgent,
     invokeAgent,
     handleFileUploadAndInvoke,
-    handleMultipleFileFields
+    handleMultipleFileFields,
+    testSimpleInvoke,
+    testWithFile
   };
 } 

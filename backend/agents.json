@@ -57,6 +57,7 @@
     "description": "基于图片生成新的图片",
     "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
     "apiKey": "app-YttnuXaJP6VDpqKy7VwvzjPW",
+    "inputType": "parameter",
     "status": "configured",
     "inputs": [
       {
@@ -123,6 +124,7 @@
     "description": "自动生成家长通知内容",
     "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
     "apiKey": "app-DAkWwoX6O95LqCRPxFhHqrab",
+    "inputType": "parameter",
     "status": "configured",
     "inputs": [
       {

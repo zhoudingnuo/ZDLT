@@ -93,8 +93,14 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     return res.status(400).json({ error: 'Agent not configured. Please configure API key and URL first.' });
   }
   
-  console.log('【INVOKE】找到Agent:', agent.name, 'inputType:', agent.inputType);
-
+    console.log('【INVOKE】找到Agent:', agent.name, 'inputType:', agent.inputType);
+  
+  // 如果inputType为undefined，默认为parameter类型
+  if (!agent.inputType) {
+    console.log('【INVOKE】inputType为undefined，默认为parameter类型');
+    agent.inputType = 'parameter';
+  }
+  
   // 1. 先判断 inputType 是否为 dialogue
   if (agent.inputType === 'dialogue') {
     console.log('【INVOKE】dialogue类型，直接处理');
@@ -137,6 +143,12 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
 
   // 2. parameter类型 - 前端文件选择 + 后端接收方式
   console.log('【INVOKE】parameter类型，开始处理前端传来的数据');
+  
+  // 检查req.body是否为空
+  if (!req.body || Object.keys(req.body).length === 0) {
+    console.error('【INVOKE】请求体为空，可能是Content-Type不正确');
+    return res.status(400).json({ error: 'Request body is empty. Please check Content-Type header.' });
+  }
   
   // 直接从req.body获取数据，不再使用formidable
   const { inputs: rawInputs, response_mode, conversation_id, user, fileData } = req.body;

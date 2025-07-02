@@ -17,7 +17,7 @@ echo ====== Connecting to server and running git pull ======
 echo Please manually enter the server password: ZDLT@20250702
 echo.
 
-ssh %SERVER_USER%@%SERVER_IP% "cd %SERVER_PATH% && git pull"
+ssh root@47.107.84.24 "cd %SERVER_PATH% && git pull"
 
 echo Local commit and push to GitHub done. Remote git pull triggered: %msg%
 pause

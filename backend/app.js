@@ -76,19 +76,29 @@ app.get('/api/agents/list', (req, res) => {
 
 // 转发到Dify智能体
 app.post('/api/agent/:id/invoke', async (req, res) => {
+  console.log('【INVOKE】开始处理请求，agentId:', req.params.id);
+  
   // 直接从 agents.json 文件读取最新的 agent 配置
   let agents = [];
   if (fs.existsSync(agentsPath)) {
     agents = JSON.parse(fs.readFileSync(agentsPath, 'utf-8'));
   }
   const agent = agents.find(a => a.id === req.params.id);
-  if (!agent) return res.status(404).json({ error: 'Agent not found' });
+  if (!agent) {
+    console.error('【INVOKE】Agent not found:', req.params.id);
+    return res.status(404).json({ error: 'Agent not found' });
+  }
   if (!agent.apiKey || !agent.apiUrl) {
+    console.error('【INVOKE】Agent not configured:', req.params.id);
     return res.status(400).json({ error: 'Agent not configured. Please configure API key and URL first.' });
   }
+  
+  console.log('【INVOKE】找到Agent:', agent.name, 'inputType:', agent.inputType);
 
   // 1. 先判断 inputType 是否为 dialogue
   if (agent.inputType === 'dialogue') {
+    console.log('【INVOKE】dialogue类型，直接处理');
+    
     // 直接用 req.body 组装参数，不用 formidable
     let inputs = {};
     try {
@@ -107,34 +117,53 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
       'Authorization': `Bearer ${agent.apiKey}`,
       'Content-Type': 'application/json'
     };
+    
+    console.log('【INVOKE】dialogue请求数据:', JSON.stringify(data, null, 2));
+    console.log('【INVOKE】dialogue请求地址:', agent.apiUrl);
+    
     try {
       const response = await axios.post(agent.apiUrl, data, { headers, timeout: 10000 });
+      console.log('【INVOKE】dialogue响应成功');
       res.json(response.data);
     } catch (err) {
+      console.error('【INVOKE】dialogue请求失败:', err.message);
+      if (err.response) {
+        console.error('【INVOKE】dialogue响应错误:', err.response.data);
+      }
       res.status(500).json({ error: err.message, detail: err.response?.data });
     }
     return;
   }
 
   // 2. 只有 parameter 类型才用 formidable 解析文件上传
+  console.log('【INVOKE】parameter类型，开始解析表单');
+  
   const formidable = require('formidable');
   const form = new formidable.IncomingForm({ multiples: true });
   form.parse(req, async (err, fields, files) => {
     if (err) {
+      console.error('【INVOKE】表单解析失败:', err);
       return res.status(400).json({ error: 'Parse error' });
     }
+    
+    console.log('【INVOKE】表单解析成功，fields:', Object.keys(fields));
+    console.log('【INVOKE】表单解析成功，files:', Object.keys(files));
     
     let inputs = {};
     try {
       inputs = fields.inputs ? JSON.parse(fields.inputs) : {};
     } catch (e) {
+      console.error('【INVOKE】inputs解析失败:', e);
       inputs = {};
     }
     
     // 处理文件上传和拼接 - 重构为更简洁的方式
     if (Array.isArray(agent.inputs)) {
+      console.log('【INVOKE】开始处理智能体输入定义:', agent.inputs.length, '个字段');
+      
       for (const inputDef of agent.inputs) {
         const key = inputDef.name;
+        console.log('【INVOKE】处理字段:', key, '类型:', inputDef.type);
         
         if (
           inputDef.type === 'file' ||
@@ -143,31 +172,43 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
         ) {
           // 单文件处理
           if (inputDef.type === 'file' || inputDef.type === 'upload') {
+            console.log('【INVOKE】单文件处理:', key);
             let file = files[key];
             if (Array.isArray(file)) {
               file = file.length > 0 ? file[0] : undefined;
+              console.log('【INVOKE】文件数组，取第一个');
             }
             if (file && file.filepath) {
+              console.log('【INVOKE】开始上传文件:', file.originalFilename);
               try {
                 const fileInfo = await uploadFileToDifySimple(file, fields.user, agent);
                 inputs[key] = fileInfo;
+                console.log('【INVOKE】文件上传成功:', key, fileInfo);
               } catch (uploadError) {
+                console.error('【INVOKE】文件上传失败:', key, uploadError.message);
                 return res.status(500).json({ error: `文件上传失败: ${uploadError.message}` });
               }
+            } else {
+              console.log('【INVOKE】字段', key, '未找到文件或文件路径无效');
             }
           }
           
           // 多文件处理
           if (inputDef.type === 'array' && inputDef.itemType === 'file') {
+            console.log('【INVOKE】多文件处理:', key);
             const fileArr = files[key];
             if (Array.isArray(fileArr)) {
               inputs[key] = [];
+              console.log('【INVOKE】文件数组长度:', fileArr.length);
               for (const file of fileArr) {
                 if (file && file.filepath) {
+                  console.log('【INVOKE】开始上传文件:', file.originalFilename);
                   try {
                     const fileInfo = await uploadFileToDifySimple(file, fields.user, agent);
                     inputs[key].push(fileInfo);
+                    console.log('【INVOKE】文件上传成功:', fileInfo);
                   } catch (uploadError) {
+                    console.error('【INVOKE】文件上传失败:', uploadError.message);
                     return res.status(500).json({ error: `文件上传失败: ${uploadError.message}` });
                   }
                 }
@@ -178,6 +219,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
           // 非文件类型，直接使用字段值
           if (fields[key] !== undefined) {
             inputs[key] = fields[key];
+            console.log('【INVOKE】非文件字段:', key, '值:', fields[key]);
           }
         }
       }
@@ -197,10 +239,18 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
       'Content-Type': 'application/json'
     };
     
+    console.log('【INVOKE】parameter最终请求数据:', JSON.stringify(data, null, 2));
+    console.log('【INVOKE】parameter请求地址:', agent.apiUrl);
+    
     try {
       const response = await axios.post(agent.apiUrl, data, { headers, timeout: 10000 });
+      console.log('【INVOKE】parameter响应成功');
       res.json(response.data);
     } catch (err) {
+      console.error('【INVOKE】parameter请求失败:', err.message);
+      if (err.response) {
+        console.error('【INVOKE】parameter响应错误:', err.response.data);
+      }
       res.status(500).json({ error: err.message, detail: err.response?.data });
     }
   });
@@ -208,10 +258,14 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
 
 // 文件上传到 Dify 并自动拼接文件对象 - 重构版本，参考Python代码格式
 async function uploadFileToDifySimple(file, user, agent) {
+  console.log('【UPLOAD】开始上传文件到Dify');
+  
   if (Array.isArray(file)) {
     file = file.length > 0 ? file[0] : undefined;
+    console.log('【UPLOAD】文件数组，取第一个');
   }
   if (!file || !file.filepath) {
+    console.error('【UPLOAD】文件对象无效:', file);
     throw new Error('文件对象无效');
   }
   
@@ -219,9 +273,12 @@ async function uploadFileToDifySimple(file, user, agent) {
   const filename = Array.isArray(file.originalFilename) ? file.originalFilename[0] : file.originalFilename;
   let mimetype = Array.isArray(file.mimetype) ? file.mimetype[0] : file.mimetype;
   
+  console.log('【UPLOAD】文件名:', filename, 'MIME类型:', mimetype);
+  
   // 如果无法确定MIME类型，默认使用"application/octet-stream"
   if (!mimetype) {
     mimetype = "application/octet-stream";
+    console.log('【UPLOAD】使用默认MIME类型:', mimetype);
   }
   
   // 准备文件数据 - 完全参照Python requests格式
@@ -248,14 +305,19 @@ async function uploadFileToDifySimple(file, user, agent) {
     DIFy_API = 'http://118.145.74.50:24131/v1/files/upload';
   }
   
+  console.log('【UPLOAD】Dify上传地址:', DIFy_API);
+  
   // 准备请求头 - 完全参照Python requests格式
   const headers = {
     ...fd.getHeaders(),
     'Authorization': `Bearer ${agent.apiKey}`
   };
   
+  console.log('【UPLOAD】请求头:', headers);
+  
   try {
     // 发送POST请求
+    console.log('【UPLOAD】开始发送POST请求');
     const response = await axios.post(DIFy_API, fd, {
       headers: headers,
       maxContentLength: Infinity,
@@ -271,9 +333,17 @@ async function uploadFileToDifySimple(file, user, agent) {
       filename: fileInfo.filename || filename
     };
     
+    console.log('【UPLOAD】Dify返回原始数据:', response.data);
+    console.log('【UPLOAD】拼接后的文件对象:', difyFileObject);
+    console.log('【UPLOAD】文件上传成功');
+    
     return difyFileObject;
     
   } catch (error) {
+    console.error('【UPLOAD】文件上传失败:', error.message);
+    if (error.response) {
+      console.error('【UPLOAD】Dify响应错误:', error.response.data);
+    }
     throw error;
   }
 }

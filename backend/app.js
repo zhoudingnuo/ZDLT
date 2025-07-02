@@ -287,12 +287,9 @@ async function uploadFileToDifySimple(file, user, agent) {
   
   // 读取文件内容
   const buffer = fs.readFileSync(file.filepath);
-  fd.append('file', buffer, {
-    filename: filename,
-    contentType: mimetype
-  });
   
-  // 准备表单数据
+  // 使用最简单的格式，避免兼容性问题
+  fd.append('file', buffer, filename);
   fd.append('user', user || 'auto_test');
   
   // 构建 Dify 文件上传地址

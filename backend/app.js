@@ -135,125 +135,115 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     return;
   }
 
-  // 2. 只有 parameter 类型才用 formidable 解析文件上传
-  console.log('【INVOKE】parameter类型，开始解析表单');
+  // 2. parameter类型 - 前端文件选择 + 后端接收方式
+  console.log('【INVOKE】parameter类型，开始处理前端传来的数据');
   
-  const formidable = require('formidable');
-  const form = new formidable.IncomingForm({ multiples: true });
-  form.parse(req, async (err, fields, files) => {
-    if (err) {
-      console.error('【INVOKE】表单解析失败:', err);
-      return res.status(400).json({ error: 'Parse error' });
-    }
+  // 直接从req.body获取数据，不再使用formidable
+  const { inputs: rawInputs, query, response_mode, conversation_id, user, fileData } = req.body;
+  
+  console.log('【INVOKE】接收到的数据:', {
+    inputs: rawInputs ? Object.keys(rawInputs) : [],
+    query,
+    user,
+    fileData: fileData ? Object.keys(fileData) : []
+  });
+  
+  let inputs = {};
+  try {
+    inputs = rawInputs || {};
+  } catch (e) {
+    console.error('【INVOKE】inputs解析失败:', e);
+    inputs = {};
+  }
+  
+  // 处理文件上传和拼接 - 前端文件选择方式
+  if (Array.isArray(agent.inputs)) {
+    console.log('【INVOKE】开始处理智能体输入定义:', agent.inputs.length, '个字段');
     
-    console.log('【INVOKE】表单解析成功，fields:', Object.keys(fields));
-    console.log('【INVOKE】表单解析成功，files:', Object.keys(files));
-    
-    let inputs = {};
-    try {
-      inputs = fields.inputs ? JSON.parse(fields.inputs) : {};
-    } catch (e) {
-      console.error('【INVOKE】inputs解析失败:', e);
-      inputs = {};
-    }
-    
-    // 处理文件上传和拼接 - 重构为更简洁的方式
-    if (Array.isArray(agent.inputs)) {
-      console.log('【INVOKE】开始处理智能体输入定义:', agent.inputs.length, '个字段');
+    for (const inputDef of agent.inputs) {
+      const key = inputDef.name;
+      console.log('【INVOKE】处理字段:', key, '类型:', inputDef.type);
       
-      for (const inputDef of agent.inputs) {
-        const key = inputDef.name;
-        console.log('【INVOKE】处理字段:', key, '类型:', inputDef.type);
-        
-        if (
-          inputDef.type === 'file' ||
-          inputDef.type === 'upload' ||
-          (inputDef.type === 'array' && inputDef.itemType === 'file')
-        ) {
-          // 单文件处理
-          if (inputDef.type === 'file' || inputDef.type === 'upload') {
-            console.log('【INVOKE】单文件处理:', key);
-            let file = files[key];
-            if (Array.isArray(file)) {
-              file = file.length > 0 ? file[0] : undefined;
-              console.log('【INVOKE】文件数组，取第一个');
-            }
-            if (file && file.filepath) {
-              console.log('【INVOKE】开始上传文件:', file.originalFilename);
-              try {
-                const fileInfo = await uploadFileToDifySimple(file, fields.user, agent);
-                inputs[key] = fileInfo;
-                console.log('【INVOKE】文件上传成功:', key, fileInfo);
-              } catch (uploadError) {
-                console.error('【INVOKE】文件上传失败:', key, uploadError.message);
-                return res.status(500).json({ error: `文件上传失败: ${uploadError.message}` });
-              }
-            } else {
-              console.log('【INVOKE】字段', key, '未找到文件或文件路径无效');
-            }
-          }
+      if (
+        inputDef.type === 'file' ||
+        inputDef.type === 'upload' ||
+        (inputDef.type === 'array' && inputDef.itemType === 'file')
+      ) {
+        // 单文件处理
+        if (inputDef.type === 'file' || inputDef.type === 'upload') {
+          console.log('【INVOKE】单文件处理:', key);
           
-          // 多文件处理
-          if (inputDef.type === 'array' && inputDef.itemType === 'file') {
-            console.log('【INVOKE】多文件处理:', key);
-            const fileArr = files[key];
-            if (Array.isArray(fileArr)) {
-              inputs[key] = [];
-              console.log('【INVOKE】文件数组长度:', fileArr.length);
-              for (const file of fileArr) {
-                if (file && file.filepath) {
-                  console.log('【INVOKE】开始上传文件:', file.originalFilename);
-                  try {
-                    const fileInfo = await uploadFileToDifySimple(file, fields.user, agent);
-                    inputs[key].push(fileInfo);
-                    console.log('【INVOKE】文件上传成功:', fileInfo);
-                  } catch (uploadError) {
-                    console.error('【INVOKE】文件上传失败:', uploadError.message);
-                    return res.status(500).json({ error: `文件上传失败: ${uploadError.message}` });
-                  }
-                }
+          // 从前端传来的fileData中获取文件信息
+          const fileInfo = fileData && fileData[key];
+          if (fileInfo) {
+            console.log('【INVOKE】找到前端传来的文件:', fileInfo.filename);
+            
+            // 如果前端已经上传了文件，直接使用
+            if (fileInfo.difyFileObject) {
+              inputs[key] = fileInfo.difyFileObject;
+              console.log('【INVOKE】使用前端已上传的文件对象:', key, fileInfo.difyFileObject);
+            } else {
+              console.log('【INVOKE】文件未上传，跳过处理');
+            }
+          } else {
+            console.log('【INVOKE】字段', key, '未找到文件数据');
+          }
+        }
+        
+        // 多文件处理
+        if (inputDef.type === 'array' && inputDef.itemType === 'file') {
+          console.log('【INVOKE】多文件处理:', key);
+          
+          const fileArray = fileData && fileData[key];
+          if (Array.isArray(fileArray)) {
+            inputs[key] = [];
+            console.log('【INVOKE】文件数组长度:', fileArray.length);
+            
+            for (const fileInfo of fileArray) {
+              if (fileInfo && fileInfo.difyFileObject) {
+                inputs[key].push(fileInfo.difyFileObject);
+                console.log('【INVOKE】添加文件对象:', fileInfo.difyFileObject);
               }
             }
           }
-        } else {
-          // 非文件类型，直接使用字段值
-          if (fields[key] !== undefined) {
-            inputs[key] = fields[key];
-            console.log('【INVOKE】非文件字段:', key, '值:', fields[key]);
-          }
+        }
+      } else {
+        // 非文件类型，直接使用字段值
+        if (inputs[key] !== undefined) {
+          console.log('【INVOKE】非文件字段:', key, '值:', inputs[key]);
         }
       }
     }
-    
-    // 组装最终请求数据
-    const data = {
-      inputs: inputs,
-      query: fields.query,
-      response_mode: fields.response_mode || 'blocking',
-      conversation_id: fields.conversation_id || '',
-      user: fields.user || 'auto_test'
-    };
-    
-    const headers = {
-      'Authorization': `Bearer ${agent.apiKey}`,
-      'Content-Type': 'application/json'
-    };
-    
-    console.log('【INVOKE】parameter最终请求数据:', JSON.stringify(data, null, 2));
-    console.log('【INVOKE】parameter请求地址:', agent.apiUrl);
-    
-    try {
-      const response = await axios.post(agent.apiUrl, data, { headers, timeout: 10000 });
-      console.log('【INVOKE】parameter响应成功');
-      res.json(response.data);
-    } catch (err) {
-      console.error('【INVOKE】parameter请求失败:', err.message);
-      if (err.response) {
-        console.error('【INVOKE】parameter响应错误:', err.response.data);
-      }
-      res.status(500).json({ error: err.message, detail: err.response?.data });
+  }
+  
+  // 组装最终请求数据
+  const data = {
+    inputs: inputs,
+    query: query,
+    response_mode: response_mode || 'blocking',
+    conversation_id: conversation_id || '',
+    user: user || 'auto_test'
+  };
+  
+  const headers = {
+    'Authorization': `Bearer ${agent.apiKey}`,
+    'Content-Type': 'application/json'
+  };
+  
+  console.log('【INVOKE】parameter最终请求数据:', JSON.stringify(data, null, 2));
+  console.log('【INVOKE】parameter请求地址:', agent.apiUrl);
+  
+  try {
+    const response = await axios.post(agent.apiUrl, data, { headers, timeout: 10000 });
+    console.log('【INVOKE】parameter响应成功');
+    res.json(response.data);
+  } catch (err) {
+    console.error('【INVOKE】parameter请求失败:', err.message);
+    if (err.response) {
+      console.error('【INVOKE】parameter响应错误:', err.response.data);
     }
-  });
+    res.status(500).json({ error: err.message, detail: err.response?.data });
+  }
 });
 
 // 文件上传到 Dify 并自动拼接文件对象 - 重构版本，参考Python代码格式
@@ -489,6 +479,70 @@ app.post('/api/upload-dify-file', async (req, res) => {
         success: false,
         error: uploadError.message,
         detail: uploadError.response?.data 
+      });
+    }
+  });
+});
+
+// 前端文件上传接口 - 用于parameter类型的智能体
+app.post('/api/upload-file-for-agent', async (req, res) => {
+  const form = new formidable.IncomingForm({ multiples: true });
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.error('【UPLOAD-FOR-AGENT】表单解析失败:', err);
+      return res.status(400).json({ error: '文件解析失败' });
+    }
+    
+    const { agentId, user, fieldName } = fields;
+    if (!agentId || !user || !fieldName) {
+      return res.status(400).json({ error: '缺少agentId、user或fieldName' });
+    }
+    
+    console.log('【UPLOAD-FOR-AGENT】开始处理文件上传:', {
+      agentId: Array.isArray(agentId) ? agentId[0] : agentId,
+      user: Array.isArray(user) ? user[0] : user,
+      fieldName: Array.isArray(fieldName) ? fieldName[0] : fieldName,
+      files: Object.keys(files)
+    });
+    
+    // 动态获取apiKey
+    const agent = agents.find(a => a.id === (Array.isArray(agentId) ? agentId[0] : agentId));
+    if (!agent) {
+      return res.status(400).json({ error: '无效的agentId' });
+    }
+    
+    try {
+      const results = [];
+      const fileArray = Array.isArray(files.file) ? files.file : [files.file];
+      
+      for (const file of fileArray) {
+        if (file && file.filepath) {
+          console.log('【UPLOAD-FOR-AGENT】上传文件:', file.originalFilename);
+          const difyFileObject = await uploadFileToDifySimple(file, Array.isArray(user) ? user[0] : user, agent);
+          results.push({
+            filename: file.originalFilename,
+            difyFileObject: difyFileObject
+          });
+        }
+      }
+      
+      console.log('【UPLOAD-FOR-AGENT】上传完成，结果:', results);
+      
+      res.json({
+        success: true,
+        data: {
+          fieldName: Array.isArray(fieldName) ? fieldName[0] : fieldName,
+          files: results
+        },
+        message: '文件上传成功'
+      });
+      
+    } catch (uploadError) {
+      console.error('【UPLOAD-FOR-AGENT】上传失败:', uploadError.message);
+      res.status(500).json({
+        success: false,
+        error: uploadError.message,
+        detail: uploadError.response?.data
       });
     }
   });

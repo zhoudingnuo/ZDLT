@@ -84,31 +84,39 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
   }
   const agent = agents.find(a => a.id === req.params.id);
   if (!agent) return res.status(404).json({ error: 'Agent not found' });
-  
-  // 检查 agent 是否已配置
   if (!agent.apiKey || !agent.apiUrl) {
     return res.status(400).json({ error: 'Agent not configured. Please configure API key and URL first.' });
   }
-  
-  // 打印收到的参数
+
+  // 根据 inputType 组装参数
+  let data;
+  if (agent.inputType === 'dialogue') {
+    data = {
+      inputs: req.body.inputs || {},
+      query: req.body.query,
+      response_mode: req.body.response_mode || 'blocking',
+      conversation_id: req.body.conversation_id || '',
+      user: req.body.user || 'auto_test'
+    };
+  } else {
+    // 其它类型直接转发 body
+    data = { ...req.body };
+  }
+
+  const headers = {
+    'Authorization': `Bearer ${agent.apiKey}`,
+    'Content-Type': 'application/json'
+  };
+
+  // 打印日志
   console.log('收到chat-messages参数:', JSON.stringify(req.body, null, 2));
-  console.log('使用agent配置:', { id: agent.id, name: agent.name, apiUrl: agent.apiUrl });
-  
+  console.log('使用agent配置:', { id: agent.id, name: agent.name, apiUrl: agent.apiUrl, inputType: agent.inputType });
   try {
-    const response = await axios.post(
-      agent.apiUrl,
-      req.body,
-      {
-        headers: {
-          'Authorization': `Bearer ${agent.apiKey}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+    const response = await axios.post(agent.apiUrl, data, { headers });
     res.json(response.data);
   } catch (err) {
     console.error('调用agent失败:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message, detail: err.response?.data });
   }
 });
 

@@ -139,7 +139,8 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
   console.log('【INVOKE】parameter类型，开始处理前端传来的数据');
   
   // 直接从req.body获取数据，不再使用formidable
-  const { inputs: rawInputs, query, response_mode, conversation_id, user, fileData } = req.body;
+  const { inputs: rawInputs, response_mode, conversation_id, user, fileData } = req.body;
+  let { query } = req.body; // 改为let声明，允许重新赋值
   
   console.log('【INVOKE】接收到的原始数据:', req.body);
   console.log('【INVOKE】数据类型检查:', {

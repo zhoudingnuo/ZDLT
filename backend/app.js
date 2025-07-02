@@ -109,14 +109,19 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
       'Content-Type': 'application/json'
     };
     // 调试输出
-    console.log('| dialogue');
-    console.log('data:', data);
+    console.log('【最终请求】dialogue类型');
+    console.log('【最终请求】data:', JSON.stringify(data, null, 2));
+    console.log('【最终请求】headers:', headers);
+    
     try {
       const response = await axios.post(agent.apiUrl, data, { headers, timeout: 10000 });
-      console.log('Dify响应:', response.data);
+      console.log('【Dify响应】成功:', response.data);
       res.json(response.data);
     } catch (err) {
-      console.error('调用agent失败:', err.message, err.response?.data);
+      console.error('【Dify调用】失败:', err.message);
+      if (err.response) {
+        console.error('【Dify响应】错误详情:', err.response.data);
+      }
       res.status(500).json({ error: err.message, detail: err.response?.data });
     }
     return;
@@ -126,84 +131,182 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
   const formidable = require('formidable');
   const form = new formidable.IncomingForm({ multiples: true });
   form.parse(req, async (err, fields, files) => {
-    if (err) return res.status(400).json({ error: 'Parse error' });
+    if (err) {
+      console.error('【参数解析】formidable解析失败:', err);
+      return res.status(400).json({ error: 'Parse error' });
+    }
+    
+    console.log('【参数解析】fields:', fields);
+    console.log('【参数解析】files:', Object.keys(files));
+    
     let inputs = {};
     try {
       inputs = fields.inputs ? JSON.parse(fields.inputs) : {};
-    } catch {
+    } catch (e) {
+      console.error('【参数解析】inputs解析失败:', e);
       inputs = {};
     }
+    
+    // 处理文件上传和拼接
     if (Array.isArray(agent.inputs)) {
+      console.log('【文件处理】开始处理智能体输入定义:', agent.inputs);
+      
       for (const inputDef of agent.inputs) {
         const key = inputDef.name;
+        console.log('【文件处理】处理输入字段:', key, '类型:', inputDef.type);
+        
         if (
           inputDef.type === 'file' ||
           inputDef.type === 'upload' ||
           (inputDef.type === 'array' && inputDef.itemType === 'file')
         ) {
-          // 单文件
+          // 单文件处理
           if (inputDef.type === 'file' || inputDef.type === 'upload') {
             const file = files[key];
+            console.log('【单文件】字段:', key, '文件对象:', file ? '存在' : '不存在');
+            
             if (file && file.filepath) {
-              const fileInfo = await uploadFileToDify(file, fields.user, agent);
-              inputs[key] = fileInfo;
+              try {
+                const fileInfo = await uploadFileToDify(file, fields.user, agent);
+                inputs[key] = fileInfo;
+                console.log('【单文件】上传成功，已拼接到inputs:', key, fileInfo);
+              } catch (uploadError) {
+                console.error('【单文件】上传失败:', key, uploadError.message);
+                return res.status(500).json({ error: `文件上传失败: ${uploadError.message}` });
+              }
+            } else {
+              console.log('【单文件】字段:', key, '未找到文件或文件路径无效');
             }
           }
-          // 多文件
+          
+          // 多文件处理
           if (inputDef.type === 'array' && inputDef.itemType === 'file') {
             const fileArr = files[key];
+            console.log('【多文件】字段:', key, '文件数组:', Array.isArray(fileArr) ? fileArr.length : '非数组');
+            
             if (Array.isArray(fileArr)) {
               inputs[key] = [];
-              for (const file of fileArr) {
+              for (let i = 0; i < fileArr.length; i++) {
+                const file = fileArr[i];
+                console.log('【多文件】处理第', i + 1, '个文件:', file ? file.originalFilename : '无效文件');
+                
                 if (file && file.filepath) {
-                  const fileInfo = await uploadFileToDify(file, fields.user, agent);
-                  inputs[key].push(fileInfo);
-                  console.log('fileInfo:', fileInfo);
+                  try {
+                    const fileInfo = await uploadFileToDify(file, fields.user, agent);
+                    inputs[key].push(fileInfo);
+                    console.log('【多文件】第', i + 1, '个文件上传成功:', fileInfo);
+                  } catch (uploadError) {
+                    console.error('【多文件】第', i + 1, '个文件上传失败:', uploadError.message);
+                    return res.status(500).json({ error: `文件上传失败: ${uploadError.message}` });
+                  }
                 }
               }
             }
           }
+        } else {
+          // 非文件类型，直接使用字段值
+          if (fields[key] !== undefined) {
+            inputs[key] = fields[key];
+            console.log('【非文件】字段:', key, '值:', fields[key]);
+          }
         }
       }
     }
+    
+    // 组装最终请求数据
     const data = {
-      ...fields,
-      inputs: inputs
+      inputs: inputs,
+      query: fields.query,
+      response_mode: fields.response_mode || 'blocking',
+      conversation_id: fields.conversation_id || '',
+      user: fields.user || 'auto_test'
     };
+    
     const headers = {
       'Authorization': `Bearer ${agent.apiKey}`,
       'Content-Type': 'application/json'
     };
-    // 日志
-    console.log('| parameter');
-    console.log('data:', data);
+    
+    // 调试输出
+    console.log('【最终请求】parameter类型');
+    console.log('【最终请求】data:', JSON.stringify(data, null, 2));
+    console.log('【最终请求】headers:', headers);
+    
     try {
       const response = await axios.post(agent.apiUrl, data, { headers, timeout: 10000 });
-      console.log('Dify响应:', response.data);
+      console.log('【Dify响应】成功:', response.data);
       res.json(response.data);
     } catch (err) {
-      console.error('调用agent失败:', err.message, err.response?.data);
+      console.error('【Dify调用】失败:', err.message);
+      if (err.response) {
+        console.error('【Dify响应】错误详情:', err.response.data);
+      }
       res.status(500).json({ error: err.message, detail: err.response?.data });
     }
   });
 });
 
-// 文件上传到 Dify
+// 文件上传到 Dify 并自动拼接文件对象
 async function uploadFileToDify(file, user, agent) {
+  console.log('【文件上传】开始上传文件:', file.originalFilename);
+  
+  // 检查文件是否存在
+  if (!file || !file.filepath) {
+    console.error('【文件上传】文件对象无效:', file);
+    throw new Error('文件对象无效');
+  }
+
   const FormData = require('form-data');
   const fd = new FormData();
   fd.append('file', fs.createReadStream(file.filepath), file.originalFilename);
   fd.append('user', user || 'auto_test');
-  const DIFy_API = agent.apiUrl.replace('/v1/chat-messages', '') + '/v1/files/upload';
-  const res = await axios.post(DIFy_API, fd, {
-    headers: {
-      ...fd.getHeaders(),
-      'Authorization': `Bearer ${agent.apiKey}`
-    },
-    maxContentLength: Infinity,
-    maxBodyLength: Infinity
-  });
-  return res.data;
+  
+  // 构建 Dify 文件上传地址
+  let DIFy_API;
+  if (agent.apiUrl && agent.apiUrl.includes('/v1/chat-messages')) {
+    // 如果 apiUrl 包含 chat-messages，则替换为 files/upload
+    DIFy_API = agent.apiUrl.replace('/v1/chat-messages', '') + '/v1/files/upload';
+  } else if (agent.apiUrl) {
+    // 如果 apiUrl 存在但不包含 chat-messages，直接拼接
+    DIFy_API = agent.apiUrl.replace(/\/$/, '') + '/v1/files/upload';
+  } else {
+    // 默认使用你提供的地址
+    DIFy_API = 'http://118.145.74.50:24131/v1/files/upload';
+  }
+  DIFy_API = 'http://118.145.74.50:24131/v1/files/upload';
+  console.log('【文件上传】Dify上传地址:', DIFy_API);
+  
+  try {
+    const res = await axios.post(DIFy_API, fd, {
+      headers: {
+        ...fd.getHeaders(),
+        'Authorization': `Bearer ${agent.apiKey}`
+      },
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity
+    });
+    
+    console.log('【文件上传】Dify返回原始数据:', res.data);
+    
+    // 自动拼接成 Dify 主 API 需要的文件对象格式
+    const fileInfo = res.data.data || res.data;
+    const difyFileObject = {
+      dify_model_identity: "file",
+      remote_url: fileInfo.url,
+      related_id: fileInfo.id,
+      filename: fileInfo.filename || file.originalFilename
+    };
+    
+    console.log('【文件拼接】拼接后的文件对象:', difyFileObject);
+    return difyFileObject;
+    
+  } catch (error) {
+    console.error('【文件上传】上传失败:', error.message);
+    if (error.response) {
+      console.error('【文件上传】Dify响应:', error.response.data);
+    }
+    throw error;
+  }
 }
 
 // 图片base64转imgbb url
@@ -253,11 +356,15 @@ app.post('/api/upload-image', async (req, res) => {
   }
 });
 
-// 新的 Dify 文件上传代理接口（支持 agentId 动态 key）
+// 新的 Dify 文件上传代理接口（支持 agentId 动态 key，自动拼接文件对象）
 app.post('/api/upload-dify-file', async (req, res) => {
   const form = new formidable.IncomingForm({ multiples: false });
   form.parse(req, async (err, fields, files) => {
-    if (err) return res.status(400).json({ error: '文件解析失败' });
+    if (err) {
+      console.error('【独立上传】文件解析失败:', err);
+      return res.status(400).json({ error: '文件解析失败' });
+    }
+    
     let user = fields.user;
     let agentId = fields.agentId;
     if (Array.isArray(agentId)) agentId = agentId[0];
@@ -266,36 +373,46 @@ app.post('/api/upload-dify-file', async (req, res) => {
     }
     if (Array.isArray(user)) user = user[0];
     const file = Array.isArray(files.file) ? files.file[0] : files.file;
+    
     // 日志输出，便于排查
-    console.log('fields:', fields);
-    console.log('自动补全后 agentId:', agentId, '可用id:', agents.map(a=>a.id));
-    if (!user || !file || !agentId) return res.status(400).json({ error: '缺少user、file或agentId' });
+    console.log('【独立上传】fields:', fields);
+    console.log('【独立上传】自动补全后 agentId:', agentId, '可用id:', agents.map(a=>a.id));
+    
+    if (!user || !file || !agentId) {
+      console.error('【独立上传】参数缺失:', { user: !!user, file: !!file, agentId: !!agentId });
+      return res.status(400).json({ error: '缺少user、file或agentId' });
+    }
 
     // 动态获取apiKey
     const agent = agents.find(a => a.id === agentId);
-    if (!agent) return res.status(400).json({ error: '无效的agentId' });
-    const DIFy_TOKEN = agent.apiKey;
-
-    const FormData = require('form-data');
-    const fd = new FormData();
-    fd.append('file', require('fs').createReadStream(file.filepath), file.originalFilename);
-    fd.append('user', user);
-
+    if (!agent) {
+      console.error('【独立上传】无效的agentId:', agentId);
+      return res.status(400).json({ error: '无效的agentId' });
+    }
+    
+    console.log('【独立上传】开始上传文件:', file.originalFilename);
+    
     try {
-      // 使用智能体配置的API URL，如果没有则使用默认值
-      const baseUrl = agent.apiUrl ? agent.apiUrl.replace('/v1/chat-messages', '') : 'http://118.145.74.50:24131';
-      const DIFy_API = `${baseUrl}/v1/files/upload`;
-      const response = await axios.post(DIFy_API, fd, {
-        headers: {
-          ...fd.getHeaders(),
-          'Authorization': `Bearer ${DIFy_TOKEN}`
-        },
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity
+      // 使用统一的文件上传函数，自动拼接文件对象
+      const difyFileObject = await uploadFileToDify(file, user, agent);
+      
+      console.log('【独立上传】上传成功，返回拼接后的文件对象:', difyFileObject);
+      res.json({ 
+        success: true, 
+        data: difyFileObject,
+        message: '文件上传成功，已自动拼接为Dify主API格式'
       });
-      res.json(response.data);
-    } catch (e) {
-      res.status(500).json({ error: e.message });
+      
+    } catch (uploadError) {
+      console.error('【独立上传】上传失败:', uploadError.message);
+      if (uploadError.response) {
+        console.error('【独立上传】Dify响应:', uploadError.response.data);
+      }
+      res.status(500).json({ 
+        success: false,
+        error: uploadError.message,
+        detail: uploadError.response?.data 
+      });
     }
   });
 });
@@ -584,6 +701,36 @@ app.get('/api/user/recharge-orders/:username', (req, res) => {
                   order.status === 'approved' ? '已到账' : '已拒绝'
     }));
   res.json(orders);
+});
+
+// 测试文件拼接功能的接口
+app.get('/api/test/file-object', (req, res) => {
+  // 模拟 Dify 文件上传返回的数据
+  const mockDifyResponse = {
+    data: {
+      id: "test-file-id-123",
+      url: "https://example.com/files/test.pdf",
+      filename: "test.pdf",
+      size: 1024,
+      type: "application/pdf"
+    }
+  };
+  
+  // 模拟拼接后的文件对象
+  const mockFileObject = {
+    dify_model_identity: "file",
+    remote_url: mockDifyResponse.data.url,
+    related_id: mockDifyResponse.data.id,
+    filename: mockDifyResponse.data.filename
+  };
+  
+  res.json({
+    success: true,
+    message: "文件对象拼接测试",
+    originalDifyResponse: mockDifyResponse,
+    splicedFileObject: mockFileObject,
+    description: "这是模拟的文件拼接结果，实际使用时后端会自动完成此过程"
+  });
 });
 
 // ====== 命令行充值功能 ======

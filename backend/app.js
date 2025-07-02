@@ -146,12 +146,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
             const file = files[key];
             if (file && file.filepath) {
               const fileInfo = await uploadFileToDify(file, fields.user, agent);
-              inputs[key] = {
-                type: 'document',
-                transfer_method: 'local_file',
-                upload_file_id: fileInfo.id,
-                url: fileInfo.preview_url || ''
-              };
+              inputs[key] = fileInfo;
             }
           }
           // 多文件
@@ -162,12 +157,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
               for (const file of fileArr) {
                 if (file && file.filepath) {
                   const fileInfo = await uploadFileToDify(file, fields.user, agent);
-                  inputs[key].push({
-                    type: 'document',
-                    transfer_method: 'local_file',
-                    upload_file_id: fileInfo.id,
-                    url: fileInfo.preview_url || ''
-                  });
+                  inputs[key].push(fileInfo);
                 }
               }
             }

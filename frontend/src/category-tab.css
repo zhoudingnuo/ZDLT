@@ -1,0 +1,18 @@
+/* 顶部分类栏悬停变色效果 */
+.category-tab {
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  border-radius: 12px;
+  border: 1.5px solid transparent;
+}
+.category-tab:hover {
+  background: #eaf3ff !important;
+  color: #4f8cff !important;
+  border: 1.5px solid #4f8cff !important;
+  border-radius: 12px !important;
+}
+.category-tab.selected, .category-tab[aria-selected='true'] {
+  background: #eaf3ff !important;
+  color: #4f8cff !important;
+  border: 1.5px solid #4f8cff !important;
+  border-radius: 12px !important;
+} 

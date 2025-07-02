@@ -1,0 +1,47 @@
+[
+  {
+    "id": "1751358665016",
+    "username": "ZDLT",
+    "password": "$2b$10$aKVRRt.30T/U3yZ8N5IIPOu94EACxpiQCPZhDdA3Z/cx5b2Yj0N5u",
+    "email": "admin@example.com",
+    "usage_tokens": 25892,
+    "isAdmin": true,
+    "balance": -0.011601
+  },
+  {
+    "id": "1751363461645",
+    "username": "ZDLT1",
+    "password": "$2b$10$aKVRRt.30T/U3yZ8N5IIPOu94EACxpiQCPZhDdA3Z/cx5b2Yj0N5u",
+    "email": "1163155015@qq.com",
+    "usage_tokens": 0,
+    "usage_price": 0,
+    "balance": 100
+  },
+  {
+    "id": "1751363598268",
+    "username": "ZDLT2",
+    "password": "$2b$10$aKVRRt.30T/U3yZ8N5IIPOu94EACxpiQCPZhDdA3Z/cx5b2Yj0N5u",
+    "email": "1163155015@qq.com",
+    "usage_tokens": 0,
+    "usage_price": 0,
+    "balance": 152
+  },
+  {
+    "id": "1751368894466",
+    "username": "ZDLT3",
+    "password": "$2b$10$aKVRRt.30T/U3yZ8N5IIPOu94EACxpiQCPZhDdA3Z/cx5b2Yj0N5u",
+    "email": "1163155015@qq.com",
+    "usage_tokens": 0,
+    "usage_price": 0,
+    "balance": 0
+  },
+  {
+    "id": "1751423739859",
+    "username": "ZDLT31",
+    "password": "$2b$10$aKVRRt.30T/U3yZ8N5IIPOu94EACxpiQCPZhDdA3Z/cx5b2Yj0N5u",
+    "email": "1163155015@qq.com",
+    "usage_tokens": 0,
+    "usage_price": 0,
+    "balance": 0
+  }
+]

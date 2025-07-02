@@ -1,0 +1,9 @@
+/* 导航按钮悬停变色效果 */
+.nav-btn {
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.nav-btn:hover {
+  background: #eaf3ff !important;   /* 悬停背景色，可自定义 */
+  color: #4f8cff !important;         /* 悬停字体色，可自定义 */
+  border: 1.5px solid #4f8cff !important; /* 悬停边框色 */
+} 

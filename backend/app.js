@@ -272,8 +272,14 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
               
               for (const fileInfo of fileArray) {
                 if (fileInfo && fileInfo.difyFileObject) {
-                  inputs[key].push(fileInfo.difyFileObject);
-                  console.log('【INVOKE】添加文件对象:', fileInfo.difyFileObject);
+                  // 根据文档格式，多文件应该使用简化的格式
+                  inputs[key].push({
+                    type: fileInfo.difyFileObject.type,
+                    transfer_method: "local_file",
+                    url: "",
+                    upload_file_id: fileInfo.difyFileObject.related_id
+                  });
+                  console.log('【INVOKE】添加文件对象:', inputs[key][inputs[key].length - 1]);
                 }
               }
             }
@@ -285,8 +291,14 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
             
             const fileInfo = validFileData && validFileData[key];
             if (fileInfo && fileInfo.difyFileObject) {
-              inputs[key] = fileInfo.difyFileObject;
-              console.log('【INVOKE】添加单文件对象:', fileInfo.difyFileObject);
+              // 根据文档格式，单文件也使用简化格式
+              inputs[key] = {
+                type: fileInfo.difyFileObject.type,
+                transfer_method: "local_file",
+                url: "",
+                upload_file_id: fileInfo.difyFileObject.related_id
+              };
+              console.log('【INVOKE】添加单文件对象:', inputs[key]);
             }
           }
         } else {
@@ -396,14 +408,21 @@ async function uploadFileToDifySimple(file, user, agent) {
     // 自动拼接成 Dify 主 API 需要的文件对象格式
     const fileInfo = response.data.data || response.data;
     const difyFileObject = {
-      dify_model_identity: "file",
-      remote_url: fileInfo.url,
+      dify_model_identity: "__dify__file__",
+      id: null,
+      tenant_id: fileInfo.created_by || null,
+      type: fileInfo.mime_type?.startsWith('image/') ? 'image' : 'file',
+      transfer_method: "local_file",
+      remote_url: fileInfo.url || fileInfo.preview_url,
       related_id: fileInfo.id,
-      filename: fileInfo.filename || filename
+      filename: fileInfo.name || fileInfo.filename || filename,
+      extension: fileInfo.extension ? `.${fileInfo.extension}` : path.extname(filename),
+      mime_type: fileInfo.mime_type || mimetype,
+      size: fileInfo.size
     };
     
-    console.log('【UPLOAD】Dify返回原始数据:', response.data);
-    console.log('【UPLOAD】拼接后的文件对象:', difyFileObject);
+    console.log('【UPLOAD】Dify返回原始数据:', JSON.stringify(response.data, null, 2));
+    console.log('【UPLOAD】拼接后的文件对象:', JSON.stringify(difyFileObject, null, 2));
     console.log('【UPLOAD】文件上传成功');
     
     return difyFileObject;

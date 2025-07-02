@@ -1261,6 +1261,9 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
                   if (uploadRes.data.success) {
                     console.log('【前端】文件上传成功:', uploadRes.data.data);
                     return uploadRes.data.data.files[0]; // 返回第一个文件的结果
+                  } else {
+                    console.error('【前端】文件上传失败:', uploadRes.data);
+                    throw new Error(uploadRes.data.error || '文件上传失败');
                   }
                 }
                 return null;
@@ -1289,11 +1292,14 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
                 headers: { 'Content-Type': 'multipart/form-data' }
               });
               
-              if (uploadRes.data.success) {
-                console.log('【前端】单文件上传成功:', uploadRes.data.data);
-                fileData[input.name] = uploadRes.data.data.files[0];
-                inputs[input.name] = uploadRes.data.data.files[0].difyFileObject;
-              }
+                             if (uploadRes.data.success) {
+                 console.log('【前端】单文件上传成功:', uploadRes.data.data);
+                 fileData[input.name] = uploadRes.data.data.files[0];
+                 inputs[input.name] = uploadRes.data.data.files[0].difyFileObject;
+               } else {
+                 console.error('【前端】单文件上传失败:', uploadRes.data);
+                 throw new Error(uploadRes.data.error || '文件上传失败');
+               }
             }
           }
         } else if (values[input.name] !== undefined) {

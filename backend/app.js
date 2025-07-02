@@ -158,6 +158,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
                 if (file && file.filepath) {
                   const fileInfo = await uploadFileToDify(file, fields.user, agent);
                   inputs[key].push(fileInfo);
+                  console.log('fileInfo:', fileInfo);
                 }
               }
             }

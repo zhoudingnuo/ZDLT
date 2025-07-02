@@ -170,6 +170,27 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
       query = Array.isArray(fields.query) ? fields.query[0] : fields.query;
       fileData = fields.fileData ? JSON.parse(fields.fileData) : {};
       
+      // 先把inputs对象内容拷贝到inputs
+      let inputs = {};
+      if (rawInputs && typeof rawInputs === 'object' && !Array.isArray(rawInputs)) {
+        inputs = { ...rawInputs };
+      }
+      // 补充其它普通字段（非文件、非系统字段）
+      for (const key in fields) {
+        if (
+          key !== 'inputs' &&
+          key !== 'response_mode' &&
+          key !== 'conversation_id' &&
+          key !== 'user' &&
+          key !== 'query' &&
+          key !== 'fileData' &&
+          key !== 'agentId' &&
+          !(files && files[key]) // 跳过文件字段
+        ) {
+          inputs[key] = fields[key];
+        }
+      }
+      
       // 🔥 处理上传的文件，直接上传到Dify
       if (Array.isArray(agent.inputs)) {
         console.log('【INVOKE】开始处理智能体输入定义:', agent.inputs.length, '个字段');

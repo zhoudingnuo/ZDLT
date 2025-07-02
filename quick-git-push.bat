@@ -17,8 +17,7 @@ echo ====== Connecting to server and running git pull ======
 echo Please manually enter the server password: ZDLT@20250702
 echo.
 
-REM Open a new command window to run ssh and auto-close after pull
-start cmd /k "chcp 65001 >nul && echo. && ssh %SERVER_USER%@%SERVER_IP% \"cd %SERVER_PATH% && git pull\" & echo. & echo Done. Press any key to close this window. & pause & exit"
+ssh %SERVER_USER%@%SERVER_IP% "cd %SERVER_PATH% && git pull"
 
 echo Local commit and push to GitHub done. Remote git pull triggered: %msg%
 pause

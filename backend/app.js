@@ -144,7 +144,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
           // 单文件
           if (inputDef.type === 'file' || inputDef.type === 'upload') {
             const file = files[key];
-            if (file) {
+            if (file && file.filepath) {
               const fileInfo = await uploadFileToDify(file, fields.user, agent);
               inputs[key] = {
                 type: 'document',
@@ -160,13 +160,15 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
             if (Array.isArray(fileArr)) {
               inputs[key] = [];
               for (const file of fileArr) {
-                const fileInfo = await uploadFileToDify(file, fields.user, agent);
-                inputs[key].push({
-                  type: 'document',
-                  transfer_method: 'local_file',
-                  upload_file_id: fileInfo.id,
-                  url: fileInfo.preview_url || ''
-                });
+                if (file && file.filepath) {
+                  const fileInfo = await uploadFileToDify(file, fields.user, agent);
+                  inputs[key].push({
+                    type: 'document',
+                    transfer_method: 'local_file',
+                    upload_file_id: fileInfo.id,
+                    url: fileInfo.preview_url || ''
+                  });
+                }
               }
             }
           }

@@ -287,8 +287,9 @@ async function uploadFileToDify(file, user, agent) {
     type_mimetype: typeof mimetype
   });
 
-  // 强制转字符串，防止意外类型
-  fd.append('file', fs.createReadStream(file.filepath), {
+  // 用 Buffer 方式组装，兼容 Python requests
+  const buffer = fs.readFileSync(file.filepath);
+  fd.append('file', buffer, {
     filename: String(filename),
     contentType: String(mimetype)
   });

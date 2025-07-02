@@ -302,10 +302,10 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
           inputDef.type === 'upload' ||
           (inputDef.type === 'array' && inputDef.itemType === 'file')
         ) {
-          // 使用已上传的文件对象
+          // 使用已上传的文件对象，直接传递完整对象
           if (uploadedFiles[key]) {
             inputs[key] = uploadedFiles[key];
-            console.log('【INVOKE】使用已上传的文件对象:', key, inputs[key]);
+            console.log('【INVOKE】使用已上传的完整文件对象:', key, inputs[key]);
           } else {
             console.log('【INVOKE】字段', key, '未找到上传的文件');
           }
@@ -336,7 +336,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
   console.log('【INVOKE】parameter请求地址:', agent.apiUrl);
   
   try {
-    const response = await axios.post(agent.apiUrl, data, { headers, timeout: 10000 });
+    const response = await axios.post(agent.apiUrl, data, { headers, timeout: 100000 });
     console.log('【INVOKE】parameter响应成功');
     res.json(response.data);
   } catch (err) {

@@ -328,3 +328,29 @@ upload返回的部分参数：
 {"response_mode":"streaming","conversation_id":"666d5179-b9aa-4a06-81ae-afaed43a1d24","files":[],"query":"开始生成","inputs":{"prompt":"12","image":[{"type":"image","transfer_method":"local_file","url":"","upload_file_id":"b30dff0c-8c8b-419d-b719-504bdbab9e77"}]},"parent_message_id":"46decd36-0c79-4eda-ad08-d5ac90b7bd60"}
 
 
+{
+    "id": "da3f5e80-6fbd-4eeb-b1a8-7fbe0b26d7bd",
+    "name": "\u5f00\u59cb\u751f\u6210",
+    "inputs": {
+        "prompt": "5",
+        "bool": "\u662f",
+        "gender": "\u7537",
+        "image": {
+            "dify_model_identity": "__dify__file__",
+            "id": null,
+            "tenant_id": "b5c2e5fb-1c76-4364-bb8d-86d007a5208f",
+            "type": "image",
+            "transfer_method": "local_file",
+            "remote_url": "http://118.145.74.50:24131/files/140c4d4d-afe6-4ec5-add5-364b12ab371d/file-preview?timestamp=1751498741&nonce=380d4d6380669ccb69d5d70682bd8599&sign=QEV2ooeA8U_xzEcbzSAHsWpeMx0oMDoRxEW8ieayHGc=",
+            "related_id": "140c4d4d-afe6-4ec5-add5-364b12ab371d",
+            "filename": "1749542839629.jpg",
+            "extension": ".jpg",
+            "mime_type": "image/jpeg",
+            "size": 339960
+        }
+    },
+    "status": "normal",
+    "introduction": "\u60a8\u597d,\u6b22\u8fce\u4f7f\u7528\u672a\u6765\u804c\u4e1a\u56fe\u7247\u751f\u6210\u667a\u80fd\u4f53,\u8bf7\u4e0a\u4f20\u60a8\u7684\u56fe\u7247\u548c\u68a6\u60f3\u804c\u4e1a,\u5728\u5feb\u901f\u751f\u6210\u91cc\u9762\u9009\u62e9\"\u662f\"\u6216\u8005\"\u5426\",\u5728\u6027\u522b\u91cc\u9009\u62e9\"\u7537\"\u6216\"\u5973\",\u5728\u5bf9\u8bdd\u6846\u91cc\u8f93\u5165\u5f00\u59cb\u751f\u6210\u5427!",
+    "created_at": 1751498747,
+    "updated_at": 1751498747
+}

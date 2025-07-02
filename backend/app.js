@@ -88,98 +88,97 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
   if (!agent.apiKey || !agent.apiUrl) {
     return res.status(400).json({ error: 'Agent not configured. Please configure API key and URL first.' });
   }
-
+  if (agent.inputType === 'dialogue') {
+    let inputs = {};
+    try {
+      inputs = fields.inputs ? JSON.parse(fields.inputs) : {};
+    } catch {
+      inputs = {};
+    }
+    const data = {
+      inputs: inputs,
+      query: fields.query,
+      response_mode: fields.response_mode || 'blocking',
+      conversation_id: fields.conversation_id || '',
+      user: fields.user || 'auto_test'
+    };
+    const headers = {
+      'Authorization': `Bearer ${agent.apiKey}`,
+      'Content-Type': 'application/json'
+    };
+    // 调试输出
+    console.log('【invoke调试】Dify URL:', agent.apiUrl);
+    console.log('【invoke调试】Headers:', headers);
+    console.log('【invoke调试】Data:', JSON.stringify(data, null, 2));
+    try {
+      const response = await axios.post(agent.apiUrl, data, { headers, timeout: 10000 });
+      console.log('【invoke调试】Dify响应:', response.data);
+      res.json(response.data);
+    } catch (err) {
+      console.error('【invoke调试】调用agent失败:', err.message, err.response?.data);
+      res.status(500).json({ error: err.message, detail: err.response?.data });
+    }
+    return; // 只处理 dialogue，后面不再执行
+  }
   const formidable = require('formidable');
   const form = new formidable.IncomingForm({ multiples: true });
   form.parse(req, async (err, fields, files) => {
     if (err) return res.status(400).json({ error: 'Parse error' });
     let data;
-    if (agent.inputType === 'dialogue') {
-      let inputs = {};
-      try {
-        inputs = fields.inputs ? JSON.parse(fields.inputs) : {};
-      } catch {
-        inputs = {};
-      }
-      const data = {
-        inputs: inputs,
-        query: fields.query,
-        response_mode: fields.response_mode || 'blocking',
-        conversation_id: fields.conversation_id || '',
-        user: fields.user || 'auto_test'
-      };
-      const headers = {
-        'Authorization': `Bearer ${agent.apiKey}`,
-        'Content-Type': 'application/json'
-      };
-      // 调试输出
-      console.log('【invoke调试】Dify URL:', agent.apiUrl);
-      console.log('【invoke调试】Headers:', headers);
-      console.log('【invoke调试】Data:', JSON.stringify(data, null, 2));
-      try {
-        const response = await axios.post(agent.apiUrl, data, { headers, timeout: 10000 });
-        console.log('【invoke调试】Dify响应:', response.data);
-        res.json(response.data);
-      } catch (err) {
-        console.error('【invoke调试】调用agent失败:', err.message, err.response?.data);
-        res.status(500).json({ error: err.message, detail: err.response?.data });
-      }
-      return; // 只处理 dialogue，后面不再执行
-    }else {
-      console.log('fields:', agent.inputType);
-      // parameter 类型，先处理文件上传
-      let inputs = {};
-      try {
-        inputs = fields.inputs ? JSON.parse(fields.inputs) : {};
-      } catch {
-        inputs = {};
-      }
-      if (Array.isArray(agent.inputs)) {
-        for (const inputDef of agent.inputs) {
-          const key = inputDef.name;
-          if (
-            inputDef.type === 'file' ||
-            inputDef.type === 'upload' ||
-            (inputDef.type === 'array' && inputDef.itemType === 'file')
-          ) {
-            // 单文件
-            if (inputDef.type === 'file' || inputDef.type === 'upload') {
-              const file = files[key];
-              if (file) {
+    console.log('fields:', agent.inputType);
+    // parameter 类型，先处理文件上传
+    let inputs = {};
+    try {
+      inputs = fields.inputs ? JSON.parse(fields.inputs) : {};
+    } catch {
+      inputs = {};
+    }
+    if (Array.isArray(agent.inputs)) {
+      for (const inputDef of agent.inputs) {
+        const key = inputDef.name;
+        if (
+          inputDef.type === 'file' ||
+          inputDef.type === 'upload' ||
+          (inputDef.type === 'array' && inputDef.itemType === 'file')
+        ) {
+          // 单文件
+          if (inputDef.type === 'file' || inputDef.type === 'upload') {
+            const file = files[key];
+            if (file) {
+              const fileInfo = await uploadFileToDify(file, fields.user, agent);
+              inputs[key] = {
+                type: 'document',
+                transfer_method: 'local_file',
+                upload_file_id: fileInfo.id,
+                url: fileInfo.preview_url || ''
+              };
+            }
+          }
+          // 多文件
+          if (inputDef.type === 'array' && inputDef.itemType === 'file') {
+            const fileArr = files[key];
+            if (Array.isArray(fileArr)) {
+              inputs[key] = [];
+              for (const file of fileArr) {
                 const fileInfo = await uploadFileToDify(file, fields.user, agent);
-                inputs[key] = {
+                inputs[key].push({
                   type: 'document',
                   transfer_method: 'local_file',
                   upload_file_id: fileInfo.id,
                   url: fileInfo.preview_url || ''
-                };
-              }
-            }
-            // 多文件
-            if (inputDef.type === 'array' && inputDef.itemType === 'file') {
-              const fileArr = files[key];
-              if (Array.isArray(fileArr)) {
-                inputs[key] = [];
-                for (const file of fileArr) {
-                  const fileInfo = await uploadFileToDify(file, fields.user, agent);
-                  inputs[key].push({
-                    type: 'document',
-                    transfer_method: 'local_file',
-                    upload_file_id: fileInfo.id,
-                    url: fileInfo.preview_url || ''
-                  });
-                }
+                });
               }
             }
           }
         }
       }
-      data = {
-        ...fields,
-        inputs: inputs
-      };
-      console.log('data:', data);
     }
+    data = {
+      ...fields,
+      inputs: inputs
+    };
+    console.log('data:', data);
+  
     const headers = {
       'Authorization': `Bearer ${agent.apiKey}`,
       'Content-Type': 'application/json'

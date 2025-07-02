@@ -88,7 +88,9 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
   if (!agent.apiKey || !agent.apiUrl) {
     return res.status(400).json({ error: 'Agent not configured. Please configure API key and URL first.' });
   }
+  console.log('agent.inputType:', agent.inputType);
   if (agent.inputType === 'dialogue') {
+    console.log('dialogue');
     let inputs = {};
     try {
       inputs = fields.inputs ? JSON.parse(fields.inputs) : {};

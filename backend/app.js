@@ -83,6 +83,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     agents = JSON.parse(fs.readFileSync(agentsPath, 'utf-8'));
   }
   const agent = agents.find(a => a.id === req.params.id);
+  console.log('agent:', agent);
   if (!agent) return res.status(404).json({ error: 'Agent not found' });
   if (!agent.apiKey || !agent.apiUrl) {
     return res.status(400).json({ error: 'Agent not configured. Please configure API key and URL first.' });
@@ -102,6 +103,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
         conversation_id: fields.conversation_id || '',
         user: fields.user || 'auto_test'
       };
+      console.log('data:', data);
     } else {
       // parameter 类型，先处理文件上传
       let inputs = {};
@@ -154,6 +156,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
         ...fields,
         inputs: inputs
       };
+      console.log('data:', data);
     }
     const headers = {
       'Authorization': `Bearer ${agent.apiKey}`,

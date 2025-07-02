@@ -163,8 +163,15 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
           // 单文件处理
           if (inputDef.type === 'file' || inputDef.type === 'upload') {
             let file = files[key];
-            // 兼容数组和单对象
-            if (Array.isArray(file)) file = file[0];
+            // 兼容数组和单对象，防御多重
+            if (Array.isArray(file)) {
+              if (file.length > 0) {
+                console.warn(`字段 ${key} 期望单文件，但收到数组，只取第一个！`);
+                file = file[0];
+              } else {
+                file = undefined;
+              }
+            }
             console.log('【单文件】字段:', key, '文件对象:', file ? '存在' : '不存在');
             console.log('【单文件】文件对象:', file);
             if (file && file.filepath) {
@@ -250,6 +257,16 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
 
 // 文件上传到 Dify 并自动拼接文件对象
 async function uploadFileToDify(file, user, agent) {
+  // 防御：如果 file 是数组，自动取第一个
+  if (Array.isArray(file)) {
+    if (file.length > 0) {
+      console.warn('uploadFileToDify 收到数组，只取第一个');
+      file = file[0];
+    } else {
+      throw new Error('文件数组为空');
+    }
+  }
+
   console.log('【文件上传】开始上传文件:', file.originalFilename);
   
   // 检查文件是否存在

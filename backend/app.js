@@ -76,6 +76,12 @@ app.get('/api/agents/list', (req, res) => {
 
 // 转发到Dify智能体
 app.post('/api/agent/:id/invoke', async (req, res) => {
+  // 判断是否为 Dify 事件推送（回调），如果是直接返回
+  if (req.body && req.body.params && req.body.params.event) {
+    console.log('【INVOKE】收到Dify事件推送，忽略:', req.body.params.event);
+    return res.status(200).json({ success: true });
+  }
+
   console.log('【INVOKE】开始处理请求，agentId:', req.params.id);
   console.log('【INVOKE】请求方法:', req.method);
   console.log('【INVOKE】请求头:', req.headers);

@@ -151,5 +151,6 @@ module.exports = {
   testFileObjectSplicing,
   testIndependentUpload,
   testAgentInvokeWithFile,
+  testDifyUploadUrl,
   runTests
 }; 

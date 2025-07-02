@@ -161,12 +161,12 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
       
       console.log('【INVOKE】formidable解析结果:', { fields, files });
       
-      // 从fields中提取数据
+      // 从fields中提取数据，处理数组格式
       rawInputs = fields.inputs ? JSON.parse(fields.inputs) : {};
       response_mode = fields.response_mode;
       conversation_id = fields.conversation_id;
-      user = fields.user;
-      query = fields.query;
+      user = Array.isArray(fields.user) ? fields.user[0] : fields.user;
+      query = Array.isArray(fields.query) ? fields.query[0] : fields.query;
       fileData = fields.fileData ? JSON.parse(fields.fileData) : {};
       
     } catch (parseError) {
@@ -276,6 +276,17 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
                   console.log('【INVOKE】添加文件对象:', fileInfo.difyFileObject);
                 }
               }
+            }
+          }
+          
+          // 单文件处理
+          if (inputDef.type === 'file' || inputDef.type === 'upload') {
+            console.log('【INVOKE】单文件处理:', key);
+            
+            const fileInfo = validFileData && validFileData[key];
+            if (fileInfo && fileInfo.difyFileObject) {
+              inputs[key] = fileInfo.difyFileObject;
+              console.log('【INVOKE】添加单文件对象:', fileInfo.difyFileObject);
             }
           }
         } else {

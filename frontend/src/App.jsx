@@ -1232,36 +1232,98 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
     try {
       setLoading(true);
       const values = await form.validateFields();
-      const formData = new FormData();
-      formData.append('agentId', agent.id);
-      // 修复query获取逻辑：如果没有第一个输入字段，使用默认值
-      const firstInputName = agent?.inputs?.[0]?.name;
-      const queryValue = firstInputName && values[firstInputName] ? values[firstInputName] : '参数配置';
-      formData.append('query', queryValue);
-      formData.append('user', getUser()?.username || 'guest');
-      // 组装inputs对象，非文件参数直接加，文件参数用FormData
+      
+      // 先上传文件到Dify，获取文件对象
+      const fileData = {};
       const inputs = {};
+      
       for (const input of agent.inputs || []) {
-        if (input.type === 'file' || input.type === 'upload') {
+        if (input.type === 'file' || input.type === 'upload' || (input.type === 'array' && input.itemType === 'file')) {
           const fileList = form.getFieldValue(input.name);
-          const fileObj = fileList && fileList[0] && fileList[0].originFileObj;
-          if (fileObj) {
-            formData.append(input.name, fileObj);
+          
+          if (input.type === 'array' && input.itemType === 'file') {
+            // 多文件处理
+            if (fileList && fileList.length > 0) {
+              const uploadPromises = fileList.map(async (fileItem) => {
+                const fileObj = fileItem.originFileObj;
+                if (fileObj) {
+                  const uploadFormData = new FormData();
+                  uploadFormData.append('file', fileObj);
+                  uploadFormData.append('agentId', agent.id);
+                  uploadFormData.append('user', getUser()?.username || 'guest');
+                  uploadFormData.append('fieldName', input.name);
+                  
+                  console.log('【前端】上传文件到Dify:', fileObj.name);
+                  const uploadRes = await axios.post(`${API_BASE}/api/upload-file-for-agent`, uploadFormData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                  });
+                  
+                  if (uploadRes.data.success) {
+                    console.log('【前端】文件上传成功:', uploadRes.data.data);
+                    return uploadRes.data.data.files[0]; // 返回第一个文件的结果
+                  }
+                }
+                return null;
+              });
+              
+              const uploadResults = await Promise.all(uploadPromises);
+              const validResults = uploadResults.filter(result => result !== null);
+              
+              if (validResults.length > 0) {
+                fileData[input.name] = validResults;
+                inputs[input.name] = validResults.map(result => result.difyFileObject);
+              }
+            }
+          } else {
+            // 单文件处理
+            const fileObj = fileList && fileList[0] && fileList[0].originFileObj;
+            if (fileObj) {
+              const uploadFormData = new FormData();
+              uploadFormData.append('file', fileObj);
+              uploadFormData.append('agentId', agent.id);
+              uploadFormData.append('user', getUser()?.username || 'guest');
+              uploadFormData.append('fieldName', input.name);
+              
+              console.log('【前端】上传单文件到Dify:', fileObj.name);
+              const uploadRes = await axios.post(`${API_BASE}/api/upload-file-for-agent`, uploadFormData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+              });
+              
+              if (uploadRes.data.success) {
+                console.log('【前端】单文件上传成功:', uploadRes.data.data);
+                fileData[input.name] = uploadRes.data.data.files[0];
+                inputs[input.name] = uploadRes.data.data.files[0].difyFileObject;
+              }
+            }
           }
         } else if (values[input.name] !== undefined) {
           inputs[input.name] = values[input.name];
         }
       }
-      formData.append('inputs', JSON.stringify(inputs));
-      // 发送到后端
-      const res = await axios.post(`${API_BASE}/api/agent/${agent.id}/invoke`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      
+      // 修复query获取逻辑：如果没有第一个输入字段，使用默认值
+      const firstInputName = agent?.inputs?.[0]?.name;
+      const queryValue = firstInputName && values[firstInputName] ? values[firstInputName] : '参数配置';
+      
+      // 发送到后端invoke接口
+      const invokeData = {
+        inputs: inputs,
+        query: queryValue,
+        user: getUser()?.username || 'guest',
+        fileData: fileData
+      };
+      
+      console.log('【前端】发送invoke请求:', invokeData);
+      const res = await axios.post(`${API_BASE}/api/agent/${agent.id}/invoke`, invokeData, {
+        headers: { 'Content-Type': 'application/json' }
       });
+      
       message.success('参数提交成功！');
       form.resetFields();
       await onSubmit(res.data);
     } catch (e) {
-      message.error('参数提交失败');
+      console.error('【前端】参数提交失败:', e);
+      message.error('参数提交失败: ' + (e.response?.data?.error || e.message));
     } finally {
       setLoading(false);
     }

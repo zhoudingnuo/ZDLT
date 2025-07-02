@@ -258,9 +258,32 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     }
   } else {
     console.log('【INVOKE】使用JSON格式，直接从req.body读取');
-    // 直接从req.body获取数据
-    ({ inputs: rawInputs, response_mode, conversation_id, user, fileData } = req.body);
-    ({ query } = req.body); // 改为let声明，允许重新赋值
+    // 兼容 params 包裹的情况
+    let body = req.body;
+    if (body && body.params) {
+      body = body.params;
+    }
+    const { inputs: rawInputs, response_mode, conversation_id, user, fileData } = body;
+    let { query } = body;
+    // 补全inputs
+    let inputs = {};
+    if (rawInputs && typeof rawInputs === 'object' && !Array.isArray(rawInputs)) {
+      inputs = { ...rawInputs };
+    }
+    // 补充其它普通字段（非inputs、非系统字段）
+    for (const key in body) {
+      if (
+        key !== 'inputs' &&
+        key !== 'response_mode' &&
+        key !== 'conversation_id' &&
+        key !== 'user' &&
+        key !== 'query' &&
+        key !== 'fileData' &&
+        key !== 'agentId'
+      ) {
+        inputs[key] = body[key];
+      }
+    }
   }
   
   console.log('【INVOKE】接收到的原始数据:', req.body);

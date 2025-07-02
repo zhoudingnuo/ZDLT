@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>请求调试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>请求调试页面</h1>
+    
+    <div class="form-group">
+        <label for="agentId">智能体ID:</label>
+        <input type="text" id="agentId" value="dream-career">
+    </div>
+    
+    <div class="form-group">
+        <label for="prompt">提示词:</label>
+        <input type="text" id="prompt" value="我想成为一名软件工程师">
+    </div>
+    
+    <div class="form-group">
+        <label for="query">查询内容:</label>
+        <input type="text" id="query" value="请帮我分析职业规划">
+    </div>
+    
+    <div class="form-group">
+        <label for="user">用户标识:</label>
+        <input type="text" id="user" value="test-user">
+    </div>
+    
+    <div>
+        <button onclick="testRequest()">发送测试请求</button>
+        <button onclick="testEmptyBody()">发送空请求体</button>
+        <button onclick="clearResult()">清空结果</button>
+    </div>
+    
+    <div id="result" class="result" style="display: none;"></div>
+    
+    <script>
+        function showResult(data, isError = false) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.style.backgroundColor = isError ? '#f8d7da' : '#d4edda';
+            resultDiv.textContent = JSON.stringify(data, null, 2);
+        }
+        
+        function clearResult() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'none';
+            resultDiv.textContent = '';
+        }
+        
+        async function testRequest() {
+            try {
+                const agentId = document.getElementById('agentId').value;
+                const user = document.getElementById('user').value;
+                const query = document.getElementById('query').value;
+                
+                const requestData = {
+                    inputs: {
+                        prompt: document.getElementById('prompt').value
+                    },
+                    query: query,
+                    user: user,
+                    fileData: {}
+                };
+                
+                console.log('【调试】发送的请求数据:', requestData);
+                console.log('【调试】请求URL:', `/api/agent/${agentId}/invoke`);
+                
+                const response = await fetch(`/api/agent/${agentId}/invoke`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const result = await response.json();
+                console.log('【调试】响应结果:', result);
+                
+                showResult({
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries()),
+                    data: result
+                });
+                
+            } catch (error) {
+                console.error('【调试】请求失败:', error);
+                showResult({
+                    error: error.message,
+                    stack: error.stack
+                }, true);
+            }
+        }
+        
+        async function testEmptyBody() {
+            try {
+                const agentId = document.getElementById('agentId').value;
+                
+                console.log('【调试】发送空请求体');
+                console.log('【调试】请求URL:', `/api/agent/${agentId}/invoke`);
+                
+                const response = await fetch(`/api/agent/${agentId}/invoke`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: '{}' // 空对象
+                });
+                
+                const result = await response.json();
+                console.log('【调试】空请求体响应:', result);
+                
+                showResult({
+                    status: response.status,
+                    statusText: response.statusText,
+                    data: result
+                });
+                
+            } catch (error) {
+                console.error('【调试】空请求体失败:', error);
+                showResult({
+                    error: error.message,
+                    stack: error.stack
+                }, true);
+            }
+        }
+        
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('【调试】页面加载完成');
+            console.log('【调试】可用的测试函数: testRequest(), testEmptyBody()');
+        });
+    </script>
+</body>
+</html> 

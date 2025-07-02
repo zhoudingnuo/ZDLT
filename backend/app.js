@@ -77,6 +77,10 @@ app.get('/api/agents/list', (req, res) => {
 // 转发到Dify智能体
 app.post('/api/agent/:id/invoke', async (req, res) => {
   console.log('【INVOKE】开始处理请求，agentId:', req.params.id);
+  console.log('【INVOKE】请求方法:', req.method);
+  console.log('【INVOKE】请求头:', req.headers);
+  console.log('【INVOKE】Content-Type:', req.headers['content-type']);
+  console.log('【INVOKE】请求体长度:', req.headers['content-length']);
   
   // 直接从 agents.json 文件读取最新的 agent 配置
   let agents = [];
@@ -93,14 +97,8 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     return res.status(400).json({ error: 'Agent not configured. Please configure API key and URL first.' });
   }
   
-    console.log('【INVOKE】找到Agent:', agent.name, 'inputType:', agent.inputType);
-  
-  // 如果inputType为undefined，默认为parameter类型
-  if (!agent.inputType) {
-    console.log('【INVOKE】inputType为undefined，默认为parameter类型');
-    agent.inputType = 'parameter';
-  }
-  
+  console.log('【INVOKE】找到Agent:', agent.name, 'inputType:', agent.inputType);
+
   // 1. 先判断 inputType 是否为 dialogue
   if (agent.inputType === 'dialogue') {
     console.log('【INVOKE】dialogue类型，直接处理');
@@ -144,15 +142,43 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
   // 2. parameter类型 - 前端文件选择 + 后端接收方式
   console.log('【INVOKE】parameter类型，开始处理前端传来的数据');
   
-  // 检查req.body是否为空
-  if (!req.body || Object.keys(req.body).length === 0) {
-    console.error('【INVOKE】请求体为空，可能是Content-Type不正确');
-    return res.status(400).json({ error: 'Request body is empty. Please check Content-Type header.' });
-  }
+  // 检查Content-Type，如果是multipart/form-data，使用formidable解析
+  let rawInputs, response_mode, conversation_id, user, fileData, query;
   
-  // 直接从req.body获取数据，不再使用formidable
-  const { inputs: rawInputs, response_mode, conversation_id, user, fileData } = req.body;
-  let { query } = req.body; // 改为let声明，允许重新赋值
+  if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
+    console.log('【INVOKE】检测到FormData，使用formidable解析');
+    
+    // 使用formidable解析FormData
+    const form = new formidable.IncomingForm({ multiples: true });
+    
+    try {
+      const [fields, files] = await new Promise((resolve, reject) => {
+        form.parse(req, (err, fields, files) => {
+          if (err) reject(err);
+          else resolve([fields, files]);
+        });
+      });
+      
+      console.log('【INVOKE】formidable解析结果:', { fields, files });
+      
+      // 从fields中提取数据
+      rawInputs = fields.inputs ? JSON.parse(fields.inputs) : {};
+      response_mode = fields.response_mode;
+      conversation_id = fields.conversation_id;
+      user = fields.user;
+      query = fields.query;
+      fileData = fields.fileData ? JSON.parse(fields.fileData) : {};
+      
+    } catch (parseError) {
+      console.error('【INVOKE】formidable解析失败:', parseError);
+      return res.status(400).json({ error: 'FormData解析失败' });
+    }
+  } else {
+    console.log('【INVOKE】使用JSON格式，直接从req.body读取');
+    // 直接从req.body获取数据
+    ({ inputs: rawInputs, response_mode, conversation_id, user, fileData } = req.body);
+    ({ query } = req.body); // 改为let声明，允许重新赋值
+  }
   
   console.log('【INVOKE】接收到的原始数据:', req.body);
   console.log('【INVOKE】数据类型检查:', {

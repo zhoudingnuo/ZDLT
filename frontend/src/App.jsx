@@ -1234,7 +1234,10 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       const values = await form.validateFields();
       const formData = new FormData();
       formData.append('agentId', agent.id);
-      formData.append('query', values[agent?.inputs?.[0]?.name] || '参数配置');
+      // 修复query获取逻辑：如果没有第一个输入字段，使用默认值
+      const firstInputName = agent?.inputs?.[0]?.name;
+      const queryValue = firstInputName && values[firstInputName] ? values[firstInputName] : '参数配置';
+      formData.append('query', queryValue);
       formData.append('user', getUser()?.username || 'guest');
       // 组装inputs对象，非文件参数直接加，文件参数用FormData
       const inputs = {};

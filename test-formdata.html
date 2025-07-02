@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FormData测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>FormData测试页面</h1>
+    
+    <form id="testForm">
+        <div class="form-group">
+            <label for="textInput">文本输入:</label>
+            <input type="text" id="textInput" name="textInput" value="测试文本">
+        </div>
+        
+        <div class="form-group">
+            <label for="textareaInput">文本域:</label>
+            <textarea id="textareaInput" name="textareaInput" rows="3">测试文本域内容</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="fileInput">文件选择:</label>
+            <input type="file" id="fileInput" name="fileInput">
+        </div>
+        
+        <button type="submit">发送FormData</button>
+    </form>
+    
+    <div class="result" id="result"></div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            
+            // 添加文本字段
+            formData.append('textInput', document.getElementById('textInput').value);
+            formData.append('textareaInput', document.getElementById('textareaInput').value);
+            
+            // 添加文件
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length > 0) {
+                formData.append('fileInput', fileInput.files[0]);
+            }
+            
+            // 添加其他测试字段
+            formData.append('agentId', 'test-agent');
+            formData.append('query', '测试查询');
+            formData.append('user', 'testuser');
+            formData.append('inputs', JSON.stringify({
+                textInput: document.getElementById('textInput').value,
+                textareaInput: document.getElementById('textareaInput').value
+            }));
+            
+            try {
+                const response = await fetch('/api/agent/test-agent/invoke', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.text();
+                document.getElementById('result').innerHTML = `
+                    <h3>响应结果:</h3>
+                    <pre>${result}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <h3>错误:</h3>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        });
+    </script>
+</body>
+</html> 

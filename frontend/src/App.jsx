@@ -30,7 +30,6 @@ import { UserListProvider, useUserList } from './contexts/UserListContext';
 import './nav-btn.css';
 import './category-tab.css';
 import API_BASE from './utils/apiConfig';
-import { hashPassword } from './utils/passwordUtils';
 
 const { Header, Content, Sider } = Layout;
 const { Search } = Input;
@@ -57,7 +56,7 @@ function initAdminUser() {
       id: Date.now().toString(),
       username: 'ZDLT',
       email: 'admin@zdltaiplatform.com',
-      password: hashPassword('Administrator2025'),
+      password: 'Administrator2025',
       createTime: new Date().toISOString(),
       lastLoginTime: null,
       isAdmin: true

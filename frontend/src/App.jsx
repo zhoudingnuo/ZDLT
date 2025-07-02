@@ -1672,16 +1672,16 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       });
       
       // 使用fetch处理SSE流式响应
-      // const response = await fetch('/api/agent/invoke', {
-      //   method: 'POST',
-      //   body: JSON.stringify({
-      //     agentId: agent.id,
-      //     params, // 或 query/inputs等
-      //   }),
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   }
-      // });
+      const response = await fetch('/api/agent/invoke', {
+        method: 'POST',
+        body: JSON.stringify({
+          agentId: agent.id,
+          params, // 或 query/inputs等
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

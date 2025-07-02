@@ -75,7 +75,8 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
       {
         headers: {
           'Authorization': `Bearer ${agent.apiKey}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Backtest':'backend'
         }
       }
     );

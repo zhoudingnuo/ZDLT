@@ -12,12 +12,15 @@ set SERVER_IP=47.107.84.24
 set SERVER_USER=root
 set SERVER_PATH=/root/ZDLT
 
+set BACKUP_DIR=/root/backup
+set BACKUP_NAME=ZDLT_backup_$(date +%%Y%%m%%d_%%H%%M%%S).tar.gz
+
 echo.
-echo ====== Connecting to server and running git pull ======
+echo ====== Connecting to server, backup project, and running git pull ======
 echo Please manually enter the server password: 
 echo.
 
-ssh root@47.107.84.24 "cd %SERVER_PATH% && git pull"
+ssh root@47.107.84.24 "mkdir -p %BACKUP_DIR% && tar czvf %BACKUP_DIR%/ZDLT_backup_$(date +%Y%m%d_%H%M%S).tar.gz -C /root ZDLT && cd %SERVER_PATH% && git pull"
 
-echo Local commit and push to GitHub done. Remote git pull triggered: %msg%
+echo Local commit and push to GitHub done. Remote backup and git pull triggered: %msg%
 pause

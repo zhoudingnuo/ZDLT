@@ -83,52 +83,50 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     agents = JSON.parse(fs.readFileSync(agentsPath, 'utf-8'));
   }
   const agent = agents.find(a => a.id === req.params.id);
-  console.log('agent:', agent);
   if (!agent) return res.status(404).json({ error: 'Agent not found' });
   if (!agent.apiKey || !agent.apiUrl) {
     return res.status(400).json({ error: 'Agent not configured. Please configure API key and URL first.' });
   }
-  console.log('agent.inputType:', agent.inputType);
+
+  // 1. 先判断 inputType 是否为 dialogue
   if (agent.inputType === 'dialogue') {
-    console.log('dialogue');
+    // 直接用 req.body 组装参数，不用 formidable
     let inputs = {};
     try {
-      inputs = fields.inputs ? JSON.parse(fields.inputs) : {};
+      inputs = req.body.inputs || {};
     } catch {
       inputs = {};
     }
     const data = {
       inputs: inputs,
-      query: fields.query,
-      response_mode: fields.response_mode || 'blocking',
-      conversation_id: fields.conversation_id || '',
-      user: fields.user || 'auto_test'
+      query: req.body.query,
+      response_mode: req.body.response_mode || 'blocking',
+      conversation_id: req.body.conversation_id || '',
+      user: req.body.user || 'auto_test'
     };
     const headers = {
       'Authorization': `Bearer ${agent.apiKey}`,
       'Content-Type': 'application/json'
     };
     // 调试输出
-    console.log('【invoke调试】Dify URL:', agent.apiUrl);
-    console.log('【invoke调试】Headers:', headers);
-    console.log('【invoke调试】Data:', JSON.stringify(data, null, 2));
+    console.log('| dialogue');
+    console.log('data:', data);
     try {
       const response = await axios.post(agent.apiUrl, data, { headers, timeout: 10000 });
-      console.log('【invoke调试】Dify响应:', response.data);
+      console.log('Dify响应:', response.data);
       res.json(response.data);
     } catch (err) {
-      console.error('【invoke调试】调用agent失败:', err.message, err.response?.data);
+      console.error('调用agent失败:', err.message, err.response?.data);
       res.status(500).json({ error: err.message, detail: err.response?.data });
     }
-    return; // 只处理 dialogue，后面不再执行
+    return;
   }
+
+  // 2. 只有 parameter 类型才用 formidable 解析文件上传
   const formidable = require('formidable');
   const form = new formidable.IncomingForm({ multiples: true });
   form.parse(req, async (err, fields, files) => {
     if (err) return res.status(400).json({ error: 'Parse error' });
-    let data;
-    console.log('fields:', agent.inputType);
-    // parameter 类型，先处理文件上传
     let inputs = {};
     try {
       inputs = fields.inputs ? JSON.parse(fields.inputs) : {};
@@ -175,24 +173,23 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
         }
       }
     }
-    data = {
+    const data = {
       ...fields,
       inputs: inputs
     };
-    console.log('data:', data);
-  
     const headers = {
       'Authorization': `Bearer ${agent.apiKey}`,
       'Content-Type': 'application/json'
     };
     // 日志
-    console.log('收到chat-messages参数:', JSON.stringify(data, null, 2));
-    console.log('使用agent配置:', { id: agent.id, name: agent.name, apiUrl: agent.apiUrl, inputType: agent.inputType });
+    console.log('| parameter');
+    console.log('data:', data);
     try {
-      const response = await axios.post(agent.apiUrl, data, { headers });
+      const response = await axios.post(agent.apiUrl, data, { headers, timeout: 10000 });
+      console.log('Dify响应:', response.data);
       res.json(response.data);
     } catch (err) {
-      console.error('调用agent失败:', err.message);
+      console.error('调用agent失败:', err.message, err.response?.data);
       res.status(500).json({ error: err.message, detail: err.response?.data });
     }
   });

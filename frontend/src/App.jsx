@@ -445,6 +445,7 @@ function ProfileModal({ visible, onCancel, user, theme }) {
     try {
       const response = await axios.get(`/api/user/${user.username}`);
       setCurrentUser(response.data);
+      setUser && setUser(response.data); // 新增：同步全局user
       localStorage.setItem('user', JSON.stringify(response.data));
     } catch (error) {
       // 忽略
@@ -561,9 +562,9 @@ function ProfileModal({ visible, onCancel, user, theme }) {
           <div>• 最后登录: {currentUser?.lastLoginTime ? new Date(currentUser.lastLoginTime).toLocaleString() : '未知'}</div>
           <div>• 用户角色: {currentUser?.isAdmin ? '管理员' : '普通用户'}</div>
           <div style={{ marginTop: 8, fontWeight: 600, color: theme === 'dark' ? '#4f8cff' : mainColorSolid }}>💰 消耗统计</div>
-          <div>累计消耗Token：<span style={{ color: theme === 'dark' ? '#fff' : '#222', fontWeight: 700 }}>{currentUser?.usage_tokens || 0}</span></div>
+          <div>累计消耗Token：<span style={{ color: theme === 'dark' ? '#fff' : '#222', fontWeight: 700 }}>{currentUser?.usage_tokens !== undefined && currentUser?.usage_tokens !== null ? currentUser.usage_tokens : '--'}</span></div>
           <div style={{ marginTop: 8, fontWeight: 600, color: theme === 'dark' ? '#4f8cff' : mainColorSolid }}>💰 账户余额</div>
-          <div>• 账户余额: {currentUser?.balance !== undefined ? (Number(currentUser.balance).toFixed(2).replace(/^-0\.00$/, '0.00')) : '未知'}
+          <div>• 账户余额: {currentUser?.balance !== undefined && currentUser?.balance !== null ? Number(currentUser.balance).toFixed(2) : '--'}
             <RechargeButton user={currentUser} onSuccess={() => { loadRechargeOrders(); refreshUserInfo(); }} />
           </div>
           
@@ -1231,122 +1232,33 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
     try {
       setLoading(true);
       const values = await form.validateFields();
+      const formData = new FormData();
+      formData.append('agentId', agent.id);
+      formData.append('query', values[agent?.inputs?.[0]?.name] || '参数配置');
+      formData.append('user', getUser()?.username || 'guest');
+      // 组装inputs对象，非文件参数直接加，文件参数用FormData
       const inputs = {};
-      
       for (const input of agent.inputs || []) {
-        if (input.type === 'upload') {
-          // 1. 上传到 Dify
+        if (input.type === 'file' || input.type === 'upload') {
           const fileList = form.getFieldValue(input.name);
           const fileObj = fileList && fileList[0] && fileList[0].originFileObj;
-          if (!fileObj && input.required) {
-            message.error(`请先选择${input.label}`);
-            setLoading(false);
-            return;
-          }
           if (fileObj) {
-            const formData = new FormData();
-            formData.append('file', fileObj);
-            formData.append('user', getUser()?.username || 'guest');
-            const res = await axios.post(
-              'http://118.145.74.50:24131/v1/files/upload',
-              formData,
-              {
-                headers: {
-                  'Authorization': `Bearer ${agent.apiKey}`,
-                  'Content-Type': 'multipart/form-data'
-                }
-              }
-            );
-            console.log('Dify 上传返回:', res.data);
-            const fileInfo = res.data; // 直接用 data
-            inputs[input.name] = {
-              type: 'document',
-              transfer_method: 'local_file',
-              upload_file_id: fileInfo.id,
-              url: fileInfo.preview_url || ''
-            };
+            formData.append(input.name, fileObj);
           }
-        } else if (input.type === 'file') {
-          // 原有文件/图片处理逻辑
-          const fileList = form.getFieldValue(input.name);
-          const fileObj = fileList && fileList[0] && fileList[0].originFileObj;
-          if (!fileObj && input.required) {
-            message.error(`请先选择${input.label}`);
-            setLoading(false);
-            return;
-          }
-          if (fileObj) {
-            const base64 = await fileToBase64(fileObj);
-            const uploadRes = await axios.post(`${API_BASE}/api/upload-image`, { base64 });
-            const imageUrl = uploadRes.data.url;
-            inputs[input.name] = {
-              type: 'image',
-              transfer_method: 'remote_url',
-              remote_url: imageUrl
-            };
-          }
-        } else if (input.type === 'array' && input.itemType === 'file') {
-          // 多文件上传
-          const fileList = form.getFieldValue(input.name);
-          if ((!fileList || fileList.length === 0) && input.required) {
-            message.error(`请先选择${input.label}`);
-            setLoading(false);
-            return;
-          }
-          const uploadedFiles = [];
-          for (const fileItem of fileList || []) {
-            if (fileItem.originFileObj) {
-              const base64 = await fileToBase64(fileItem.originFileObj);
-              const uploadRes = await axios.post(`${API_BASE}/api/upload-image`, { base64 });
-              const imageUrl = uploadRes.data.url;
-              uploadedFiles.push({
-                type: 'image',
-                transfer_method: 'remote_url',
-                remote_url: imageUrl
-              });
-            }
-          }
-          // 深度过滤，确保每个对象只包含需要的字段
-          inputs[input.name] = uploadedFiles.map(f => ({
-            type: f.type,
-            transfer_method: f.transfer_method,
-            remote_url: f.remote_url
-          })).filter(f => f.remote_url);
         } else if (values[input.name] !== undefined) {
           inputs[input.name] = values[input.name];
         }
       }
-      
-      // 3. 组装主API请求体
-      const params = {
-        response_mode: 'streaming',
-        conversation_id: '',
-        files: [],
-        query: values[agent?.inputs?.[0]?.name] || '参数配置',
-        inputs, // 这里inputs里就包含了Dify返回的file_info结构
-        parent_message_id: null,
-        user: getUser()?.username || 'guest'
-      };
-      
-      await onSubmit(params);
-      form.resetFields();
+      formData.append('inputs', JSON.stringify(inputs));
+      // 发送到后端
+      const res = await axios.post(`${API_BASE}/api/agent/invoke`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       message.success('参数提交成功！');
+      form.resetFields();
+      await onSubmit(res.data);
     } catch (e) {
-      console.error('参数验证或提交失败:', e);
-      if (e.response) {
-        console.error('服务器响应错误:', {
-          status: e.response.status,
-          statusText: e.response.statusText,
-          data: e.response.data
-        });
-        message.error(`服务器错误 (${e.response.status}): ${e.response.statusText}`);
-      } else if (e.request) {
-        console.error('网络请求错误:', e.request);
-        message.error('网络连接失败，请检查网络设置');
-      } else {
-        console.error('其他错误:', e.message);
-        message.error(`操作失败: ${e.message}`);
-      }
+      message.error('参数提交失败');
     } finally {
       setLoading(false);
     }
@@ -1613,27 +1525,14 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     setInput('');
     try {
       console.log('普通消息调用信息:', {
-        apiUrl: agent.apiUrl,
-        apiKey: agent.apiKey,
         query: input,
         timestamp: new Date().toISOString()
       });
       
-      const res = await axios.post(agent.apiUrl, {
-        inputs: {},
+      const res = await axios.post('/api/agent/invoke', {
+        agentId: agent.id,
         query: input.trim(),
-        response_mode: 'blocking',
-        conversation_id: '',
-        user: 'guest',
-      }, {
-        headers: {
-          'Authorization': `Bearer ${agent.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        timeout: 30000, // 30秒超时
-        validateStatus: function (status) {
-          return status < 500; // 允许所有状态码，不抛出错误
-        }
+        inputs: {},
       });
       
       console.log('API响应状态:', res.status);
@@ -1767,23 +1666,22 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     let lastUsageEvent = '';
     try {
       console.log('工作流调用信息:', {
-        apiUrl: agent.apiUrl,
         apiKey: agent.apiKey,
         params,
         timestamp: new Date().toISOString()
       });
       
       // 使用fetch处理SSE流式响应
-      const response = await fetch('/api/agent/invoke', {
-        method: 'POST',
-        body: JSON.stringify({
-          agentId: agent.id,
-          params, // 或 query/inputs等
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      // const response = await fetch('/api/agent/invoke', {
+      //   method: 'POST',
+      //   body: JSON.stringify({
+      //     agentId: agent.id,
+      //     params, // 或 query/inputs等
+      //   }),
+      //   headers: {
+      //     'Content-Type': 'application/json'
+      //   }
+      // });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -2517,7 +2415,7 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                             padding: '2px 8px',
                             marginLeft: 8
                           }}>
-                            Token: {msg.tokens} / 金额: ¥{msg.price !== undefined ? Number(msg.price).toFixed(4) : '0.0000'}
+                            Token: {msg.tokens !== undefined && msg.tokens !== null ? msg.tokens : '--'} / 金额: ¥{msg.price !== undefined && msg.price !== null ? Number(msg.price).toFixed(4) : '--'}
                           </span>
                         )}
                       </div>
@@ -2739,7 +2637,7 @@ function ChatPageWrapper({ theme, setTheme, user, setUser }) {
         // 新增：完整打印所有智能体
         // console.log('【前端调试】全部agents.json内容如下：');
         res.data.forEach((agent, idx) => {
-          console.log(`#${idx + 1}:`, agent);
+          // console.log(`#${idx + 1}:`, agent);
         });
         setAgents(res.data);
         setLoading(false);

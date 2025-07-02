@@ -88,37 +88,108 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     return res.status(400).json({ error: 'Agent not configured. Please configure API key and URL first.' });
   }
 
-  // 根据 inputType 组装参数
-  let data;
-  if (agent.inputType === 'dialogue') {
-    data = {
-      inputs: req.body.inputs || {},
-      query: req.body.query,
-      response_mode: req.body.response_mode || 'blocking',
-      conversation_id: req.body.conversation_id || '',
-      user: req.body.user || 'auto_test'
+  // 使用 formidable 解析 multipart/form-data
+  const formidable = require('formidable');
+  const form = new formidable.IncomingForm({ multiples: true });
+  form.parse(req, async (err, fields, files) => {
+    if (err) return res.status(400).json({ error: 'Parse error' });
+    let inputs = {};
+    try {
+      inputs = fields.inputs ? JSON.parse(fields.inputs) : {};
+    } catch {
+      inputs = {};
+    }
+    // 文件参数处理
+    if (Array.isArray(agent.inputs)) {
+      for (const inputDef of agent.inputs) {
+        const key = inputDef.name;
+        if (
+          inputDef.type === 'file' ||
+          inputDef.type === 'upload' ||
+          (inputDef.type === 'array' && inputDef.itemType === 'file')
+        ) {
+          // 单文件
+          if (inputDef.type === 'file' || inputDef.type === 'upload') {
+            const file = files[key];
+            if (file) {
+              const fileInfo = await uploadFileToDify(file, fields.user, agent);
+              inputs[key] = {
+                type: 'document',
+                transfer_method: 'local_file',
+                upload_file_id: fileInfo.id,
+                url: fileInfo.preview_url || ''
+              };
+            }
+          }
+          // 多文件
+          if (inputDef.type === 'array' && inputDef.itemType === 'file') {
+            const fileArr = files[key];
+            if (Array.isArray(fileArr)) {
+              inputs[key] = [];
+              for (const file of fileArr) {
+                const fileInfo = await uploadFileToDify(file, fields.user, agent);
+                inputs[key].push({
+                  type: 'document',
+                  transfer_method: 'local_file',
+                  upload_file_id: fileInfo.id,
+                  url: fileInfo.preview_url || ''
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+    // 组装 data
+    let data;
+    if (agent.inputType === 'dialogue') {
+      data = {
+        inputs: inputs,
+        query: fields.query,
+        response_mode: fields.response_mode || 'blocking',
+        conversation_id: fields.conversation_id || '',
+        user: fields.user || 'auto_test'
+      };
+    } else {
+      data = {
+        ...fields,
+        inputs: inputs
+      };
+    }
+    const headers = {
+      'Authorization': `Bearer ${agent.apiKey}`,
+      'Content-Type': 'application/json'
     };
-  } else {
-    // 其它类型直接转发 body
-    data = { ...req.body };
-  }
-
-  const headers = {
-    'Authorization': `Bearer ${agent.apiKey}`,
-    'Content-Type': 'application/json'
-  };
-
-  // 打印日志
-  console.log('收到chat-messages参数:', JSON.stringify(req.body, null, 2));
-  console.log('使用agent配置:', { id: agent.id, name: agent.name, apiUrl: agent.apiUrl, inputType: agent.inputType });
-  try {
-    const response = await axios.post(agent.apiUrl, data, { headers });
-    res.json(response.data);
-  } catch (err) {
-    console.error('调用agent失败:', err.message);
-    res.status(500).json({ error: err.message, detail: err.response?.data });
-  }
+    // 日志
+    console.log('收到chat-messages参数:', JSON.stringify(data, null, 2));
+    console.log('使用agent配置:', { id: agent.id, name: agent.name, apiUrl: agent.apiUrl, inputType: agent.inputType });
+    try {
+      const response = await axios.post(agent.apiUrl, data, { headers });
+      res.json(response.data);
+    } catch (err) {
+      console.error('调用agent失败:', err.message);
+      res.status(500).json({ error: err.message, detail: err.response?.data });
+    }
+  });
 });
+
+// 文件上传到 Dify
+async function uploadFileToDify(file, user, agent) {
+  const FormData = require('form-data');
+  const fd = new FormData();
+  fd.append('file', fs.createReadStream(file.filepath), file.originalFilename);
+  fd.append('user', user || 'auto_test');
+  const DIFy_API = agent.apiUrl.replace('/v1/chat-messages', '') + '/v1/files/upload';
+  const res = await axios.post(DIFy_API, fd, {
+    headers: {
+      ...fd.getHeaders(),
+      'Authorization': `Bearer ${agent.apiKey}`
+    },
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity
+  });
+  return res.data;
+}
 
 // 图片base64转imgbb url
 async function base64ToImgbbUrl(base64_data) {

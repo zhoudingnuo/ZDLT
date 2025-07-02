@@ -165,8 +165,9 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
             let file = files[key];
             // 兼容数组和单对象，防御多重
             if (Array.isArray(file)) {
+              console.warn(`字段 ${key} 期望单文件，但收到数组，长度=${file.length}，只取第一个！`);
+              console.warn('【DEBUG】file数组内容:', file);
               if (file.length > 0) {
-                console.warn(`字段 ${key} 期望单文件，但收到数组，只取第一个！`);
                 file = file[0];
               } else {
                 file = undefined;
@@ -184,7 +185,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
                 return res.status(500).json({ error: `文件上传失败: ${uploadError.message}` });
               }
             } else {
-              console.log('【单文件】字段:', key, '未找到文件或文件路径无效');
+              console.error('【单文件】字段:', key, '未找到文件或文件路径无效，file=', file);
             }
           }
           
@@ -257,24 +258,22 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
 
 // 文件上传到 Dify 并自动拼接文件对象
 async function uploadFileToDify(file, user, agent) {
-  // 防御：如果 file 是数组，自动取第一个
-  console.log('----【文件上传----file:', file);
+  // 加强防御和调试
+  console.log('【DEBUG】uploadFileToDify 入参 file 类型:', Array.isArray(file) ? 'Array' : typeof file, ', 内容:', file);
   if (Array.isArray(file)) {
+    console.warn('【DEBUG】uploadFileToDify 收到数组，长度=', file.length, '，内容:', file);
     if (file.length > 0) {
-      console.warn('uploadFileToDify 收到数组，只取第一个');
       file = file[0];
     } else {
       throw new Error('文件数组为空');
     }
   }
-  console.log('【文件上传】开始上传文件:', file.originalFilename);
-  
-  // 检查文件是否存在
   if (!file || !file.filepath) {
     console.error('【文件上传】文件对象无效:', file);
-    throw new Error('文件对象无效');
+    throw new Error('文件对象无效，file=' + JSON.stringify(file));
   }
-
+  console.log('【文件上传】开始上传文件:', file.originalFilename);
+  
   const FormData = require('form-data');
   const fd = new FormData();
   // 兼容 Python requests 三元组格式
@@ -296,7 +295,6 @@ async function uploadFileToDify(file, user, agent) {
     // 默认使用你提供的地址
     DIFy_API = 'http://118.145.74.50:24131/v1/files/upload';
   }
-  DIFy_API = 'http://118.145.74.50:24131/v1/files/upload';
   console.log('【文件上传】Dify上传地址:', DIFy_API);
   
   try {

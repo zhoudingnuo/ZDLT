@@ -164,7 +164,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
           if (inputDef.type === 'file' || inputDef.type === 'upload') {
             const file = files[key];
             console.log('【单文件】字段:', key, '文件对象:', file ? '存在' : '不存在');
-            
+            console.log('【单文件】文件对象:', file);
             if (file && file.filepath) {
               try {
                 const fileInfo = await uploadFileToDify(file, fields.user, agent);

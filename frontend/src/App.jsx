@@ -2631,7 +2631,9 @@ function ChatPageWrapper({ theme, setTheme, user, setUser }) {
 
   React.useEffect(() => {
     // console.log('【前端调试】ChatPageWrapper开始请求 /api/agents/list');
-    axios.get(`${API_BASE}/api/agents/list`)
+    axios.get(`${API_BASE}/api/agents/list`, {
+      params: { username: user?.username }
+    })
       .then(res => {
         // console.log('【前端调试】ChatPageWrapper API响应成功:', res.data);
         // 新增：完整打印所有智能体
@@ -2646,7 +2648,7 @@ function ChatPageWrapper({ theme, setTheme, user, setUser }) {
         // console.error('【前端调试】ChatPageWrapper API请求失败:', error);
         setLoading(false);
       });
-  }, []);
+  }, [user?.username]);
 
   React.useEffect(() => {
     if (!loading && chatId && agents.length > 0) {
@@ -2723,7 +2725,9 @@ const getAgentCategories = (agent) => {
 
   React.useEffect(() => {
     // console.log('【前端调试】HomePage开始请求 /api/agents/list');
-    axios.get(`${API_BASE}/api/agents/list`)
+    axios.get(`${API_BASE}/api/agents/list`, {
+      params: { username: user?.username }
+    })
       .then(res => {
         // console.log('【前端调试】HomePage API响应成功:', res.data);
         setAgents(res.data);
@@ -2739,7 +2743,7 @@ const getAgentCategories = (agent) => {
         // });
         setLoading(false);
       });
-  }, []);
+  }, [user?.username]);
 
   // 智能问答助手卡片
 
@@ -3186,7 +3190,9 @@ function App() {
 
   useEffect(() => {
     // console.log('【前端调试】开始请求 /api/agents/list');
-    axios.get(`${API_BASE}/api/agents/list`)
+    axios.get(`${API_BASE}/api/agents/list`, {
+      params: { username: user?.username }
+    })
       .then(res => {
         // console.log('【前端调试】API响应成功:', res.data);
         setAgents(res.data);
@@ -3202,7 +3208,7 @@ function App() {
         });
         setLoading(false);
       });
-  }, []);
+  }, [user?.username]);
 
   // 登录处理
   const handleLogin = async (values) => {

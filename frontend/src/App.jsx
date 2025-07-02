@@ -1251,7 +1251,7 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       }
       formData.append('inputs', JSON.stringify(inputs));
       // 发送到后端
-      const res = await axios.post(`${API_BASE}/api/agent/invoke`, formData, {
+      const res = await axios.post(`${API_BASE}/api/agent/${agent.id}/invoke`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       message.success('参数提交成功！');
@@ -1529,8 +1529,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         timestamp: new Date().toISOString()
       });
       
-      const res = await axios.post('/api/agent/invoke', {
-        agentId: agent.id,
+      const res = await axios.post(`/api/agent/${agent.id}/invoke`, {
         query: input.trim(),
         inputs: {},
       });
@@ -1672,10 +1671,9 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       });
       
       // 使用fetch处理SSE流式响应
-      const response = await fetch('/api/agent/invoke', {
+      const response = await fetch(`/api/agent/${agent.id}/invoke`, {
         method: 'POST',
         body: JSON.stringify({
-          agentId: agent.id,
           params, // 或 query/inputs等
         }),
         headers: {

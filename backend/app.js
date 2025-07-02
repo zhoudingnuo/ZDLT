@@ -162,7 +162,9 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
         ) {
           // 单文件处理
           if (inputDef.type === 'file' || inputDef.type === 'upload') {
-            const file = files[key];
+            let file = files[key];
+            // 兼容数组和单对象
+            if (Array.isArray(file)) file = file[0];
             console.log('【单文件】字段:', key, '文件对象:', file ? '存在' : '不存在');
             console.log('【单文件】文件对象:', file);
             if (file && file.filepath) {

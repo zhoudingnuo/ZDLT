@@ -95,6 +95,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     if (err) return res.status(400).json({ error: 'Parse error' });
     let data;
     if (agent.inputType === 'dialogue') {
+      console.log('fields:', agent.inputType);
       // dialogue 类型，直接组装参数，不处理文件上传
       data = {
         inputs: fields.inputs ? JSON.parse(fields.inputs) : {},
@@ -105,6 +106,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
       };
       console.log('data:', data);
     } else {
+      console.log('fields:', agent.inputType);
       // parameter 类型，先处理文件上传
       let inputs = {};
       try {

@@ -258,6 +258,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
 // 文件上传到 Dify 并自动拼接文件对象
 async function uploadFileToDify(file, user, agent) {
   // 防御：如果 file 是数组，自动取第一个
+  console.log('----【文件上传----file:', file);
   if (Array.isArray(file)) {
     if (file.length > 0) {
       console.warn('uploadFileToDify 收到数组，只取第一个');

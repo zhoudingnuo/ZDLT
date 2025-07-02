@@ -77,10 +77,23 @@ app.get('/api/agents/list', (req, res) => {
 
 // 转发到Dify智能体
 app.post('/api/agent/:id/invoke', async (req, res) => {
+  // 直接从 agents.json 文件读取最新的 agent 配置
+  let agents = [];
+  if (fs.existsSync(agentsPath)) {
+    agents = JSON.parse(fs.readFileSync(agentsPath, 'utf-8'));
+  }
   const agent = agents.find(a => a.id === req.params.id);
   if (!agent) return res.status(404).json({ error: 'Agent not found' });
+  
+  // 检查 agent 是否已配置
+  if (!agent.apiKey || !agent.apiUrl) {
+    return res.status(400).json({ error: 'Agent not configured. Please configure API key and URL first.' });
+  }
+  
   // 打印收到的参数
   console.log('收到chat-messages参数:', JSON.stringify(req.body, null, 2));
+  console.log('使用agent配置:', { id: agent.id, name: agent.name, apiUrl: agent.apiUrl });
+  
   try {
     const response = await axios.post(
       agent.apiUrl,
@@ -94,6 +107,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     );
     res.json(response.data);
   } catch (err) {
+    console.error('调用agent失败:', err.message);
     res.status(500).json({ error: err.message });
   }
 });

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image-to-Image 智能体测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .file-upload {
+            margin: 10px 0;
+        }
+        .file-upload input[type="file"] {
+            margin: 5px 0;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Image-to-Image 智能体测试</h1>
+        
+        <div class="test-section">
+            <h3>1. 文件上传测试</h3>
+            <div class="file-upload">
+                <label for="fileInput">选择图片文件:</label>
+                <input type="file" id="fileInput" accept="image/*">
+                <button onclick="uploadFile()">上传文件</button>
+            </div>
+            <div id="uploadResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. 智能体调用测试</h3>
+            <div class="form-group">
+                <label for="promptInput">提示词 (prompt):</label>
+                <textarea id="promptInput" rows="3" placeholder="请输入图片处理提示词，例如：将这张图片转换为卡通风格">将这张图片转换为卡通风格</textarea>
+            </div>
+            <div class="form-group">
+                <label for="queryInput">查询 (query):</label>
+                <input type="text" id="queryInput" placeholder="请输入查询内容" value="请生成新的图片">
+            </div>
+            <div class="form-group">
+                <label for="userInput">用户 (user):</label>
+                <input type="text" id="userInput" placeholder="请输入用户标识" value="test-user">
+            </div>
+            
+            <button onclick="testWithUploadedFile()" id="testWithFileBtn" disabled>使用上传文件测试</button>
+            <button onclick="testWithMockFile()">使用模拟文件测试</button>
+            <button onclick="testEmptyQuery()">测试空Query</button>
+            
+            <div id="testResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. 调试信息</h3>
+            <button onclick="clearLogs()">清空日志</button>
+            <div id="debugLog" class="result info" style="max-height: 300px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <script src="test-image-to-image.js"></script>
+    <script>
+        let uploadedFileData = null;
+
+        // 日志函数
+        function log(message, type = 'info') {
+            const debugLog = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            debugLog.textContent += logEntry;
+            debugLog.scrollTop = debugLog.scrollHeight;
+            console.log(message);
+        }
+
+        // 清空日志
+        function clearLogs() {
+            document.getElementById('debugLog').textContent = '';
+        }
+
+        // 显示结果
+        function showResult(elementId, content, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = content;
+            element.className = `result ${type}`;
+            element.style.display = 'block';
+        }
+
+        // 上传文件
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showResult('uploadResult', '请先选择文件', 'error');
+                return;
+            }
+
+            log(`开始上传文件: ${file.name} (${file.size} bytes)`);
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/upload-file-for-agent', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    uploadedFileData = result;
+                    showResult('uploadResult', `文件上传成功:\n${JSON.stringify(result, null, 2)}`, 'success');
+                    document.getElementById('testWithFileBtn').disabled = false;
+                    log(`文件上传成功: ${result.filename}`);
+                } else {
+                    showResult('uploadResult', `文件上传失败: ${result.error || '未知错误'}`, 'error');
+                    log(`文件上传失败: ${result.error}`);
+                }
+            } catch (error) {
+                showResult('uploadResult', `上传请求失败: ${error.message}`, 'error');
+                log(`上传请求失败: ${error.message}`);
+            }
+        }
+
+        // 使用上传的文件测试
+        async function testWithUploadedFile() {
+            if (!uploadedFileData) {
+                showResult('testResult', '请先上传文件', 'error');
+                return;
+            }
+
+            const prompt = document.getElementById('promptInput').value;
+            const query = document.getElementById('queryInput').value;
+            const user = document.getElementById('userInput').value;
+
+            const inputs = { prompt };
+            const fileData = {
+                image: [uploadedFileData]
+            };
+
+            const requestData = {
+                inputs,
+                query,
+                user,
+                fileData
+            };
+
+            log(`使用上传文件测试，发送数据: ${JSON.stringify(requestData, null, 2)}`);
+
+            try {
+                const response = await fetch('/api/agent/image-to-image/invoke', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult('testResult', `调用成功:\n${JSON.stringify(result, null, 2)}`, 'success');
+                    log(`智能体调用成功`);
+                } else {
+                    showResult('testResult', `调用失败: ${result.error || '未知错误'}\n${JSON.stringify(result, null, 2)}`, 'error');
+                    log(`智能体调用失败: ${result.error}`);
+                }
+            } catch (error) {
+                showResult('testResult', `请求失败: ${error.message}`, 'error');
+                log(`请求失败: ${error.message}`);
+            }
+        }
+
+        // 使用模拟文件测试
+        async function testWithMockFile() {
+            const prompt = document.getElementById('promptInput').value;
+            const query = document.getElementById('queryInput').value;
+            const user = document.getElementById('userInput').value;
+
+            log(`使用模拟文件测试，调用 testImageToImage()`);
+            
+            try {
+                const result = await testImageToImage();
+                showResult('testResult', `模拟文件测试结果:\n${JSON.stringify(result, null, 2)}`, 'success');
+            } catch (error) {
+                showResult('testResult', `模拟文件测试失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 测试空Query
+        async function testEmptyQuery() {
+            log(`测试空Query，调用 testImageToImageEmptyQuery()`);
+            
+            try {
+                const result = await testImageToImageEmptyQuery();
+                showResult('testResult', `空Query测试结果:\n${JSON.stringify(result, null, 2)}`, 'success');
+            } catch (error) {
+                showResult('testResult', `空Query测试失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', function() {
+            log('测试页面加载完成');
+            log('后端服务地址: ' + (window.location.origin || 'http://localhost:5000'));
+        });
+    </script>
+</body>
+</html> 

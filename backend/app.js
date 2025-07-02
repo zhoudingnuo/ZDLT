@@ -266,7 +266,6 @@ async function uploadFileToDify(file, user, agent) {
       throw new Error('文件数组为空');
     }
   }
-
   console.log('【文件上传】开始上传文件:', file.originalFilename);
   
   // 检查文件是否存在
@@ -277,7 +276,11 @@ async function uploadFileToDify(file, user, agent) {
 
   const FormData = require('form-data');
   const fd = new FormData();
-  fd.append('file', fs.createReadStream(file.filepath), file.originalFilename);
+  // 兼容 Python requests 三元组格式
+  fd.append('file', fs.createReadStream(file.filepath), {
+    filename: file.originalFilename,
+    contentType: file.mimetype
+  });
   fd.append('user', user || 'auto_test');
   
   // 构建 Dify 文件上传地址

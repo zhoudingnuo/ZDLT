@@ -144,6 +144,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
   
   // 检查Content-Type，如果是multipart/form-data，使用formidable解析
   let rawInputs, response_mode, conversation_id, user, fileData, query;
+  let uploadedFiles = {}; // 存储上传的文件对象
   
   if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
     console.log('【INVOKE】检测到FormData，使用formidable解析');
@@ -168,6 +169,67 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
       user = Array.isArray(fields.user) ? fields.user[0] : fields.user;
       query = Array.isArray(fields.query) ? fields.query[0] : fields.query;
       fileData = fields.fileData ? JSON.parse(fields.fileData) : {};
+      
+      // 🔥 处理上传的文件，直接上传到Dify
+      if (Array.isArray(agent.inputs)) {
+        console.log('【INVOKE】开始处理智能体输入定义:', agent.inputs.length, '个字段');
+        
+        for (const inputDef of agent.inputs) {
+          const key = inputDef.name;
+          console.log('【INVOKE】处理字段:', key, '类型:', inputDef.type);
+          
+          if (inputDef.type === 'file' || inputDef.type === 'upload' || (inputDef.type === 'array' && inputDef.itemType === 'file')) {
+            const fileArray = files[key];
+            
+            if (inputDef.type === 'array' && inputDef.itemType === 'file') {
+              // 多文件处理
+              console.log('【INVOKE】多文件处理:', key);
+              if (Array.isArray(fileArray)) {
+                uploadedFiles[key] = [];
+                console.log('【INVOKE】文件数组长度:', fileArray.length);
+                
+                for (const file of fileArray) {
+                  if (file && file.filepath) {
+                    console.log('【INVOKE】上传文件到Dify:', file.originalFilename);
+                    try {
+                      const difyFileObject = await uploadFileToDifySimple(file, user, agent);
+                      uploadedFiles[key].push({
+                        type: difyFileObject.type,
+                        transfer_method: "local_file",
+                        url: "",
+                        upload_file_id: difyFileObject.related_id
+                      });
+                      console.log('【INVOKE】文件上传成功:', uploadedFiles[key][uploadedFiles[key].length - 1]);
+                    } catch (uploadError) {
+                      console.error('【INVOKE】文件上传失败:', uploadError.message);
+                    }
+                  }
+                }
+              }
+            } else {
+              // 单文件处理
+              console.log('【INVOKE】单文件处理:', key);
+              const file = Array.isArray(fileArray) ? fileArray[0] : fileArray;
+              
+              if (file && file.filepath) {
+                console.log('【INVOKE】上传文件到Dify:', file.originalFilename);
+                try {
+                  const difyFileObject = await uploadFileToDifySimple(file, user, agent);
+                  uploadedFiles[key] = {
+                    type: difyFileObject.type,
+                    transfer_method: "local_file",
+                    url: "",
+                    upload_file_id: difyFileObject.related_id
+                  };
+                  console.log('【INVOKE】文件上传成功:', uploadedFiles[key]);
+                } catch (uploadError) {
+                  console.error('【INVOKE】文件上传失败:', uploadError.message);
+                }
+              }
+            }
+          }
+        }
+      }
       
     } catch (parseError) {
       console.error('【INVOKE】formidable解析失败:', parseError);
@@ -227,7 +289,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     fileData: Object.keys(validFileData)
   });
   
-      // 处理文件上传和拼接 - 前端文件选择方式
+      // 处理文件上传和拼接 - 使用已上传的文件对象
     if (Array.isArray(agent.inputs)) {
       console.log('【INVOKE】开始处理智能体输入定义:', agent.inputs.length, '个字段');
       
@@ -240,66 +302,12 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
           inputDef.type === 'upload' ||
           (inputDef.type === 'array' && inputDef.itemType === 'file')
         ) {
-          // 单文件处理
-          if (inputDef.type === 'file' || inputDef.type === 'upload') {
-            console.log('【INVOKE】单文件处理:', key);
-            
-            // 从前端传来的fileData中获取文件信息
-            const fileInfo = validFileData && validFileData[key];
-            if (fileInfo) {
-              console.log('【INVOKE】找到前端传来的文件:', fileInfo.filename);
-              
-              // 如果前端已经上传了文件，直接使用
-              if (fileInfo.difyFileObject) {
-                inputs[key] = fileInfo.difyFileObject;
-                console.log('【INVOKE】使用前端已上传的文件对象:', key, fileInfo.difyFileObject);
-              } else {
-                console.log('【INVOKE】文件未上传，跳过处理');
-              }
-            } else {
-              console.log('【INVOKE】字段', key, '未找到文件数据');
-            }
-          }
-          
-          // 多文件处理
-          if (inputDef.type === 'array' && inputDef.itemType === 'file') {
-            console.log('【INVOKE】多文件处理:', key);
-            
-            const fileArray = validFileData && validFileData[key];
-            if (Array.isArray(fileArray)) {
-              inputs[key] = [];
-              console.log('【INVOKE】文件数组长度:', fileArray.length);
-              
-              for (const fileInfo of fileArray) {
-                if (fileInfo && fileInfo.difyFileObject) {
-                  // 根据文档格式，多文件应该使用简化的格式
-                  inputs[key].push({
-                    type: fileInfo.difyFileObject.type,
-                    transfer_method: "local_file",
-                    url: "",
-                    upload_file_id: fileInfo.difyFileObject.related_id
-                  });
-                  console.log('【INVOKE】添加文件对象:', inputs[key][inputs[key].length - 1]);
-                }
-              }
-            }
-          }
-          
-          // 单文件处理
-          if (inputDef.type === 'file' || inputDef.type === 'upload') {
-            console.log('【INVOKE】单文件处理:', key);
-            
-            const fileInfo = validFileData && validFileData[key];
-            if (fileInfo && fileInfo.difyFileObject) {
-              // 根据文档格式，单文件也使用简化格式
-              inputs[key] = {
-                type: fileInfo.difyFileObject.type,
-                transfer_method: "local_file",
-                url: "",
-                upload_file_id: fileInfo.difyFileObject.related_id
-              };
-              console.log('【INVOKE】添加单文件对象:', inputs[key]);
-            }
+          // 使用已上传的文件对象
+          if (uploadedFiles[key]) {
+            inputs[key] = uploadedFiles[key];
+            console.log('【INVOKE】使用已上传的文件对象:', key, inputs[key]);
+          } else {
+            console.log('【INVOKE】字段', key, '未找到上传的文件');
           }
         } else {
           // 非文件类型，直接使用字段值

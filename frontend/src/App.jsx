@@ -1228,100 +1228,59 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
     });
   };
 
-  const handleSubmit = async () => {
+    const handleSubmit = async () => {
     try {
       setLoading(true);
       const values = await form.validateFields();
       
-      // 先上传文件到Dify，获取文件对象
-      const fileData = {};
+      // 直接组装FormData，让后端处理文件上传
+      const formData = new FormData();
       const inputs = {};
-      
-      for (const input of agent.inputs || []) {
-        if (input.type === 'file' || input.type === 'upload' || (input.type === 'array' && input.itemType === 'file')) {
-          const fileList = form.getFieldValue(input.name);
-          
-          if (input.type === 'array' && input.itemType === 'file') {
-            // 多文件处理
-            if (fileList && fileList.length > 0) {
-              const uploadPromises = fileList.map(async (fileItem) => {
-                const fileObj = fileItem.originFileObj;
-                if (fileObj) {
-                  const uploadFormData = new FormData();
-                  uploadFormData.append('file', fileObj);
-                  uploadFormData.append('agentId', agent.id);
-                  uploadFormData.append('user', getUser()?.username || 'guest');
-                  uploadFormData.append('fieldName', input.name);
-                  
-                  console.log('【前端】上传文件到Dify:', fileObj.name);
-                  const uploadRes = await axios.post(`${API_BASE}/api/upload-file-for-agent`, uploadFormData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                  });
-                  
-                  if (uploadRes.data.success) {
-                    console.log('【前端】文件上传成功:', uploadRes.data.data);
-                    return uploadRes.data.data.files[0]; // 返回第一个文件的结果
-                  } else {
-                    console.error('【前端】文件上传失败:', uploadRes.data);
-                    throw new Error(uploadRes.data.error || '文件上传失败');
-                  }
-                }
-                return null;
-              });
-              
-              const uploadResults = await Promise.all(uploadPromises);
-              const validResults = uploadResults.filter(result => result !== null);
-              
-              if (validResults.length > 0) {
-                fileData[input.name] = validResults;
-                inputs[input.name] = validResults.map(result => result.difyFileObject);
-              }
-            }
-          } else {
-            // 单文件处理
-            const fileObj = fileList && fileList[0] && fileList[0].originFileObj;
-            if (fileObj) {
-              const uploadFormData = new FormData();
-              uploadFormData.append('file', fileObj);
-              uploadFormData.append('agentId', agent.id);
-              uploadFormData.append('user', getUser()?.username || 'guest');
-              uploadFormData.append('fieldName', input.name);
-              
-              console.log('【前端】上传单文件到Dify:', fileObj.name);
-              const uploadRes = await axios.post(`${API_BASE}/api/upload-file-for-agent`, uploadFormData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-              });
-              
-                             if (uploadRes.data.success) {
-                 console.log('【前端】单文件上传成功:', uploadRes.data.data);
-                 fileData[input.name] = uploadRes.data.data.files[0];
-                 inputs[input.name] = uploadRes.data.data.files[0].difyFileObject;
-               } else {
-                 console.error('【前端】单文件上传失败:', uploadRes.data);
-                 throw new Error(uploadRes.data.error || '文件上传失败');
-               }
-            }
-          }
-        } else if (values[input.name] !== undefined) {
-          inputs[input.name] = values[input.name];
-        }
-      }
       
       // 修复query获取逻辑：如果没有第一个输入字段，使用默认值
       const firstInputName = agent?.inputs?.[0]?.name;
       const queryValue = firstInputName && values[firstInputName] ? values[firstInputName] : '参数配置';
       
-      // 发送到后端invoke接口
-      const invokeData = {
-        inputs: inputs,
-        query: queryValue,
-        user: getUser()?.username || 'guest',
-        fileData: fileData
-      };
+      formData.append('query', queryValue);
+      formData.append('user', getUser()?.username || 'guest');
       
-      console.log('【前端】发送invoke请求:', invokeData);
-      const res = await axios.post(`${API_BASE}/api/agent/${agent.id}/invoke`, invokeData, {
-        headers: { 'Content-Type': 'application/json' }
+      // 处理文件和非文件参数
+      for (const input of agent.inputs || []) {
+        if (input.type === 'file' || input.type === 'upload' || (input.type === 'array' && input.itemType === 'file')) {
+          // 文件参数，直接添加到FormData
+          const fileList = form.getFieldValue(input.name);
+          
+          if (input.type === 'array' && input.itemType === 'file') {
+            // 多文件处理
+            if (fileList && fileList.length > 0) {
+              fileList.forEach((fileItem, index) => {
+                const fileObj = fileItem.originFileObj;
+                if (fileObj) {
+                  formData.append(input.name, fileObj);
+                  console.log('【前端】添加多文件:', fileObj.name);
+                }
+              });
+            }
+          } else {
+            // 单文件处理
+            const fileObj = fileList && fileList[0] && fileList[0].originFileObj;
+            if (fileObj) {
+              formData.append(input.name, fileObj);
+              console.log('【前端】添加单文件:', fileObj.name);
+            }
+          }
+        } else if (values[input.name] !== undefined) {
+          // 非文件参数，添加到inputs对象
+          inputs[input.name] = values[input.name];
+        }
+      }
+      
+      // 将非文件参数序列化后添加到FormData
+      formData.append('inputs', JSON.stringify(inputs));
+      
+      console.log('【前端】发送FormData到后端，包含文件和非文件参数');
+      const res = await axios.post(`${API_BASE}/api/agent/${agent.id}/invoke`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       
       message.success('参数提交成功！');

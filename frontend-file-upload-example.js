@@ -67,6 +67,7 @@ async function invokeAgent(agentId, inputs, query, user) {
   };
   
   console.log('【前端】发送的请求数据:', requestData);
+  console.log('【前端】注意：后端会自动在inputs中补充query为"开始"');
   
   try {
     const response = await fetch(`/api/agent/${agentId}/invoke`, {

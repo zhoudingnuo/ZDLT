@@ -250,12 +250,17 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
   
   // 组装最终请求数据
   const data = {
-    inputs: inputs,
+    inputs: {
+      ...inputs,
+      query: "开始" // 自动补充query为"开始"
+    },
     query: query,
     response_mode: response_mode || 'blocking',
     conversation_id: conversation_id || '',
     user: user || 'auto_test'
   };
+  
+  console.log('【INVOKE】自动补充query后的inputs:', data.inputs);
   
   const headers = {
     'Authorization': `Bearer ${agent.apiKey}`,

@@ -1285,7 +1285,13 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       
       message.success('参数提交成功！');
       form.resetFields();
-      await onSubmit(res.data);
+      // 不等待onSubmit完成，直接关闭弹窗，让SSE流处理在后台进行
+      onCancel();
+      // 异步调用onSubmit，传递原始的inputs参数，不阻塞UI
+      onSubmit(inputs).catch(err => {
+        console.error('SSE流处理失败:', err);
+        message.error('处理失败: ' + err.message);
+      });
     } catch (e) {
       console.error('【前端】参数提交失败:', e);
       message.error('参数提交失败: ' + (e.response?.data?.error || e.message));

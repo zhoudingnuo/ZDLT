@@ -1280,24 +1280,28 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       
       console.log('【前端】发送FormData到后端，包含文件和非文件参数');
       
-      // 立即认为参数提交成功，不等待后端响应
-      message.success('参数提交成功！');
-      form.resetFields();
-      onCancel();
-      
-      // 异步发送请求，不阻塞UI
-      axios.post(`${API_BASE}/api/agent/${agent.id}/invoke`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      }).then(res => {
-        // 后端处理成功，开始SSE流处理
-        onSubmit(inputs).catch(err => {
-          console.error('SSE流处理失败:', err);
-          message.error('处理失败: ' + err.message);
+      // 先提交文件，成功后关闭弹窗，然后在对话框中处理后续流程
+      try {
+        const res = await axios.post(`${API_BASE}/api/agent/${agent.id}/invoke`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
-      }).catch(err => {
-        console.error('参数提交失败:', err);
-        message.error('参数提交失败: ' + (err.response?.data?.error || err.message));
-      });
+        
+        // 文件上传成功，关闭弹窗
+        message.success('参数提交成功！');
+        form.resetFields();
+        onCancel(); // 关闭弹窗
+        
+        // 如果有响应数据，直接显示结果
+        if (res.data && res.data.answer) {
+          await onSubmit(res.data);
+        } else {
+          // 如果没有直接结果，说明是异步处理，在对话框中显示处理中状态
+          await onSubmit({ status: 'processing', message: '正在处理中...' });
+        }
+      } catch (uploadError) {
+        // 文件上传失败
+        throw uploadError;
+      }
     } catch (e) {
       console.error('【前端】参数提交失败:', e);
       message.error('参数提交失败: ' + (e.response?.data?.error || e.message));
@@ -1700,6 +1704,20 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     aiTimerRef.current = setInterval(() => {
       setAiTimer(((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1));
     }, 100);
+    
+    // 检查是否是处理中状态
+    if (params.status === 'processing') {
+      setMessages([
+        ...newMessages,
+        {
+          role: 'assistant',
+          content: params.message || '文件上传成功，正在处理中...',
+          usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
+        }
+      ]);
+      setLoading(false);
+      return;
+    }
     
     let usage = undefined; // 统一定义usage变量
     let finalResult = '';

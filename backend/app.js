@@ -379,6 +379,9 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     console.log('【INVOKE】parameter最终请求数据:', JSON.stringify(data, null, 2));
     console.log('【INVOKE】parameter请求地址:', agent.apiUrl);
     
+    // 继续同步调用Dify，但优化用户体验
+    console.log('【INVOKE】文件上传完成，开始调用Dify');
+    
     try {
       const response = await axios.post(agent.apiUrl, data, { headers, timeout: 1000000 });
       console.log('【INVOKE】parameter响应成功');

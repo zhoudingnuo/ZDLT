@@ -1715,15 +1715,19 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       return;
     }
     
-    setLoading(true);
+    // 立即显示用户消息和AI思考气泡
     const newMessages = [...messages, { role: 'user', content: `提交参数：图片+其它参数` }];
     setMessages([...newMessages, { role: 'assistant', content: '', isLoading: true }]); // 立即插入AI正在思考气泡
     setWorkflowInputVisible(false);
+    
+    // 立即开始计时
     aiStartTimeRef.current = Date.now();
     setAiTimer(0);
     aiTimerRef.current = setInterval(() => {
       setAiTimer(((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1));
     }, 100);
+    
+    setLoading(true);
     
     // 检查是否是处理中状态
     if (params.status === 'processing') {
@@ -1736,11 +1740,14 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         }
       ]);
       // 继续让计时器运行，不要立即停止loading
-      return;
+      // 注意：这里不return，让计时器继续运行
+      return; // 但是要return，避免后续逻辑执行
     }
     
     // 检查是否是错误状态
     if (params.status === 'error') {
+      clearInterval(aiTimerRef.current);
+      setAiTimer(0);
       setMessages([
         ...newMessages,
         {

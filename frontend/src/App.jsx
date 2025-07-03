@@ -1453,29 +1453,35 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
                           'Valuable 有价值的；贵重的'
                         ].join('\n');
                         
-                        // 使用 React 的方式设置值并触发验证
+                        // 使用 React 的方式设置值
                         form.setFieldsValue({ [input.name]: example });
                         
-                        // 触发表单验证，确保状态正确更新
-                        form.validateFields([input.name]).then(() => {
-                          // 验证成功后，确保输入框获得焦点
-                          setTimeout(() => {
-                            const textArea = window.wordListInput?.resizableTextArea?.textArea;
-                            if (textArea) {
-                              textArea.focus();
-                              // 将光标移到末尾
-                              textArea.setSelectionRange(textArea.value.length, textArea.value.length);
-                            }
-                          }, 100);
-                        }).catch(() => {
-                          // 即使验证失败，也要确保输入框获得焦点
-                          setTimeout(() => {
-                            const textArea = window.wordListInput?.resizableTextArea?.textArea;
-                            if (textArea) {
-                              textArea.focus();
-                            }
-                          }, 100);
-                        });
+                        // 强制触发 TextArea 的 onChange 事件，确保显示内容
+                        setTimeout(() => {
+                          const textArea = window.wordListInput?.resizableTextArea?.textArea;
+                          if (textArea) {
+                            // 先设置值
+                            textArea.value = example;
+                            // 触发 input 事件，让 Ant Design 的 TextArea 组件更新显示
+                            const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+                            textArea.dispatchEvent(inputEvent);
+                            // 触发 change 事件
+                            const changeEvent = new Event('change', { bubbles: true, cancelable: true });
+                            textArea.dispatchEvent(changeEvent);
+                            // 聚焦并设置光标位置
+                            textArea.focus();
+                            textArea.setSelectionRange(textArea.value.length, textArea.value.length);
+                          }
+                        }, 50);
+                        
+                        // 额外确保：使用 React 的 ref 直接调用 onChange
+                        setTimeout(() => {
+                          if (window.wordListInput && window.wordListInput.props && window.wordListInput.props.onChange) {
+                            window.wordListInput.props.onChange({
+                              target: { value: example }
+                            });
+                          }
+                        }, 100);
                       }}
                     >自动填入示例</Button>
                     <div style={{ 

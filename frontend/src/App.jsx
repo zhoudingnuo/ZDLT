@@ -1709,6 +1709,12 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
 
   // 工作流提交处理
   const handleWorkflowSubmit = async (params) => {
+    // 如果已经有loading状态，说明正在处理中，直接返回
+    if (loading) {
+      console.log('【前端】已有处理中的请求，忽略重复调用');
+      return;
+    }
+    
     setLoading(true);
     const newMessages = [...messages, { role: 'user', content: `提交参数：图片+其它参数` }];
     setMessages([...newMessages, { role: 'assistant', content: '', isLoading: true }]); // 立即插入AI正在思考气泡
@@ -1747,153 +1753,46 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       return;
     }
     
-    let usage = undefined; // 统一定义usage变量
-    let finalResult = '';
-    let isWorkflowFinished = false;
-    let lastUsageEvent = '';
-    try {
-      console.log('工作流调用信息:', {
-        apiKey: agent.apiKey,
-        params,
-        timestamp: new Date().toISOString()
-      });
-      
-      // 使用fetch处理SSE流式响应
-      const response = await fetch(`/api/agent/${agent.id}/invoke`, {
-        method: 'POST',
-        body: JSON.stringify({
-          query: '参数配置',
-          inputs: params, // 将params作为inputs传递
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      const processingMessage = { role: 'assistant', content: '', isLoading: true };
-      setMessages([...newMessages, processingMessage]);
-      
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              console.log('SSE数据:', data);
-              
-              // 处理message_end事件，优先级最高
-              if (data.event === 'message_end' && data.metadata && data.metadata.usage) {
-                usage = data.metadata.usage;
-                lastUsageEvent = 'message_end';
-              }
-              // 处理工作流完成事件
-              if (data.event === 'workflow_finished') {
-                isWorkflowFinished = true;
-                if (data.data && data.data.outputs) {
-                  finalResult = data.data.outputs.text || data.data.outputs.answer || JSON.stringify(data.data.outputs);
-                } else if (data.data && data.data.error) {
-                  finalResult = `处理失败: ${data.data.error}`;
-                }
-                // 只有在没有message_end时才用workflow_finished的usage
-                if (lastUsageEvent !== 'message_end' && data.data && data.data.total_tokens !== undefined) {
-                  usage = {
-                    total_tokens: data.data.total_tokens,
-                    total_price: data.data.total_price || 0
-                  };
-                  lastUsageEvent = 'workflow_finished';
-                }
-              }
-              // 处理错误事件
-              if (data.event === 'error') {
-                finalResult = `错误: ${data.message}`;
-                isWorkflowFinished = true;
-              }
-              // 处理节点完成事件，提取文本输出
-              if (data.event === 'node_finished' && data.data && data.data.outputs) {
-                if (data.data.outputs.text) {
-                  finalResult = data.data.outputs.text;
-                } else if (data.data.outputs.answer) {
-                  finalResult = data.data.outputs.answer;
-                }
-              }
-            } catch (e) {
-              console.log('解析SSE数据失败:', line, e);
-            }
-          }
-        }
-
-        // 如果工作流完成，更新最终结果
-        if (isWorkflowFinished && finalResult) {
-          clearInterval(aiTimerRef.current);
-          setAiTimer(0);
-          
-          // 累加token和价格消耗
-          if (usage && user) {
-            const tokens = Number(usage.total_tokens) || 0;
-            let currentUser = getUser();
-            currentUser.usage_tokens = (currentUser.usage_tokens || 0) + tokens;
-            setUser(currentUser);
-            await updateUserUsage(currentUser.username, currentUser.usage_tokens);
-          }
-          
-          setMessages([
-            ...newMessages,
-            {
-              role: 'assistant',
-              content: finalResult,
-              usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
-              tokens: usage?.total_tokens,
-              price: usage?.total_price
-            }
-          ]);
-          break;
-        }
-      }
-
-      // 如果没有获取到最终结果，显示处理完成
-      if (!finalResult) {
-        clearInterval(aiTimerRef.current);
-        setAiTimer(0);
-        setMessages([
-          ...newMessages,
-          { 
-            role: 'assistant', 
-            content: '处理完成，但未获取到结果数据', 
-            usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
-            tokens: usage?.total_tokens,
-            price: usage?.total_price
-          }
-        ]);
-      }
-
-    } catch (error) {
+    // 如果有直接的结果数据（如answer字段），直接显示
+    if (params.answer || params.content) {
       clearInterval(aiTimerRef.current);
       setAiTimer(0);
+      
+      // 累加token和价格消耗
+      if (params.metadata?.usage && user) {
+        const tokens = Number(params.metadata.usage.total_tokens) || 0;
+        let currentUser = getUser();
+        currentUser.usage_tokens = (currentUser.usage_tokens || 0) + tokens;
+        setUser(currentUser);
+        await updateUserUsage(currentUser.username, currentUser.usage_tokens);
+      }
+      
       setMessages([
         ...newMessages,
-        { 
-          role: 'assistant', 
-          content: `调用失败: ${error.message}`, 
+        {
+          role: 'assistant',
+          content: params.answer || params.content || '处理完成',
           usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
-          tokens: usage?.total_tokens,
-          price: usage?.total_price
+          tokens: params.metadata?.usage?.total_tokens,
+          price: params.metadata?.usage?.total_price
         }
       ]);
-    } finally {
       setLoading(false);
+      return;
     }
+    
+    // 其他情况，显示处理完成
+    clearInterval(aiTimerRef.current);
+    setAiTimer(0);
+    setMessages([
+      ...newMessages,
+      {
+        role: 'assistant',
+        content: '处理完成',
+        usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
+      }
+    ]);
+    setLoading(false);
   };
 
   // 网络诊断功能

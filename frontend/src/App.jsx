@@ -1704,7 +1704,8 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       const response = await fetch(`/api/agent/${agent.id}/invoke`, {
         method: 'POST',
         body: JSON.stringify({
-          params, // 或 query/inputs等
+          query: '参数配置',
+          inputs: params, // 将params作为inputs传递
         }),
         headers: {
           'Content-Type': 'application/json'

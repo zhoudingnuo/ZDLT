@@ -1302,18 +1302,18 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
             data: res.data
           });
           console.log('【前端】Dify调用成功:', difyResponse.data);
-          // 更新最终结果
-          await onSubmit(difyResponse.data);
+          // 直接更新最终结果，不重新调用onSubmit
+          onSubmit(difyResponse.data);
         } catch (difyError) {
           console.error('【前端】Dify调用失败:', difyError);
-          await onSubmit({ 
+          onSubmit({ 
             status: 'error', 
             message: 'Dify调用失败: ' + (difyError.response?.data?.error || difyError.message)
           });
         }
       } else if (res.data && res.data.answer) {
         // 如果有直接结果，更新为最终结果
-        await onSubmit(res.data);
+        onSubmit(res.data);
       }
     } catch (e) {
       console.error('【前端】参数提交失败:', e);
@@ -1726,46 +1726,24 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         setLoading(true);
       }
       
-             // 更新处理中消息，保持isLoading状态以显示计时器
-       setMessages(msgs => {
-         const lastIdx = msgs.length - 1;
-         if (msgs[lastIdx]?.isLoading) {
-           return [
-             ...msgs.slice(0, lastIdx),
-             {
-               role: 'assistant',
-               content: params.message || '文件上传成功，正在处理中...',
-               isLoading: true, // 保持isLoading状态，让计时器继续显示
-               usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
-             }
-           ];
-         }
-         return msgs;
-       });
+      // 更新处理中消息，保持isLoading状态以显示计时器
+      setMessages(msgs => {
+        const lastIdx = msgs.length - 1;
+        if (msgs[lastIdx]?.isLoading) {
+          return [
+            ...msgs.slice(0, lastIdx),
+            {
+              role: 'assistant',
+              content: params.message || '文件上传成功，正在处理中...',
+              isLoading: true, // 保持isLoading状态，让计时器继续显示
+              usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
+            }
+          ];
+        }
+        return msgs;
+      });
       return;
     }
-    
-    // 如果已经有loading状态，说明正在处理中，直接返回
-    if (loading) {
-      console.log('【前端】已有处理中的请求，忽略重复调用');
-      return;
-    }
-    
-    // 立即显示用户消息和AI思考气泡
-    const newMessages = [...messages, { role: 'user', content: `提交参数：图片+其它参数` }];
-    setMessages([...newMessages, { role: 'assistant', content: '', isLoading: true }]); // 立即插入AI正在思考气泡
-    setWorkflowInputVisible(false);
-    
-    // 立即开始计时
-    aiStartTimeRef.current = Date.now();
-    setAiTimer(0);
-    aiTimerRef.current = setInterval(() => {
-      setAiTimer(((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1));
-    }, 100);
-    
-    setLoading(true);
-    
-
     
     // 检查是否是错误状态
     if (params.status === 'error') {
@@ -1827,6 +1805,26 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       setLoading(false);
       return;
     }
+    
+    // 如果已经有loading状态，说明正在处理中，直接返回
+    if (loading) {
+      console.log('【前端】已有处理中的请求，忽略重复调用');
+      return;
+    }
+    
+    // 立即显示用户消息和AI思考气泡
+    const newMessages = [...messages, { role: 'user', content: `提交参数：图片+其它参数` }];
+    setMessages([...newMessages, { role: 'assistant', content: '', isLoading: true }]); // 立即插入AI正在思考气泡
+    setWorkflowInputVisible(false);
+    
+    // 立即开始计时
+    aiStartTimeRef.current = Date.now();
+    setAiTimer(0);
+    aiTimerRef.current = setInterval(() => {
+      setAiTimer(((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1));
+    }, 100);
+    
+    setLoading(true);
     
     // 其他情况，显示处理完成
     clearInterval(aiTimerRef.current);

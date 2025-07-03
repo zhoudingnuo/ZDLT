@@ -251,7 +251,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
             }
           }
         }
-        
+        return
       } catch (parseError) {
         console.error('【INVOKE】formidable解析失败:', parseError);
         return res.status(400).json({ error: 'FormData解析失败' });

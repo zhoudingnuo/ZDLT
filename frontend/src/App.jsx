@@ -988,7 +988,7 @@ function AgentReviewModal({ visible, onCancel, theme }) {
   const [agentsByStatus, setAgentsByStatus] = useState({ pending: [], review: [], configured: [] });
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('review');
-
+  const aiStartTimeRef = useRef(null);
   // 根据theme动态设置颜色
   const modalBg = theme === 'dark' ? '#2f3136' : '#fff';
   const textColor = theme === 'dark' ? '#eee' : '#333';
@@ -1290,7 +1290,7 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       message.success('参数提交成功！');
       form.resetFields();
       onCancel(); // 关闭弹窗
-      
+      aiStartTimeRef.current = Date.now();
       // 如果有响应数据，直接显示结果
       if (res.data && res.data.answer) {
         await onSubmit(res.data);
@@ -1707,7 +1707,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         ...newMessages,
         {
           role: 'assistant',
-          content: params.message || '文件上传成功，正在处理中...',
+          content: '文件上传成功，正在处理中...',
           usedTime: params.usedTime || ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
         }
       ]);

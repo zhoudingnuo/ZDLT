@@ -399,7 +399,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
 // 新增：专门用于调用Dify的API端点
 app.post('/api/agent/:id/call-dify', async (req, res) => {
   try {
-    const { data } = req.body;
+    const data = req.body.data || req.body;
     console.log('【INVOKE】call-dify请求数据:', data);
     const agents = readJson('agents.json');
     const agent = agents.find(a => a.id === req.params.id);

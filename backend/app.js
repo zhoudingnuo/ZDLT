@@ -214,12 +214,8 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
                       console.log('【INVOKE】上传文件到Dify:', file.originalFilename);
                       try {
                         const difyFileObject = await uploadFileToDifySimple(file, user, agent);
-                        uploadedFiles[key].push({
-                          type: difyFileObject.type,
-                          transfer_method: "local_file",
-                          url: "",
-                          upload_file_id: difyFileObject.related_id
-                        });
+                        // 保留完整的Dify文件对象，不要覆盖
+                        uploadedFiles[key].push(difyFileObject);
                         console.log('【INVOKE】文件上传成功:', uploadedFiles[key][uploadedFiles[key].length - 1]);
                       } catch (uploadError) {
                         console.error('【INVOKE】文件上传失败:', uploadError.message);
@@ -236,12 +232,8 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
                   console.log('【INVOKE】上传文件到Dify:', file.originalFilename);
                   try {
                     const difyFileObject = await uploadFileToDifySimple(file, user, agent);
-                    uploadedFiles[key] = {
-                      type: difyFileObject.type,
-                      transfer_method: "local_file",
-                      url: "",
-                      upload_file_id: difyFileObject.related_id
-                    };
+                    // 保留完整的Dify文件对象，不要覆盖
+                    uploadedFiles[key] = difyFileObject;
                     console.log('【INVOKE】文件上传成功:', uploadedFiles[key]);
                   } catch (uploadError) {
                     console.error('【INVOKE】文件上传失败:', uploadError.message);
@@ -353,9 +345,11 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
               console.log('【INVOKE】字段', key, '未找到上传的文件');
             }
           } else {
-            // 非文件类型，直接使用字段值
+            // 非文件类型，保留原有值，不要覆盖
             if (inputs[key] !== undefined) {
               console.log('【INVOKE】非文件字段:', key, '值:', inputs[key]);
+            } else {
+              console.log('【INVOKE】非文件字段:', key, '未提供值');
             }
           }
         }

@@ -1281,26 +1281,21 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       console.log('【前端】发送FormData到后端，包含文件和非文件参数');
       
       // 先提交文件，成功后关闭弹窗，然后在对话框中处理后续流程
-      try {
-        const res = await axios.post(`${API_BASE}/api/agent/${agent.id}/invoke`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        
-        // 文件上传成功，关闭弹窗
-        message.success('参数提交成功！');
-        form.resetFields();
-        onCancel(); // 关闭弹窗
-        
-        // 如果有响应数据，直接显示结果
-        if (res.data && res.data.answer) {
-          await onSubmit(res.data);
-        } else {
-          // 如果没有直接结果，说明是异步处理，在对话框中显示处理中状态
-          await onSubmit({ status: 'processing', message: '正在处理中...' });
-        }
-      } catch (uploadError) {
-        // 文件上传失败
-        throw uploadError;
+      const res = await axios.post(`${API_BASE}/api/agent/${agent.id}/invoke`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      // 文件上传成功，关闭弹窗
+      message.success('参数提交成功！');
+      form.resetFields();
+      onCancel(); // 关闭弹窗
+      
+      // 如果有响应数据，直接显示结果
+      if (res.data && res.data.answer) {
+        await onSubmit(res.data);
+      } else {
+        // 如果没有直接结果，说明是异步处理，在对话框中显示处理中状态
+        await onSubmit({ status: 'processing', message: '正在处理中...' });
       }
     } catch (e) {
       console.error('【前端】参数提交失败:', e);

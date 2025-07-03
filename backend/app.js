@@ -492,7 +492,7 @@ async function uploadFileToDifySimple(file, user, agent) {
       id: tenantId,
       upload_file_id: tenantId,
       tenant_id: tenantId,
-      type: fileInfo.mime_type?.startsWith('image/') ? 'image' : 'file',
+      type: fileInfo.mime_type || mimetype,
       transfer_method: "local_file",
       remote_url: fileInfo.url || fileInfo.preview_url,
       related_id: fileInfo.id,

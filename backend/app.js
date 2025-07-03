@@ -405,6 +405,7 @@ app.post('/api/agent/:id/call-dify', async (req, res) => {
     const agent = agents.find(a => a.id === req.params.id);
     
     if (!agent || !agent.apiKey || !agent.apiUrl) {
+      console.log('【INVOKE】agent not configured');
       return res.status(400).json({ error: 'Agent not configured' });
     }
     
@@ -417,6 +418,7 @@ app.post('/api/agent/:id/call-dify', async (req, res) => {
     
     return res.json(response.data);
   } catch (err) {
+    console.error('【INVOKE】call-dify请求失败:', err.message);
     return res.status(500).json({ error: err.message });
   }
 });

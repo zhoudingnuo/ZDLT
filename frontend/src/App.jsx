@@ -1300,7 +1300,7 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
         try {
           const isWorkflow = agent?.apiUrl?.includes('workflows/run');
           let difyResponse;
-          if (false) {
+          if (isWorkflow) {
             difyResponse = await axios.post(`${API_BASE}/api/agent/${agent.id}/call-dify`, res.data);
           } else {
             difyResponse = await axios.post(`${API_BASE}/api/agent/${agent.id}/call-dify`, { data: res.data });

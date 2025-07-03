@@ -4,7 +4,7 @@
     "username": "ZDLT_admin",
     "password": "$2b$10$aKVRRt.30T/U3yZ8N5IIPOu94EACxpiQCPZhDdA3Z/cx5b2Yj0N5u",
     "email": "admin@example.com",
-    "usage_tokens": 25892,
+    "usage_tokens": 104008,
     "isAdmin": true,
     "balance": 0
   },
@@ -13,7 +13,7 @@
     "username": "ZDLT",
     "password": "$2b$10$aKVRRt.30T/U3yZ8N5IIPOu94EACxpiQCPZhDdA3Z/cx5b2Yj0N5u",
     "email": "admin@example.com",
-    "usage_tokens": 25892,
+    "usage_tokens": 43754,
     "isAdmin": false,
     "balance": 100
   },

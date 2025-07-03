@@ -48,8 +48,8 @@ const fontFamily = 'PingFang SC, Microsoft YaHei, Arial, sans-serif';
 // 初始化默认用户
 initDefaultUsers();
 
-// 强制桌面端模式
-useEffect(() => {
+// 强制桌面端模式函数
+function forceDesktopMode() {
   // 检测是否为移动设备
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   
@@ -70,7 +70,10 @@ useEffect(() => {
       root.style.minWidth = '1200px';
     }
   }
-}, []);
+}
+
+// 立即执行强制桌面端模式
+forceDesktopMode();
 
 // 初始化管理员账号
 function initAdminUser() {
@@ -3341,6 +3344,11 @@ return (
   );
 }
 function App() {
+  // 强制桌面端模式
+  useEffect(() => {
+    forceDesktopMode();
+  }, []);
+
   const [page, setPage] = useState('home');
   const [chatType, setChatType] = useState('qa');
   const [agents, setAgents] = useState([]);

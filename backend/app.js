@@ -224,9 +224,17 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
                       } catch (uploadError) {
                         console.error('【INVOKE】文件上传失败:', uploadError.message);
                       }
+                      
                     }
                   }
                 }
+                return res.json({
+                  status: 'upload_success',
+                  message: '文件上传成功，正在处理中...',
+                  uploadedFiles: Object.keys(uploadedFiles),
+                  inputs: inputs,
+                  query: query
+                });
               } else {
                 // 单文件处理
                 console.log('【INVOKE】单文件处理:', key);
@@ -243,6 +251,13 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
                       upload_file_id: difyFileObject.related_id
                     };
                     console.log('【INVOKE】文件上传成功:', uploadedFiles[key]);
+                    return res.json({
+                      status: 'upload_success',
+                      message: '文件上传成功，正在处理中...',
+                      uploadedFiles: Object.keys(uploadedFiles),
+                      inputs: inputs,
+                      query: query
+                    });
                   } catch (uploadError) {
                     console.error('【INVOKE】文件上传失败:', uploadError.message);
                   }

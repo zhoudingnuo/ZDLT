@@ -242,7 +242,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
                       url: "",
                       upload_file_id: difyFileObject.related_id
                     };
-                                        console.log('【INVOKE】文件上传成功:', uploadedFiles[key]);
+                    console.log('【INVOKE】文件上传成功:', uploadedFiles[key]);
                   } catch (uploadError) {
                     console.error('【INVOKE】文件上传失败:', uploadError.message);
                   }
@@ -251,18 +251,6 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
             }
           }
         }
-        
-        // 文件上传完成后，立即返回成功
-        console.log('【INVOKE】所有文件上传完成，立即返回');
-        return res.json({
-          status: 'upload_success',
-          message: '文件上传成功，正在处理中...',
-          uploadedFiles: Object.keys(uploadedFiles),
-          inputs: inputs,
-          query: query,
-          user: user,
-          agentId: req.params.id
-        });
         
       } catch (parseError) {
         console.error('【INVOKE】formidable解析失败:', parseError);
@@ -402,61 +390,6 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
       console.error('【INVOKE】parameter请求失败:', err.message);
       if (err.response) {
         console.error('【INVOKE】parameter响应错误:', err.response.data);
-      }
-      return res.status(500).json({ error: err.message, detail: err.response?.data });
-    }
-  } catch (err) {
-    return res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// 新增：处理文件上传后的Dify调用
-app.post('/api/agent/:id/process', async (req, res) => {
-  try {
-    console.log('【PROCESS】开始处理后续Dify调用，agentId:', req.params.id);
-    
-    const { inputs, query, user, uploadedFiles } = req.body;
-    
-    // 直接从 agents.json 文件读取最新的 agent 配置
-    let agents = [];
-    if (fs.existsSync(agentsPath)) {
-      agents = JSON.parse(fs.readFileSync(agentsPath, 'utf-8'));
-    }
-    const agent = agents.find(a => a.id === req.params.id);
-    if (!agent) {
-      console.error('【PROCESS】Agent not found:', req.params.id);
-      return res.status(404).json({ error: 'Agent not found' });
-    }
-    if (!agent.apiKey || !agent.apiUrl) {
-      console.error('【PROCESS】Agent not configured:', req.params.id);
-      return res.status(400).json({ error: 'Agent not configured' });
-    }
-    
-    // 组装最终请求数据
-    const data = {
-      inputs: inputs || {},
-      query: query || '开始',
-      response_mode: 'blocking',
-      conversation_id: '',
-      user: user || 'auto_test'
-    };
-    
-    const headers = {
-      'Authorization': `Bearer ${agent.apiKey}`,
-      'Content-Type': 'application/json'
-    };
-    
-    console.log('【PROCESS】Dify请求数据:', JSON.stringify(data, null, 2));
-    console.log('【PROCESS】Dify请求地址:', agent.apiUrl);
-    
-    try {
-      const response = await axios.post(agent.apiUrl, data, { headers, timeout: 1000000 });
-      console.log('【PROCESS】Dify响应成功');
-      return res.json(response.data);
-    } catch (err) {
-      console.error('【PROCESS】Dify请求失败:', err.message);
-      if (err.response) {
-        console.error('【PROCESS】Dify响应错误:', err.response.data);
       }
       return res.status(500).json({ error: err.message, detail: err.response?.data });
     }

@@ -45,6 +45,18 @@ const tagColor = '#4f8cff';
 const cardShadow = '0 4px 24px 0 rgba(79,140,255,0.08)';
 const fontFamily = 'PingFang SC, Microsoft YaHei, Arial, sans-serif';
 
+// 移动端检测
+const isMobile = () => {
+  return window.innerWidth <= 768;
+};
+
+// 响应式断点
+const breakpoints = {
+  mobile: 768,
+  tablet: 1024,
+  desktop: 1200
+};
+
 // 初始化默认用户
 initDefaultUsers();
 
@@ -1503,6 +1515,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
   const [chatHistory, setChatHistory] = useState(loadChatHistory(agent?.id));
   const [currentHistoryId, setCurrentHistoryId] = useState(null);
   const [chatPageKey, setChatPageKey] = useState(Date.now());
+  const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
 
   useEffect(() => {
     if (chatRef.current) {
@@ -1941,17 +1954,17 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
 
   // 聊天主内容区样式优化
   const mainCardStyle = {
-    maxWidth: 1400,
-    width: '95vw',
-    margin: '8px auto',
+    maxWidth: isMobile() ? '100vw' : 1400,
+    width: isMobile() ? '100vw' : '95vw',
+    margin: isMobile() ? '0' : '8px auto',
     background: theme === 'dark' ? '#202125' : '#fff', // 更深
-    borderRadius: 28, // 圆角加大
+    borderRadius: isMobile() ? 0 : 28, // 移动端无圆角
     boxShadow: theme === 'dark' ? '0 6px 32px 0 rgba(0,0,0,0.22)' : cardShadow,
-    padding: '40px 40px', // 留白加大
+    padding: isMobile() ? '20px 16px' : '40px 40px', // 移动端减少留白
     display: 'flex',
     flexDirection: 'column',
-    height: '80vh',
-    minHeight: 500,
+    height: isMobile() ? '100vh' : '80vh',
+    minHeight: isMobile() ? '100vh' : 500,
     border: theme === 'dark' ? '1.5px solid #202125' : 'none',
   };
 
@@ -1959,11 +1972,11 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
   const chatContentStyle = {
     flex: 1,
     minHeight: 0,
-    maxHeight: 'calc(80vh - 140px)', // 主卡片高度减去底部输入区
+    maxHeight: isMobile() ? 'calc(100vh - 120px)' : 'calc(80vh - 140px)', // 移动端调整高度
     overflowY: 'auto',
-    padding: 32, // 留白加大
+    padding: isMobile() ? '16px' : 32, // 移动端减少留白
     background: 'transparent',
-    borderRadius: 18,
+    borderRadius: isMobile() ? 12 : 18,
     wordBreak: 'break-all',
     whiteSpace: 'pre-wrap',
   };
@@ -2104,6 +2117,17 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     }
   }, [user]);
 
+  // 监听窗口大小变化，自动适配移动端
+  useEffect(() => {
+    const handleResize = () => {
+      // 强制重新渲染以更新移动端状态
+      setChatPageKey(Date.now());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <Layout key={chatPageKey} style={{ minHeight: '100vh', fontFamily, background: theme === 'dark' ? '#18191c' : undefined, paddingTop: 20 }}>
       <style>{globalDarkStyles}</style>
@@ -2205,6 +2229,39 @@ body[data-theme="light"] .category-scrollbar::-webkit-scrollbar-thumb {
 body[data-theme="light"] .category-scrollbar::-webkit-scrollbar-track {
   background: transparent !important;
 }
+
+/* 移动端适配样式 */
+@media (max-width: 768px) {
+  .ant-layout-sider {
+    display: none !important;
+  }
+  
+  .ant-layout-content {
+    margin-left: 0 !important;
+  }
+  
+  .ant-modal {
+    margin: 16px !important;
+    max-width: calc(100vw - 32px) !important;
+  }
+  
+  .ant-drawer-content {
+    width: 100% !important;
+  }
+  
+  .ant-form-item {
+    margin-bottom: 16px !important;
+  }
+  
+  .ant-input, .ant-input-textarea {
+    font-size: 16px !important; /* 防止iOS缩放 */
+  }
+  
+  .ant-btn {
+    height: 40px !important;
+    font-size: 14px !important;
+  }
+}
 `}
 </style>
       <style>
@@ -2229,7 +2286,18 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
 }
 `}
 </style>
-      <Sider width={260} style={{ background: theme === 'dark' ? '#202125' : '#f7f8fa', borderRight: theme === 'dark' ? '1px solid #23262e' : '1px solid #eee', transition: 'all 0.2s', borderTopRightRadius: 16, borderBottomRightRadius: 16, boxShadow: theme === 'dark' ? '2px 0 16px 0 rgba(0,0,0,0.10)' : 'none' }}>
+      <Sider 
+        width={isMobile() ? 200 : 260} 
+        style={{ 
+          background: theme === 'dark' ? '#202125' : '#f7f8fa', 
+          borderRight: theme === 'dark' ? '1px solid #23262e' : '1px solid #eee', 
+          transition: 'all 0.2s', 
+          borderTopRightRadius: isMobile() ? 0 : 16, 
+          borderBottomRightRadius: isMobile() ? 0 : 16, 
+          boxShadow: theme === 'dark' ? '2px 0 16px 0 rgba(0,0,0,0.10)' : 'none',
+          display: isMobile() ? 'none' : 'block' // 移动端隐藏侧边栏
+        }}
+      >
         <LogoTitle onClick={() => navigate('/')} />
         <div style={{ padding: '0 16px', marginTop: 10 }}>
           <Button type="primary" icon={<PlusOutlined />} block style={{ marginBottom: 16, background: mainColor, border: 'none', borderRadius: 12, fontWeight: 600 }} onClick={handleNewChat}>新对话</Button>
@@ -2352,9 +2420,35 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
         </div>
       </Sider>
       <Layout style={{ background: theme === 'dark' ? '#18191c' : undefined }}>
-        <Header style={{ background: theme === 'dark' ? '#23262e' : '#f5f6fa', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: 64, marginTop: 0 }}>
-          <span style={{ flex: 1, textAlign: 'center', fontWeight: 700, fontSize: 26, color: mainColorSolid, letterSpacing: 1 }}>{agent?.name || ''}</span>
+        <Header style={{ 
+          background: theme === 'dark' ? '#23262e' : '#f5f6fa', 
+          padding: isMobile() ? '0 16px' : '0 24px', 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          minHeight: isMobile() ? 56 : 64, 
+          marginTop: 0 
+        }}>
+          <span style={{ 
+            flex: 1, 
+            textAlign: 'center', 
+            fontWeight: 700, 
+            fontSize: isMobile() ? 20 : 26, 
+            color: mainColorSolid, 
+            letterSpacing: 1 
+          }}>{agent?.name || ''}</span>
           <div style={{ display: 'flex', alignItems: 'center' }}>
+            {isMobile() && (
+              <Button
+                type="text"
+                icon={<MenuUnfoldOutlined />}
+                onClick={() => setMobileMenuVisible(true)}
+                style={{
+                  color: theme === 'dark' ? '#eee' : '#333',
+                  marginRight: 8
+                }}
+              />
+            )}
             <Tooltip title={user ? user.username : '未登录'}>
             <Dropdown 
               overlay={
@@ -2486,14 +2580,14 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                       <div
                         className="markdown-body"
                         style={{
-                          maxWidth: '70%',
+                          maxWidth: isMobile() ? '85%' : '70%',
                           background: isUser
                             ? 'linear-gradient(90deg, #4f8cff 0%, #6f6fff 100%)'
                             : (theme === 'dark' ? '#23262e' : '#f5f6fa'),
                           color: isUser ? '#fff' : (theme === 'dark' ? '#eee' : '#333'),
-                          borderRadius: 18,
-                          padding: '16px 22px',
-                          fontSize: 16,
+                          borderRadius: isMobile() ? 12 : 18,
+                          padding: isMobile() ? '12px 16px' : '16px 22px',
+                          fontSize: isMobile() ? 14 : 16,
                           boxShadow: theme === 'dark' ? '0 2px 12px 0 rgba(0,0,0,0.13)' : '0 2px 8px 0 rgba(79,140,255,0.08)',
                           whiteSpace: isUser ? 'pre-line' : 'normal',
                           overflowX: 'auto',
@@ -2573,7 +2667,16 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                     placeholder="请输入你的问题，按Enter发送"
                     autoSize={{ minRows: 1, maxRows: 1 }}
                     disabled={loading}
-                    style={{ borderRadius: 14, fontSize: 15, background: theme === 'dark' ? '#23262e' : '#f7f8fa', border: theme === 'dark' ? '1.5px solid #23262e' : `1.5px solid ${mainColor2}`, color: theme === 'dark' ? '#eee' : '#333', minHeight: 36, height: 36, resize: 'none' }}
+                    style={{ 
+                      borderRadius: isMobile() ? 12 : 14, 
+                      fontSize: isMobile() ? 14 : 15, 
+                      background: theme === 'dark' ? '#23262e' : '#f7f8fa', 
+                      border: theme === 'dark' ? '1.5px solid #23262e' : `1.5px solid ${mainColor2}`, 
+                      color: theme === 'dark' ? '#eee' : '#333', 
+                      minHeight: isMobile() ? 32 : 36, 
+                      height: isMobile() ? 32 : 36, 
+                      resize: 'none' 
+                    }}
                   />
                   <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
                     <Button
@@ -2653,6 +2756,119 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
 
       {/* 用户管理弹窗 */}
       <UserListModal theme={theme} />
+      
+      {/* 移动端侧边栏抽屉 */}
+      {isMobile() && (
+        <Drawer
+          title="菜单"
+          placement="left"
+          onClose={() => setMobileMenuVisible(false)}
+          open={mobileMenuVisible}
+          width={280}
+          style={{ background: theme === 'dark' ? '#202125' : '#fff' }}
+        >
+          <div style={{ padding: '0 16px', marginTop: 10 }}>
+            <Button type="primary" icon={<PlusOutlined />} block style={{ marginBottom: 16, background: mainColor, border: 'none', borderRadius: 12, fontWeight: 600 }} onClick={handleNewChat}>新对话</Button>
+            <Button
+              block
+              icon={<ArrowLeftOutlined />}
+              style={{
+                marginBottom: 16,
+                borderRadius: 12,
+                fontWeight: 600,
+                background: '#fff',
+                color: '#4f8cff',
+                border: '1.5px solid #4f8cff',
+                transition: 'all 0.2s',
+              }}
+              onClick={() => navigate('/')}
+            >
+              返回主页
+            </Button>
+            <Button
+              block
+              icon={<MessageOutlined />}
+              style={{
+                marginBottom: 16,
+                borderRadius: 12,
+                fontWeight: 600,
+                background: '#fff',
+                color: '#4f8cff',
+                border: '1.5px solid #4f8cff',
+                transition: 'all 0.2s',
+              }}
+              onClick={handleNetworkDiagnosis}
+            >
+              网络诊断
+            </Button>
+          </div>
+          <div style={{ padding: '0 8px' }}>
+            <div style={{
+              background: theme === 'dark' ? '#23262e' : '#fff',
+              borderRadius: 20,
+              boxShadow: theme === 'dark' ? '0 2px 16px 0 rgba(0,0,0,0.10)' : '0 2px 16px 0 rgba(79,140,255,0.06)',
+              padding: '18px 10px 10px 10px',
+              margin: '0 2px',
+              border: theme === 'dark' ? '1.5px solid #23262e' : '1.5px solid #e6eaf0',
+              minHeight: 120
+            }}>
+              <div style={{ fontWeight: 700, fontSize: 15, color: theme === 'dark' ? '#4f8cff' : mainColorSolid, marginBottom: 10, letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <HistoryOutlined style={{ fontSize: 17 }} /> 历史对话
+              </div>
+              <div style={{ maxHeight: 340, overflowY: 'auto', paddingRight: 2 }}>
+                {chatHistory.length === 0 ? (
+                  <div style={{ color: theme === 'dark' ? '#888' : '#aaa', textAlign: 'center', padding: '32px 0' }}>暂无历史对话</div>
+                ) : (
+                  chatHistory.map((item, idx) => (
+                    <div
+                      key={item.id}
+                      onClick={() => { handleHistoryClick(item); setMobileMenuVisible(false); }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        background: currentHistoryId === item.id ? (theme === 'dark' ? 'rgba(79,140,255,0.10)' : '#eaf3ff') : (theme === 'dark' ? '#23262e' : '#fff'),
+                        border: currentHistoryId === item.id ? `2px solid ${mainColorSolid}` : `1.5px solid ${theme === 'dark' ? '#23262e' : '#e6eaf0'}`,
+                        borderRadius: 14,
+                        marginBottom: 10,
+                        padding: '10px 12px',
+                        boxShadow: currentHistoryId === item.id ? '0 2px 8px 0 rgba(79,140,255,0.10)' : '0 1px 4px 0 rgba(0,0,0,0.04)',
+                        cursor: 'pointer',
+                        transition: 'all 0.18s',
+                        position: 'relative',
+                        minHeight: 40
+                      }}
+                    >
+                      <MessageOutlined style={{ color: currentHistoryId === item.id ? mainColorSolid : (theme === 'dark' ? '#8cbfff' : '#bbb'), fontSize: 18, marginRight: 10, flexShrink: 0 }} />
+                      <span style={{ flex: 1, fontSize: 15, color: theme === 'dark' ? '#eee' : '#222', fontWeight: currentHistoryId === item.id ? 700 : 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginRight: 40 }}>{item.title || '新对话'}</span>
+                      <Button
+                        danger
+                        size="small"
+                        style={{
+                          marginLeft: 8,
+                          borderRadius: 8,
+                          position: 'absolute',
+                          right: 10,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          opacity: 0.7,
+                          fontSize: 12,
+                          padding: '0 8px',
+                          height: 24,
+                          zIndex: 2,
+                          color: theme === 'dark' ? '#fff' : '#ff4d4f',
+                          borderColor: theme === 'dark' ? '#fff' : '#ff4d4f',
+                          background: 'transparent'
+                        }}
+                        onClick={e => { e.stopPropagation(); handleDeleteHistory(item.id, e); }}
+                      >删除</Button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </Drawer>
+      )}
     </Layout>
   );
 }
@@ -2941,9 +3157,16 @@ const getAgentCategories = (agent) => {
     setProfileVisible(true);
   };
 
-return (
+  return (
   <Layout style={{ minHeight: '100vh', background: mainBg }}>
-    <Sider width={220} style={{ background: siderBg, borderRight: `1.5px solid ${siderBorder}` }}>
+    <Sider 
+      width={isMobile() ? 0 : 220} 
+      style={{ 
+        background: siderBg, 
+        borderRight: `1.5px solid ${siderBorder}`,
+        display: isMobile() ? 'none' : 'block'
+      }}
+    >
       <LogoTitle onClick={() => navigate('/')} theme={theme} marginTop={20} />
       <Menu mode="inline" selectedKeys={[tabKey]} onClick={e => setTabKey(e.key)} style={{ background: 'transparent', border: 'none', marginTop: 20 }}>
         {categories.map(cat => (
@@ -2966,24 +3189,31 @@ return (
       </Menu>
     </Sider>
     <Layout style={{ background: mainBg }}>
-      <Header style={{ background: theme === 'dark' ? '#23262e' : '#f5f6fa', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: 64 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      <Header style={{ 
+        background: theme === 'dark' ? '#23262e' : '#f5f6fa', 
+        padding: isMobile() ? '0 16px' : '0 24px', 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        minHeight: isMobile() ? 56 : 64 
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile() ? 8 : 16 }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            height: 36,
+            height: isMobile() ? 32 : 36,
               background: theme === 'dark' ? '#23262e' : '#fff',
               border: `1.5px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
-            borderRadius: 16,
-            padding: '0 10px',
+            borderRadius: isMobile() ? 12 : 16,
+            padding: isMobile() ? '0 8px' : '0 10px',
                 color: theme === 'dark' ? '#eee' : '#333',
-            marginRight: 24,
-            minWidth: 220,
-            maxWidth: 300,
+            marginRight: isMobile() ? 12 : 24,
+            minWidth: isMobile() ? 160 : 220,
+            maxWidth: isMobile() ? 200 : 300,
             boxSizing: 'border-box',
             boxShadow: 'none',
           }}>
-            <SearchOutlined style={{ color: theme === 'dark' ? '#888' : '#bbb', fontSize: 16, marginRight: 6 }} />
+            <SearchOutlined style={{ color: theme === 'dark' ? '#888' : '#bbb', fontSize: isMobile() ? 14 : 16, marginRight: isMobile() ? 4 : 6 }} />
             <input
               type="text"
               placeholder="搜索智能体"
@@ -2994,33 +3224,33 @@ return (
                 border: 'none',
                 outline: 'none',
                 color: theme === 'dark' ? '#eee' : '#333',
-                fontSize: 15,
+                fontSize: isMobile() ? 14 : 15,
                 width: '100%'
             }}
           />
           </div>
-          <div style={{ display: 'flex', gap: 8, marginLeft: 32 }}>
+          <div style={{ display: 'flex', gap: isMobile() ? 4 : 8, marginLeft: isMobile() ? 16 : 32 }}>
             <div style={{ display: 'flex', gap: 2 }}>
-              {['首页', '知识库', '个人空间', '创建智能体'].map((text, idx) => (
-                <Button
-                  key={text}
-                  type="text"
-                  className="nav-btn"
-                  icon={<span style={{ fontSize: 20 }}>{['🏠', '📒', '👤', '➕'][idx]}</span>}
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 16,
-                    borderRadius: 16,
-                    padding: '4px 18px',
-                    color: tabKey === (['home', 'knowledge', 'user', 'create'][idx]) ? mainColorSolid : buttonTextColor,
-                    background: tabKey === (['home', 'knowledge', 'user', 'create'][idx]) ? menuItemActiveBg : buttonBg,
-                    border: tabKey === (['home', 'knowledge', 'user', 'create'][idx]) ? `1.5px solid ${mainColorSolid}` : `1.5px solid ${buttonBorder}`,
-                    marginRight: 2,
-                    transition: 'all 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                  }}
+                              {['首页', '知识库', '个人空间', '创建智能体'].map((text, idx) => (
+                  <Button
+                    key={text}
+                    type="text"
+                    className="nav-btn"
+                    icon={<span style={{ fontSize: isMobile() ? 16 : 20 }}>{['🏠', '📒', '👤', '➕'][idx]}</span>}
+                    style={{
+                      fontWeight: 600,
+                      fontSize: isMobile() ? 12 : 16,
+                      borderRadius: isMobile() ? 12 : 16,
+                      padding: isMobile() ? '2px 8px' : '4px 18px',
+                      color: tabKey === (['home', 'knowledge', 'user', 'create'][idx]) ? mainColorSolid : buttonTextColor,
+                      background: tabKey === (['home', 'knowledge', 'user', 'create'][idx]) ? menuItemActiveBg : buttonBg,
+                      border: tabKey === (['home', 'knowledge', 'user', 'create'][idx]) ? `1.5px solid ${mainColorSolid}` : `1.5px solid ${buttonBorder}`,
+                      marginRight: isMobile() ? 1 : 2,
+                      transition: 'all 0.2s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: isMobile() ? 3 : 6,
+                    }}
                   onClick={() => {
                     if (text === '首页') navigate('/');
                     if (text === '知识库') message.info('知识库功能开发中');
@@ -3125,58 +3355,58 @@ return (
                   <div style={{
                     display: 'flex',
                     flexWrap: 'wrap',
-                    gap: 16,
-                    justifyContent: 'flex-start',
+                    gap: isMobile() ? 12 : 16,
+                    justifyContent: isMobile() ? 'center' : 'flex-start',
                     alignItems: 'flex-start',
-                    padding: '0 16px',
+                    padding: isMobile() ? '0 8px' : '0 16px',
                   }}>
               {/* 新增：最左上角自定义卡片 */}
               <div
                 style={{
                   background: cardBg,
                   border: `2px dashed ${mainColorSolid}`,
-                  borderRadius: 16,
+                  borderRadius: isMobile() ? 12 : 16,
                   boxShadow: cardShadow,
-                  padding: 14,
-                  width: 210,
-                  height: 180,
+                  padding: isMobile() ? 12 : 14,
+                  width: isMobile() ? 160 : 210,
+                  height: isMobile() ? 140 : 180,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginBottom: 16,
+                  marginBottom: isMobile() ? 12 : 16,
                   color: descColor,
                   position: 'relative',
-                  minWidth: 210,
-                  minHeight: 180
+                  minWidth: isMobile() ? 160 : 210,
+                  minHeight: isMobile() ? 140 : 180
                 }}
               >
-                <div style={{ fontSize: 32, marginBottom: 10 }}>⚙️</div>
-                <div style={{ fontWeight: 700, fontSize: 16, color: cardTitleColor, marginBottom: 10, textAlign: 'center' }}>智能体管理</div>
-                <Button
-                  type="primary"
-                  style={{ width: '90%', marginBottom: 8, borderRadius: 8, fontWeight: 600 }}
-                  onClick={() => {
-                    if (!user) {
-                      message.info('请先登录后再配置智能体');
-                    } else if (!user.isAdmin) {
-                      message.info('仅管理员可配置智能体');
-                    } else {
-                      setAgentConfigVisible(true);
-                      setEditingAgent(agents[0] || null);
-                    }
-                  }}
-                >配置智能体</Button>
-                <Button
-                  style={{ width: '90%', borderRadius: 8, fontWeight: 600 }}
-                  onClick={() => {
-                    if (!user) {
-                      message.info('请先登录后再创建智能体');
-                    } else {
-                      window.open('http://118.145.74.50:24131/apps', '_blank');
-                    }
-                  }}
-                >创建智能体</Button>
+                <div style={{ fontSize: isMobile() ? 24 : 32, marginBottom: isMobile() ? 6 : 10 }}>⚙️</div>
+                <div style={{ fontWeight: 700, fontSize: isMobile() ? 14 : 16, color: cardTitleColor, marginBottom: isMobile() ? 6 : 10, textAlign: 'center' }}>智能体管理</div>
+                                  <Button
+                    type="primary"
+                    style={{ width: '90%', marginBottom: isMobile() ? 6 : 8, borderRadius: isMobile() ? 6 : 8, fontWeight: 600, fontSize: isMobile() ? 12 : 14 }}
+                    onClick={() => {
+                      if (!user) {
+                        message.info('请先登录后再配置智能体');
+                      } else if (!user.isAdmin) {
+                        message.info('仅管理员可配置智能体');
+                      } else {
+                        setAgentConfigVisible(true);
+                        setEditingAgent(agents[0] || null);
+                      }
+                    }}
+                  >配置智能体</Button>
+                  <Button
+                    style={{ width: '90%', borderRadius: isMobile() ? 6 : 8, fontWeight: 600, fontSize: isMobile() ? 12 : 14 }}
+                    onClick={() => {
+                      if (!user) {
+                        message.info('请先登录后再创建智能体');
+                      } else {
+                        window.open('http://118.145.74.50:24131/apps', '_blank');
+                      }
+                    }}
+                  >创建智能体</Button>
               </div>
               {agentsByCategory[tabKey]
                       .filter(a => a.name.includes(search) || a.description.includes(search))
@@ -3189,18 +3419,18 @@ return (
                             border: agent.isConfigured === false
                               ? `2px solid ${cardUnconfiguredBorder}`
                               : `2px solid ${cardBorder}`,
-                            borderRadius: 16,
+                            borderRadius: isMobile() ? 12 : 16,
                             boxShadow: cardShadow,
-                            padding: 14,
-                            width: 210,
-                            height: 180,
+                            padding: isMobile() ? 12 : 14,
+                            width: isMobile() ? 160 : 210,
+                            height: isMobile() ? 140 : 180,
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
                             cursor: 'pointer',
                             transition: 'box-shadow 0.2s, border 0.2s, background 0.2s',
-                            marginBottom: 16,
+                            marginBottom: isMobile() ? 12 : 16,
                             color: descColor,
                           }}
                           tabIndex={-1}
@@ -3217,9 +3447,9 @@ return (
                             e.currentTarget.querySelector('.card-title').style.color = cardTitleColor;
                           }}
                         >
-                          <div style={{ marginBottom: 12 }}>{cardIcons[i % cardIcons.length]}</div>
-                          <div className="card-title" style={{ fontWeight: 700, fontSize: 16, color: cardTitleColor, marginBottom: 6, textAlign: 'center' }}>{agent.name}</div>
-                          <div style={{ color: descColor, fontSize: 13, textAlign: 'center', marginBottom: 4, height: 40, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: '20px', wordBreak: 'break-all' }}>{agent.description}</div>
+                          <div style={{ marginBottom: isMobile() ? 8 : 12 }}>{cardIcons[i % cardIcons.length]}</div>
+                          <div className="card-title" style={{ fontWeight: 700, fontSize: isMobile() ? 14 : 16, color: cardTitleColor, marginBottom: isMobile() ? 4 : 6, textAlign: 'center' }}>{agent.name}</div>
+                          <div style={{ color: descColor, fontSize: isMobile() ? 11 : 13, textAlign: 'center', marginBottom: 4, height: isMobile() ? 32 : 40, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: isMobile() ? '16px' : '20px', wordBreak: 'break-all' }}>{agent.description}</div>
                           {agent.isConfigured !== undefined && (
                             <div style={{ textAlign: 'center', marginTop: 2 }}>
                               {agent.isConfigured

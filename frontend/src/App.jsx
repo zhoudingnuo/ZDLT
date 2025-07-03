@@ -1291,8 +1291,26 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       form.resetFields();
       onCancel(); // 关闭弹窗
       aiStartTimeRef.current = Date.now();
-      // 如果有响应数据，直接显示结果
-      if (res.data && res.data.answer) {
+      
+      // 如果有组装好的数据，调用新的Dify API
+      if (res.data && res.data.inputs) {
+        console.log('【前端】获取到组装好的数据，开始调用Dify');
+        try {
+          const difyResponse = await axios.post(`${API_BASE}/api/agent/${agent.id}/call-dify`, {
+            data: res.data
+          });
+          console.log('【前端】Dify调用成功:', difyResponse.data);
+          await onSubmit(difyResponse.data);
+        } catch (difyError) {
+          console.error('【前端】Dify调用失败:', difyError);
+          await onSubmit({ 
+            status: 'error', 
+            message: 'Dify调用失败: ' + (difyError.response?.data?.error || difyError.message),
+            usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
+          });
+        }
+      } else if (res.data && res.data.answer) {
+        // 如果有直接结果，直接显示
         await onSubmit(res.data);
       } else {
         // 如果没有直接结果，说明是异步处理，在对话框中显示处理中状态
@@ -1711,9 +1729,22 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
           usedTime: params.usedTime || ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
         }
       ]);
-      // 不要立即停止loading，让计时器继续运行
-      // setLoading(false);
-      // return;
+      // 继续让计时器运行，不要立即停止loading
+      return;
+    }
+    
+    // 检查是否是错误状态
+    if (params.status === 'error') {
+      setMessages([
+        ...newMessages,
+        {
+          role: 'assistant',
+          content: params.message || '处理失败',
+          usedTime: params.usedTime || ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
+        }
+      ]);
+      setLoading(false);
+      return;
     }
     
     let usage = undefined; // 统一定义usage变量

@@ -1284,6 +1284,8 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
+      console.log('【前端】axios.post成功返回，响应数据:', res.data);
+      
       // 文件上传成功，关闭弹窗
       message.success('参数提交成功！');
       form.resetFields();

@@ -1279,18 +1279,24 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       formData.append('inputs', JSON.stringify(inputs));
       
       console.log('【前端】发送FormData到后端，包含文件和非文件参数');
-      const res = await axios.post(`${API_BASE}/api/agent/${agent.id}/invoke`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
       
+      // 立即认为参数提交成功，不等待后端响应
       message.success('参数提交成功！');
       form.resetFields();
-      // 不等待onSubmit完成，直接关闭弹窗，让SSE流处理在后台进行
       onCancel();
-      // 异步调用onSubmit，传递原始的inputs参数，不阻塞UI
-      onSubmit(inputs).catch(err => {
-        console.error('SSE流处理失败:', err);
-        message.error('处理失败: ' + err.message);
+      
+      // 异步发送请求，不阻塞UI
+      axios.post(`${API_BASE}/api/agent/${agent.id}/invoke`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      }).then(res => {
+        // 后端处理成功，开始SSE流处理
+        onSubmit(inputs).catch(err => {
+          console.error('SSE流处理失败:', err);
+          message.error('处理失败: ' + err.message);
+        });
+      }).catch(err => {
+        console.error('参数提交失败:', err);
+        message.error('参数提交失败: ' + (err.response?.data?.error || err.message));
       });
     } catch (e) {
       console.error('【前端】参数提交失败:', e);

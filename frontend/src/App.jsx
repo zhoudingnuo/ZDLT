@@ -1206,7 +1206,7 @@ function AgentReviewModal({ visible, onCancel, theme }) {
 function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-
+  const aiStartTimeRef = useRef(null);
   // 根据theme动态设置颜色
   const modalBg = theme === 'dark' ? '#2f3136' : '#fff';
   const textColor = theme === 'dark' ? '#eee' : '#333';

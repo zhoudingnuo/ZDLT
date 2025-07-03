@@ -1596,9 +1596,20 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       console.log('API响应状态:', res.status);
       console.log('API响应数据:', res.data);
       
-      const answer = res.data.answer || (res.data.data && res.data.data.answer) || JSON.stringify(res.data);
+      // 检查智能体是否为workflow类型
+      const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/');
+      
+      let answer;
+      if (isWorkflow) {
+        // Workflow类型：直接使用完整响应数据
+        answer = res.data;
+      } else {
+        // Chat类型：提取answer字段
+        answer = res.data.answer || (res.data.data && res.data.data.answer) || JSON.stringify(res.data);
+      }
+      
       // 累加token和价格消耗
-      usage = res.data.metadata?.usage;
+      usage = res.data.metadata?.usage || res.data.data;
       if (usage && user) {
         const tokens = Number(usage.total_tokens) || 0;
         let currentUser = getUser();
@@ -1781,6 +1792,9 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         await updateUserUsage(currentUser.username, currentUser.usage_tokens);
       }
       
+      // 检查智能体是否为workflow类型
+      const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/');
+      
       // 更新最终结果，保持计时器运行
       setMessages(msgs => {
         const lastIdx = msgs.length - 1;
@@ -1789,9 +1803,9 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
             ...msgs.slice(0, lastIdx),
             {
               role: 'assistant',
-              content: params.answer || params.content || '处理完成',
+              content: isWorkflow ? params : (params.answer || params.content || '处理完成'),
               usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
-              tokens: params.metadata?.usage?.total_tokens,
+              tokens: params.metadata?.usage?.total_tokens || params.data?.total_tokens,
               price: params.metadata?.usage?.total_price
             }
           ];
@@ -2356,38 +2370,77 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
           <div style={{ ...mainCardStyle, marginTop: 30 }}>
             <div style={chatContentStyle} ref={chatRef}>
               {messages.map((msg, idx) => {
-                // 1. 提取text内容（支持对象、字符串、JSON字符串等）
+                // 1. 根据智能体类型提取text内容
                 let text = null;
-                if (typeof msg?.content === 'string') {
-                  try {
-                    const parsed = JSON.parse(msg.content);
-                    if (parsed && typeof parsed.result === 'string') {
-                      text = parsed.result;
+                
+                // 检查智能体是否为workflow类型
+                const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/');
+                
+                if (isWorkflow) {
+                  // Workflow类型：从outputs.result中提取内容
+                  if (typeof msg?.content === 'string') {
+                    try {
+                      const parsed = JSON.parse(msg.content);
+                      if (parsed?.data?.outputs?.result) {
+                        text = parsed.data.outputs.result;
+                      } else if (parsed?.outputs?.result) {
+                        text = parsed.outputs.result;
+                      } else if (parsed?.result) {
+                        text = parsed.result;
+                      }
+                    } catch (e) {
+                      // 如果不是JSON，尝试直接解析
+                      text = msg.content;
                     }
-                  } catch (e) {
+                  }
+                  if (!text && typeof msg?.content === 'object') {
+                    if (msg.content?.data?.outputs?.result) {
+                      text = msg.content.data.outputs.result;
+                    } else if (msg.content?.outputs?.result) {
+                      text = msg.content.outputs.result;
+                    } else if (msg.content?.result) {
+                      text = msg.content.result;
+                    }
+                  }
+                  if (!text && typeof msg?.data?.outputs?.result === 'string') {
+                    text = msg.data.outputs.result;
+                  }
+                  if (!text && typeof msg?.outputs?.result === 'string') {
+                    text = msg.outputs.result;
+                  }
+                } else {
+                  // Chat类型：使用原有的提取逻辑
+                  if (typeof msg?.content === 'string') {
+                    try {
+                      const parsed = JSON.parse(msg.content);
+                      if (parsed && typeof parsed.result === 'string') {
+                        text = parsed.result;
+                      }
+                    } catch (e) {
+                      text = msg.content;
+                    }
+                  }
+                  if (!text && typeof msg?.content === 'object' && typeof msg.content.result === 'string') {
+                    text = msg.content.result;
+                  }
+                  if (!text && typeof msg?.result === 'string') {
+                    text = msg.result;
+                  }
+                  if (!text && typeof msg?.content === 'string') {
                     text = msg.content;
                   }
-                }
-                if (!text && typeof msg?.content === 'object' && typeof msg.content.result === 'string') {
-                  text = msg.content.result;
-                }
-                if (!text && typeof msg?.result === 'string') {
-                  text = msg.result;
-                }
-                if (!text && typeof msg?.content === 'string') {
-                  text = msg.content;
-                }
-                if (!text && typeof msg?.content === 'object' && typeof msg.content.answer === 'string') {
-                  text = msg.content.answer;
-                }
-                if (!text && typeof msg?.answer === 'string') {
-                  text = msg.answer;
-                }
-                if (!text && typeof msg?.text === 'string') {
-                  text = msg.text;
-                }
-                if (!text && typeof msg?.message === 'string') {
-                  text = msg.message;
+                  if (!text && typeof msg?.content === 'object' && typeof msg.content.answer === 'string') {
+                    text = msg.content.answer;
+                  }
+                  if (!text && typeof msg?.answer === 'string') {
+                    text = msg.answer;
+                  }
+                  if (!text && typeof msg?.text === 'string') {
+                    text = msg.text;
+                  }
+                  if (!text && typeof msg?.message === 'string') {
+                    text = msg.message;
+                  }
                 }
 
                 // 2. 单词消消乐（word-elimination）用小游戏渲染器

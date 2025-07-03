@@ -1845,7 +1845,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       ...newMessages,
       {
         role: 'assistant',
-        content: params.data.outputs.result || '处理已经完成',
+        content: params.data.outputs.result || params.data.outputs.text ||'处理已经完成',
         usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
       }
     ]);

@@ -387,10 +387,11 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     
     console.log('【INVOKE】parameter最终请求数据:', JSON.stringify(result, null, 2));
     console.log('【INVOKE】parameter请求地址:', agent.apiUrl);
-    
+    console.log('【INVOKE】parameter请求数据:', result);
     // 返回组装好的数据给前端，让前端调用新的API
     return res.json(result);
   } catch (err) {
+    console.error('【INVOKE】parameter请求失败:', err.message);
     return res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -399,6 +400,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
 app.post('/api/agent/:id/call-dify', async (req, res) => {
   try {
     const { data } = req.body;
+    console.log('【INVOKE】call-dify请求数据:', data);
     const agents = readJson('agents.json');
     const agent = agents.find(a => a.id === req.params.id);
     
@@ -410,6 +412,8 @@ app.post('/api/agent/:id/call-dify', async (req, res) => {
       headers: { 'Authorization': `Bearer ${agent.apiKey}`, 'Content-Type': 'application/json' },
       timeout: 1000000
     });
+    console.log(agent.apiKey);
+    console.log('【INVOKE】call-dify响应数据:', response.data);
     
     return res.json(response.data);
   } catch (err) {

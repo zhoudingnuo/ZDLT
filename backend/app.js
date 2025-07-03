@@ -214,8 +214,12 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
                       console.log('【INVOKE】上传文件到Dify:', file.originalFilename);
                       try {
                         const difyFileObject = await uploadFileToDifySimple(file, user, agent);
-                        // 保留完整的Dify文件对象，不要覆盖
-                        uploadedFiles[key].push(difyFileObject);
+                        uploadedFiles[key].push({
+                          type: difyFileObject.type,
+                          transfer_method: "local_file",
+                          url: "",
+                          upload_file_id: difyFileObject.related_id
+                        });
                         console.log('【INVOKE】文件上传成功:', uploadedFiles[key][uploadedFiles[key].length - 1]);
                       } catch (uploadError) {
                         console.error('【INVOKE】文件上传失败:', uploadError.message);
@@ -232,8 +236,12 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
                   console.log('【INVOKE】上传文件到Dify:', file.originalFilename);
                   try {
                     const difyFileObject = await uploadFileToDifySimple(file, user, agent);
-                    // 保留完整的Dify文件对象，不要覆盖
-                    uploadedFiles[key] = difyFileObject;
+                    uploadedFiles[key] = {
+                      type: difyFileObject.type,
+                      transfer_method: "local_file",
+                      url: "",
+                      upload_file_id: difyFileObject.related_id
+                    };
                     console.log('【INVOKE】文件上传成功:', uploadedFiles[key]);
                   } catch (uploadError) {
                     console.error('【INVOKE】文件上传失败:', uploadError.message);
@@ -345,11 +353,9 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
               console.log('【INVOKE】字段', key, '未找到上传的文件');
             }
           } else {
-            // 非文件类型，保留原有值，不要覆盖
+            // 非文件类型，直接使用字段值
             if (inputs[key] !== undefined) {
               console.log('【INVOKE】非文件字段:', key, '值:', inputs[key]);
-            } else {
-              console.log('【INVOKE】非文件字段:', key, '未提供值');
             }
           }
         }
@@ -486,13 +492,11 @@ async function uploadFileToDifySimple(file, user, agent) {
     
     // 自动拼接成 Dify 主 API 需要的文件对象格式
     const fileInfo = response.data.data || response.data;
-    const tenantId = fileInfo.created_by || null;
     const difyFileObject = {
       dify_model_identity: "__dify__file__",
-      id: tenantId,
-      upload_file_id: tenantId,
-      tenant_id: tenantId,
-      type: fileInfo.mime_type || mimetype,
+      id: null,
+      tenant_id: fileInfo.created_by || null,
+      type: fileInfo.mime_type?.startsWith('image/') ? 'image' : 'file',
       transfer_method: "local_file",
       remote_url: fileInfo.url || fileInfo.preview_url,
       related_id: fileInfo.id,

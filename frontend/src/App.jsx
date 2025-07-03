@@ -1711,7 +1711,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
           usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
         }
       ]);
-      setLoading(false);
+      // 不要设置setLoading(false)，让计时器继续运行
       return;
     }
     

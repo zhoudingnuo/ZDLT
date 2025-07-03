@@ -1726,21 +1726,22 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         setLoading(true);
       }
       
-      // 更新处理中消息
-      setMessages(msgs => {
-        const lastIdx = msgs.length - 1;
-        if (msgs[lastIdx]?.isLoading) {
-          return [
-            ...msgs.slice(0, lastIdx),
-            {
-              role: 'assistant',
-              content: params.message || '文件上传成功，正在处理中...',
-              usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
-            }
-          ];
-        }
-        return msgs;
-      });
+             // 更新处理中消息，保持isLoading状态以显示计时器
+       setMessages(msgs => {
+         const lastIdx = msgs.length - 1;
+         if (msgs[lastIdx]?.isLoading) {
+           return [
+             ...msgs.slice(0, lastIdx),
+             {
+               role: 'assistant',
+               content: params.message || '文件上传成功，正在处理中...',
+               isLoading: true, // 保持isLoading状态，让计时器继续显示
+               usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
+             }
+           ];
+         }
+         return msgs;
+       });
       return;
     }
     

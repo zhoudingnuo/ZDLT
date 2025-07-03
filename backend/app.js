@@ -418,7 +418,7 @@ app.post('/api/agent/:id/call-dify', async (req, res) => {
     
     return res.json(response.data);
   } catch (err) {
-    console.error('【INVOKE】call-dify请求失败:', err.message);
+    console.error('【INVOKE】call-dify请求失败:', res.json(response.text));
     return res.status(500).json({ error: err.message });
   }
 });

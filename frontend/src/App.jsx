@@ -1299,7 +1299,9 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
         console.log('【前端】获取到组装好的数据，开始调用Dify');
         try {
           // 统一用chat类型的构造方式
-          const difyResponse = await axios.post(`${API_BASE}/api/agent/${agent.id}/call-dify`, { data: res.data });
+          const difyResponse = await axios.post(`${API_BASE}/api/agent/${agent.id}/call-dify`, { data: res.data }, {
+            timeout: 0  // 0表示无超时限制，或者设置更大的值如 300000 (5分钟)
+          });
           console.log('【前端】Dify调用成功:', difyResponse.data);
           onSubmit(difyResponse.data);
         } catch (difyError) {

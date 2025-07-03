@@ -496,7 +496,19 @@ async function uploadFileToDifySimple(file, user, agent) {
       dify_model_identity: "__dify__file__",
       id: null,
       tenant_id: fileInfo.created_by || null,
-      type: fileInfo.mime_type?.startsWith('image/') ? 'image' : 'file',
+      type: (() => {
+        const mimeType = fileInfo.mime_type || '';
+        if (mimeType.startsWith('image/')) return 'image';
+        if (mimeType.startsWith('video/')) return 'video';
+        if (mimeType.startsWith('audio/')) return 'audio';
+        if (mimeType.includes('pdf')) return 'pdf';
+        if (mimeType.includes('document') || mimeType.includes('word') || mimeType.includes('msword')) return 'document';
+        if (mimeType.includes('spreadsheet') || mimeType.includes('excel') || mimeType.includes('sheet')) return 'spreadsheet';
+        if (mimeType.includes('presentation') || mimeType.includes('powerpoint') || mimeType.includes('slides')) return 'presentation';
+        if (mimeType.startsWith('text/')) return 'text';
+        if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('tar') || mimeType.includes('7z')) return 'archive';
+        return 'file'; // 默认类型
+      })(),
       transfer_method: "local_file",
       remote_url: fileInfo.url || fileInfo.preview_url,
       related_id: fileInfo.id,

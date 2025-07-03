@@ -490,6 +490,7 @@ async function uploadFileToDifySimple(file, user, agent) {
     const difyFileObject = {
       dify_model_identity: "__dify__file__",
       id: tenantId,
+      upload_file_id: tenantId,
       tenant_id: tenantId,
       type: fileInfo.mime_type?.startsWith('image/') ? 'image' : 'file',
       transfer_method: "local_file",

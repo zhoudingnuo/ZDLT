@@ -1843,11 +1843,33 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     setAiTimer(0);
     setMessages([
       ...newMessages,
-      {
-        role: 'assistant',
-        content: params.data.outputs.result || params.data.outputs.text ||'处理已经完成',
-        usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
-      }
+              {
+          role: 'assistant',
+          content: (() => {
+            // 自动提取outputs中的所有内容
+            if (params.data && params.data.outputs) {
+              const outputs = params.data.outputs;
+              const outputFields = [];
+              
+              // 遍历outputs中的所有字段
+              for (const [key, value] of Object.entries(outputs)) {
+                if (value !== null && value !== undefined && value !== '') {
+                  if (typeof value === 'string') {
+                    outputFields.push(`**${key}:**\n${value}`);
+                  } else if (typeof value === 'object') {
+                    outputFields.push(`**${key}:**\n${JSON.stringify(value, null, 2)}`);
+                  } else {
+                    outputFields.push(`**${key}:** ${value}`);
+                  }
+                }
+              }
+              
+              return outputFields.length > 0 ? outputFields.join('\n\n') : '处理已经完成';
+            }
+            return '处理已经完成';
+          })(),
+          usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
+        }
     ]);
     setLoading(false);
   };

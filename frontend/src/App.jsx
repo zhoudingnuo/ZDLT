@@ -1769,25 +1769,31 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     
     // 检查是否是错误状态
     if (params.status === 'error') {
+      // 更新错误消息，保持计时器运行
+      setMessages(msgs => {
+        const lastIdx = msgs.length - 1;
+        if (msgs[lastIdx]?.isLoading) {
+          return [
+            ...msgs.slice(0, lastIdx),
+            {
+              role: 'assistant',
+              content: params.message || '处理失败',
+              usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
+            }
+          ];
+        }
+        return msgs;
+      });
+      
+      // 停止计时器
       clearInterval(aiTimerRef.current);
       setAiTimer(0);
-      setMessages([
-        ...newMessages,
-        {
-          role: 'assistant',
-          content: params.message || '处理失败',
-          usedTime: params.usedTime || ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
-        }
-      ]);
       setLoading(false);
       return;
     }
     
     // 如果有直接的结果数据（如answer字段），直接显示
     if (params.answer || params.content) {
-      clearInterval(aiTimerRef.current);
-      setAiTimer(0);
-      
       // 累加token和价格消耗
       if (params.metadata?.usage && user) {
         const tokens = Number(params.metadata.usage.total_tokens) || 0;
@@ -1797,16 +1803,27 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         await updateUserUsage(currentUser.username, currentUser.usage_tokens);
       }
       
-      setMessages([
-        ...newMessages,
-        {
-          role: 'assistant',
-          content: params.answer || params.content || '处理完成',
-          usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
-          tokens: params.metadata?.usage?.total_tokens,
-          price: params.metadata?.usage?.total_price
+      // 更新最终结果，保持计时器运行
+      setMessages(msgs => {
+        const lastIdx = msgs.length - 1;
+        if (msgs[lastIdx]?.isLoading) {
+          return [
+            ...msgs.slice(0, lastIdx),
+            {
+              role: 'assistant',
+              content: params.answer || params.content || '处理完成',
+              usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
+              tokens: params.metadata?.usage?.total_tokens,
+              price: params.metadata?.usage?.total_price
+            }
+          ];
         }
-      ]);
+        return msgs;
+      });
+      
+      // 停止计时器
+      clearInterval(aiTimerRef.current);
+      setAiTimer(0);
       setLoading(false);
       return;
     }

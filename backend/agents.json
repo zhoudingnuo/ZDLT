@@ -1,0 +1,1078 @@
+[
+  {
+    "id": "word-to-song",
+    "name": "单词成歌曲",
+    "description": "将单词转换成歌曲，帮助记忆学习",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-NeEPfElCVkBZeiaups0X2CGm",
+    "inputs": [
+      {
+        "name": "identity",
+        "type": "text",
+        "label": "identity",
+        "required": false
+      },
+      {
+        "name": "style",
+        "type": "text",
+        "label": "style",
+        "required": true
+      },
+      {
+        "name": "toidentity",
+        "type": "text",
+        "label": "toidentity",
+        "required": true
+      },
+      {
+        "name": "doc",
+        "type": "file",
+        "label": "doc",
+        "required": true
+      },
+      {
+        "name": "theirmes",
+        "type": "text",
+        "label": "theirmes",
+        "required": true
+      }
+    ],
+    "inputType": "parameter",
+    "status": "pending",
+    "rejectTime": "2025-07-01T20:46:07.347Z",
+    "rejectReason": "配置不符合要求"
+  },
+  {
+    "id": "audio-to-text",
+    "name": "音视频成文字",
+    "description": "将音视频内容转换为文字",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-QErgCcqZGAfvaQFi78bWGtla",
+    "inputType": "parameter",
+    "status": "pending"
+  },
+  {
+    "id": "image-to-image",
+    "name": "图生图",
+    "description": "基于图片生成新的图片",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-YttnuXaJP6VDpqKy7VwvzjPW",
+    "status": "configured",
+    "inputs": [
+      {
+        "name": "image",
+        "type": "array",
+        "label": "image",
+        "required": true,
+        "itemType": "file"
+      },
+      {
+        "name": "prompt",
+        "type": "text",
+        "label": "prompt",
+        "required": true
+      }
+    ],
+    "approveTime": "2025-07-01T23:07:10.808Z"
+  },
+  {
+    "id": "high-eq-reply",
+    "name": "高情商回复",
+    "description": "提供高情商的智能回复建议",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-OCijB448pfouB8l6oPotVZuI",
+    "inputs": [
+      {
+        "name": "identity",
+        "type": "text",
+        "label": "identity",
+        "required": true
+      },
+      {
+        "name": "style",
+        "type": "text",
+        "label": "style",
+        "required": true
+      },
+      {
+        "name": "toidentity",
+        "type": "text",
+        "label": "toidentity",
+        "required": true
+      },
+      {
+        "name": "doc",
+        "type": "file",
+        "label": "doc",
+        "required": false
+      },
+      {
+        "name": "theirmes",
+        "type": "text",
+        "label": "theirmes",
+        "required": true
+      }
+    ],
+    "inputType": "parameter",
+    "status": "configured",
+    "approveTime": "2025-07-01T23:10:52.245Z"
+  },
+  {
+    "id": "parent-notice",
+    "name": "家长通知",
+    "description": "自动生成家长通知内容",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-DAkWwoX6O95LqCRPxFhHqrab",
+    "status": "configured",
+    "inputs": [
+      {
+        "name": "message",
+        "type": "text",
+        "label": "message",
+        "required": true
+      },
+      {
+        "name": "style",
+        "type": "text",
+        "label": "style",
+        "required": true
+      },
+      {
+        "name": "wordlimit",
+        "type": "text",
+        "label": "wordlimit",
+        "required": true
+      },
+      {
+        "name": "doc",
+        "type": "upload",
+        "label": "doc",
+        "required": false
+      }
+    ],
+    "approveTime": "2025-07-02T01:59:29.060Z"
+  },
+  {
+    "id": "math-correction",
+    "name": "数学批改",
+    "description": "智能批改数学作业",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-DAkWwoX6O95LqCRPxFhHqrab",
+    "status": "pending"
+  },
+  {
+    "id": "english-dictation",
+    "name": "英语课文默写批改",
+    "description": "英语课文默写内容智能批改",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-a2bq2coFVbnGAvIEQjYEdpLT",
+    "status": "pending"
+  },
+  {
+    "id": "dream-career",
+    "name": "梦想职业",
+    "description": "职业规划与梦想探索助手",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-8LnQ7C6jydXAo8gZpvXQHGyN",
+    "status": "configured",
+    "inputs": [
+      {
+        "name": "prompt",
+        "type": "text",
+        "label": "prompt",
+        "required": true
+      },
+      {
+        "name": "bool",
+        "type": "text",
+        "label": "bool",
+        "required": true
+      },
+      {
+        "name": "gender",
+        "type": "text",
+        "label": "gender",
+        "required": true
+      },
+      {
+        "name": "image",
+        "type": "file",
+        "label": "image",
+        "required": true
+      }
+    ],
+    "approveTime": "2025-07-01T23:22:58.310Z"
+  },
+  {
+    "id": "high-school-english",
+    "name": "高中英语作文批改",
+    "description": "高中英语作文智能批改",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-B7Guaxd4YLAB3oteRHU2B9XE",
+    "status": "pending"
+  },
+  {
+    "id": "chinese-sync-correction",
+    "name": "语文同步作文批改",
+    "description": "语文同步作文智能批改",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-sONH9FkAijFe5Sdj3vdADJFI",
+    "status": "pending"
+  },
+  {
+    "id": "chinese-correction",
+    "name": "语文作文批改",
+    "description": "语文作文智能批改",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-qsWNlbwazjrrry12OGskZGGt",
+    "workflow": true,
+    "inputs": [
+      {
+        "name": "im",
+        "label": "图片",
+        "type": "file",
+        "required": true,
+        "description": "上传图片"
+      },
+      {
+        "name": "grade",
+        "label": "年级",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "req",
+        "label": "要求",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "form",
+        "label": "表单",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "choices",
+        "label": "选项",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "score",
+        "label": "分数",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "name",
+        "label": "姓名",
+        "type": "string",
+        "required": false
+      }
+    ],
+    "inputType": "parameter",
+    "status": "configured"
+  },
+  {
+    "id": "chinese-dictation",
+    "name": "语文课文默写批改",
+    "description": "语文课文默写内容智能批改，支持图片上传和参数配置",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-eBrZ5PhyjyEH1lc1U0eNySMN",
+    "workflow": true,
+    "inputs": [
+      {
+        "name": "image",
+        "label": "学生默写课文",
+        "type": "file",
+        "required": true,
+        "description": "学生默写课文的图片文件，本地上传，上传之后须包含url链接"
+      },
+      {
+        "name": "text",
+        "label": "课文",
+        "type": "string",
+        "required": true,
+        "description": "学生默写课文的题目"
+      },
+      {
+        "name": "mode",
+        "label": "批改模式",
+        "type": "select",
+        "required": true,
+        "options": [
+          {
+            "value": "开启",
+            "label": "开启"
+          },
+          {
+            "value": "关闭",
+            "label": "关闭"
+          }
+        ],
+        "description": "批改模式选择"
+      }
+    ],
+    "inputType": "parameter",
+    "status": "configured"
+  },
+  {
+    "id": "qa-module",
+    "name": "智能问答助手",
+    "description": "通用智能问答，支持多轮对话，无需上传图片",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-erhssC3oFlp89j6HRnOS8D7D",
+    "inputType": "dialogue",
+    "status": "configured"
+  },
+  {
+    "id": "teacher-ai",
+    "name": "教师AI",
+    "description": "教师专用AI助手，支持教学、管理等多场景应用",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-kaIxmo5WvSCcauu0Vsjk12Bh",
+    "status": "review",
+    "inputs": [],
+    "inputType": "dialogue"
+  },
+  {
+    "id": "batch-student-comments",
+    "name": "批量学生评语",
+    "description": "批量生成学生评语，提升教师工作效率",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "personal-comments",
+    "name": "AI评语（个人版）",
+    "description": "为个人定制的AI评语生成工具",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "differentiated-homework",
+    "name": "分层作业",
+    "description": "支持分层布置与批改的作业工具",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "lesson-plan",
+    "name": "说课稿",
+    "description": "自动生成说课稿，辅助教师备课",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "english-homework-design",
+    "name": "英语作业设计",
+    "description": "英语作业智能设计与生成",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "question-presentation",
+    "name": "说题稿",
+    "description": "自动生成说题稿，提升课堂效率",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "math-homework-design",
+    "name": "数学作业设计",
+    "description": "数学作业智能设计与生成",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "math-problem-analysis",
+    "name": "数学题目解析",
+    "description": "数学题目智能解析与讲解",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-oazekJiNhbRmX61eDDWuStji",
+    "status": "review",
+    "inputs": [
+      {
+        "name": "grade",
+        "type": "select",
+        "label": "grade",
+        "required": true,
+        "options": [
+          {
+            "value": "一年级",
+            "label": "一年级"
+          },
+          {
+            "value": "二年级",
+            "label": "二年级"
+          },
+          {
+            "value": "三年级",
+            "label": "三年级"
+          },
+          {
+            "value": "四年级",
+            "label": "四年级"
+          },
+          {
+            "value": "五年级",
+            "label": "五年级"
+          },
+          {
+            "value": "六年级",
+            "label": "六年级"
+          },
+          {
+            "value": "初一",
+            "label": "初一"
+          },
+          {
+            "value": "初二",
+            "label": "初二"
+          },
+          {
+            "value": "初三",
+            "label": "初三"
+          },
+          {
+            "value": "高一",
+            "label": "高一"
+          },
+          {
+            "value": "高二",
+            "label": "高二"
+          },
+          {
+            "value": "高三",
+            "label": "高三"
+          }
+        ]
+      },
+      {
+        "name": "question",
+        "type": "text",
+        "label": "question",
+        "required": true
+      },
+      {
+        "name": "question_pic",
+        "type": "array",
+        "label": "question_pic",
+        "required": true,
+        "itemType": "file"
+      }
+    ],
+    "inputType": "parameter"
+  },
+  {
+    "id": "cross-disciplinary-design",
+    "name": "跨学科设计",
+    "description": "跨学科教学与活动设计助手",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "observation-record",
+    "name": "观察记录",
+    "description": "幼儿园及班级观察记录工具",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "activity-lesson-plan",
+    "name": "活动教案",
+    "description": "各类活动教案智能生成",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "deep-thinking",
+    "name": "深度思考",
+    "description": "培养学生深度思考能力的AI工具",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "representation-generator",
+    "name": "表征小人生成器",
+    "description": "生成各类表征小人形象",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "random-rollcall",
+    "name": "随机点名",
+    "description": "课堂随机点名工具",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "countdown-generator",
+    "name": "倒计时生成器",
+    "description": "生成各类倒计时工具",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "class-points-manager",
+    "name": "班级积分管理",
+    "description": "班级积分与奖励管理工具",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "classroom-decibel",
+    "name": "教室分贝管家",
+    "description": "教室噪音监测与管理助手",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "word-elimination",
+    "name": "单词消消乐",
+    "description": "趣味单词消除游戏",
+    "apiUrl": "http://118.145.74.50:24131/v1/workflows/run",
+    "apiKey": "app-moCvIcvCvB67LEBjlK7NDh16",
+    "workflow": true,
+    "inputs": [
+      {
+        "name": "word_list",
+        "label": "单词列表",
+        "type": "string",
+        "required": true,
+        "description": "每行一个，格式如：Achieve 实现；达到"
+      }
+    ],
+    "inputType": "parameter",
+    "status": "configured"
+  },
+  {
+    "id": "word-pk",
+    "name": "单词PK",
+    "description": "单词对战小游戏",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "periodic-table",
+    "name": "元素周期表",
+    "description": "元素周期表查询与学习工具",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "number-recognition",
+    "name": "认识数字",
+    "description": "数字认知与学习小游戏",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "tianji-horse-race",
+    "name": "田忌赛马",
+    "description": "田忌赛马策略游戏",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "music-mini-game",
+    "name": "音乐小游戏",
+    "description": "音乐启蒙与趣味小游戏",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "art-mini-game",
+    "name": "美术小游戏",
+    "description": "美术启蒙与趣味小游戏",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "geography-mini-game",
+    "name": "地理小游戏",
+    "description": "地理知识趣味小游戏",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "biology-mini-game",
+    "name": "生物小游戏",
+    "description": "生物知识趣味小游戏",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "history-mini-game",
+    "name": "历史小游戏",
+    "description": "历史知识趣味小游戏",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "word-huarongdao",
+    "name": "单词华容道",
+    "description": "单词拼图华容道游戏",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "text-mindmap",
+    "name": "文生思维导图",
+    "description": "文本生成思维导图工具",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "work-analysis-kindergarten",
+    "name": "作品分析（幼儿）",
+    "description": "幼儿作品智能分析工具",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "project-pro",
+    "name": "项目化pro",
+    "description": "项目化学习与管理专业工具",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "chinese-reading-explanation",
+    "name": "语文阅读讲解",
+    "description": "语文阅读内容智能讲解",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "english-reading-explanation",
+    "name": "英语阅读讲解",
+    "description": "英语阅读内容智能讲解",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "exam-quality-analysis",
+    "name": "历次考试质量分析",
+    "description": "历次考试数据智能分析",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "multi-subject-quality-analysis",
+    "name": "多学科质量分析",
+    "description": "多学科考试质量智能分析",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "class-quality-analysis",
+    "name": "班级间质量分析",
+    "description": "班级间考试质量对比分析",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "ai-integrated-open-class",
+    "name": "AI融合公开课",
+    "description": "AI融合创新公开课设计",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "video-generation",
+    "name": "生成视频",
+    "description": "AI驱动的视频生成工具",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "ai-question-generation",
+    "name": "AI出题",
+    "description": "AI智能出题工具",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "question-analysis",
+    "name": "题目解析",
+    "description": "各学科题目智能解析",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "teaching-reflection",
+    "name": "教学反思",
+    "description": "教师教学反思与成长助手",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "score-dashboard",
+    "name": "成绩看板",
+    "description": "班级与个人成绩可视化看板",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "ai-ppt",
+    "name": "AI PPT",
+    "description": "AI驱动的PPT智能生成工具",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "application-report",
+    "name": "申报书",
+    "description": "各类申报书智能生成",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-7WhidB6j8TAgjwRpDwuFip41",
+    "status": "configured",
+    "inputs": [
+      {
+        "name": "cname",
+        "type": "text",
+        "label": "cname",
+        "required": true
+      },
+      {
+        "name": "level",
+        "type": "text",
+        "label": "level",
+        "required": true
+      },
+      {
+        "name": "outline",
+        "type": "text",
+        "label": "outline",
+        "required": false
+      }
+    ],
+    "inputType": "parameter",
+    "approveTime": "2025-07-03T12:20:35.638Z"
+  },
+  {
+    "id": "project-report",
+    "name": "课题报告",
+    "description": "课题研究报告智能生成",
+    "apiUrl": "",
+    "apiKey": "",
+    "status": "pending"
+  },
+  {
+    "id": "paper-assistant",
+    "name": "论文助手",
+    "description": "论文写作与润色助手",
+    "apiUrl": "",
+    "apiKey": "app-26FdbHy27AEEQKlA3AEphYer",
+    "status": "review",
+    "inputs": [
+      {
+        "name": "subj",
+        "type": "text",
+        "label": "subj",
+        "required": true
+      },
+      {
+        "name": "aim",
+        "type": "text",
+        "label": "aim",
+        "required": false
+      },
+      {
+        "name": "content",
+        "type": "text",
+        "label": "content",
+        "required": false
+      },
+      {
+        "name": "method",
+        "type": "text",
+        "label": "method",
+        "required": false
+      }
+    ],
+    "inputType": "dialogue"
+  },
+  {
+    "id": "training-summary",
+    "name": "培训心得",
+    "description": "教师培训心得体会生成",
+    "apiUrl": "",
+    "apiKey": "app-swFu92Ah0zxL3Or4O14AYFog",
+    "status": "review",
+    "inputs": [
+      {
+        "name": "iden",
+        "type": "text",
+        "label": "iden",
+        "required": true
+      },
+      {
+        "name": "subj",
+        "type": "text",
+        "label": "subj",
+        "required": true
+      },
+      {
+        "name": "content",
+        "type": "text",
+        "label": "content",
+        "required": false
+      }
+    ],
+    "inputType": "dialogue"
+  },
+  {
+    "id": "primary-home-visit",
+    "name": "小学家访记录",
+    "description": "小学家访记录与管理工具",
+    "apiUrl": "",
+    "apiKey": "app-XMpiq7AWNqCYDxNZcvPMenHh",
+    "status": "review",
+    "inputs": [
+      {
+        "name": "sname",
+        "type": "text",
+        "label": "sname",
+        "required": true
+      },
+      {
+        "name": "grade",
+        "type": "text",
+        "label": "grade",
+        "required": true
+      },
+      {
+        "name": "date",
+        "type": "text",
+        "label": "date",
+        "required": true
+      },
+      {
+        "name": "perform",
+        "type": "text",
+        "label": "perform",
+        "required": true
+      },
+      {
+        "name": "aim",
+        "type": "text",
+        "label": "aim",
+        "required": true
+      },
+      {
+        "name": "req",
+        "type": "text",
+        "label": "req",
+        "required": false
+      }
+    ],
+    "inputType": "parameter"
+  },
+  {
+    "id": "ai-reading",
+    "name": "AI 朗读",
+    "description": "AI驱动的朗读与语音合成工具",
+    "apiUrl": "",
+    "apiKey": "app-1x0aWq9ZFGqgTM2Cp72AKY12",
+    "status": "review",
+    "inputs": [
+      {
+        "name": "utext",
+        "type": "text",
+        "label": "utext",
+        "required": false
+      },
+      {
+        "name": "ufile",
+        "type": "upload",
+        "label": "ufile",
+        "required": false
+      },
+      {
+        "name": "voice",
+        "type": "select",
+        "label": "voice",
+        "required": true,
+        "options": [
+          {
+            "value": "知心姐姐，童声，严厉女声，诙谐男声，情感男声，青年男声，英语女声，英语男声，",
+            "label": "知心姐姐，童声，严厉女声，诙谐男声，情感男声，青年男声，英语女声，英语男声，"
+          }
+        ]
+      }
+    ],
+    "inputType": "parameter"
+  },
+  {
+    "id": "kantu",
+    "name": "看图说话",
+    "description": "看图说话",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-j7gmpSOO1RK2MZufCu70m1fX",
+    "status": "review",
+    "inputs": [
+      {
+        "name": "image",
+        "type": "file",
+        "label": "image",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "jiaoansheji",
+    "name": "教案设计",
+    "description": "教案设计",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiKey": "app-UKthJ2tCC3XcjLsyOBKopVIv",
+    "status": "review",
+    "inputs": [
+      {
+        "name": "Lesson_Plan",
+        "type": "array",
+        "label": "Lesson_Plan",
+        "required": true,
+        "itemType": "file"
+      },
+      {
+        "name": "content",
+        "type": "text",
+        "label": "content",
+        "required": true
+      },
+      {
+        "name": "grade",
+        "type": "select",
+        "label": "grade",
+        "required": true,
+        "options": [
+          {
+            "value": "一年级",
+            "label": "一年级"
+          },
+          {
+            "value": "二年级",
+            "label": "二年级"
+          },
+          {
+            "value": "三年级",
+            "label": "三年级"
+          },
+          {
+            "value": "四年级",
+            "label": "四年级"
+          },
+          {
+            "value": "五年级",
+            "label": "五年级"
+          },
+          {
+            "value": "六年级",
+            "label": "六年级"
+          },
+          {
+            "value": "七年级",
+            "label": "七年级"
+          },
+          {
+            "value": "八年级",
+            "label": "八年级"
+          },
+          {
+            "value": "九年级",
+            "label": "九年级"
+          }
+        ]
+      },
+      {
+        "name": "subject",
+        "type": "select",
+        "label": "subject",
+        "required": true,
+        "options": [
+          {
+            "value": "语文",
+            "label": "语文"
+          },
+          {
+            "value": "数学",
+            "label": "数学"
+          },
+          {
+            "value": "英语",
+            "label": "英语"
+          }
+        ]
+      },
+      {
+        "name": "teaching_aim",
+        "type": "text",
+        "label": "teaching_aim",
+        "required": true
+      },
+      {
+        "name": "class_hours",
+        "type": "text",
+        "label": "class_hours",
+        "required": false
+      },
+      {
+        "name": "teaching_content",
+        "type": "text",
+        "label": "teaching_content",
+        "required": false
+      },
+      {
+        "name": "others",
+        "type": "text",
+        "label": "others",
+        "required": false
+      }
+    ],
+    "inputType": "parameter"
+  }
+]

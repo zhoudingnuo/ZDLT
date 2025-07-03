@@ -4,7 +4,3 @@ dist/
 build/
 *.log
 .env
-agents.json
-backend/agents.json
-backend/users.json
-users.json

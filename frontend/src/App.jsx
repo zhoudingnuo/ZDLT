@@ -1839,7 +1839,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     }, 100);
     
     setLoading(true);
-    console.log('【前端】处理完成', params);
+    
     // 其他情况，显示处理完成
     clearInterval(aiTimerRef.current);
     setAiTimer(0);
@@ -1847,7 +1847,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       ...newMessages,
       {
         role: 'assistant',
-        content: '处理已经完成',
+        content: params.data.outputs.result || '处理已经完成',
         usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
       }
     ]);

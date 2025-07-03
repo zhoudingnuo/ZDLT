@@ -1290,23 +1290,21 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       form.resetFields();
       onCancel(); // 关闭弹窗
       
-      // 检查响应状态
-      if (res.data && res.data.status === 'upload_success') {
-        // 文件上传成功，显示处理中状态
-        await onSubmit({ 
-          status: 'processing', 
-          message: res.data.message || '文件上传成功，正在处理中...',
-          uploadedFiles: res.data.uploadedFiles,
-          inputs: res.data.inputs,
-          query: res.data.query
-        });
-      } else if (res.data && res.data.answer) {
-        // 有直接结果，显示结果
-        await onSubmit(res.data);
-      } else {
-        // 其他情况，显示处理中状态
-        await onSubmit({ status: 'processing', message: '正在处理中...' });
-      }
+              // 检查是否是文件上传成功状态
+        if (res.data && res.data.status === 'upload_success') {
+          // 文件上传成功，调用新的API处理后续逻辑
+          await onSubmit({ 
+            status: 'upload_success', 
+            message: res.data.message,
+            data: res.data
+          });
+        } else if (res.data && res.data.answer) {
+          // 有直接结果，显示结果
+          await onSubmit(res.data);
+        } else {
+          // 其他情况，显示处理中状态
+          await onSubmit({ status: 'processing', message: '正在处理中...' });
+        }
     } catch (e) {
       console.error('【前端】参数提交失败:', e);
       message.error('参数提交失败: ' + (e.response?.data?.error || e.message));
@@ -1710,24 +1708,80 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       setAiTimer(((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1));
     }, 100);
     
-    // 检查是否是处理中状态
-    if (params.status === 'processing') {
-      let content = params.message || '文件上传成功，正在处理中...';
-      
-      // 如果有上传文件信息，显示更详细的内容
-      if (params.uploadedFiles && params.uploadedFiles.length > 0) {
-        content += `\n\n已上传文件：${params.uploadedFiles.join(', ')}`;
-      }
-      
-      if (params.inputs && Object.keys(params.inputs).length > 0) {
-        content += `\n\n参数：${JSON.stringify(params.inputs, null, 2)}`;
-      }
-      
+    // 检查是否是文件上传成功状态
+    if (params.status === 'upload_success') {
       setMessages([
         ...newMessages,
         {
           role: 'assistant',
-          content: content,
+          content: params.message || '文件上传成功，正在处理中...',
+          usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
+        }
+      ]);
+      
+      // 调用新的API处理后续逻辑
+      try {
+        const processRes = await axios.post(`${API_BASE}/api/agent/${agent.id}/process`, {
+          inputs: params.data.inputs,
+          query: params.data.query,
+          user: params.data.user,
+          uploadedFiles: params.data.uploadedFiles
+        });
+        
+        // 处理Dify返回的结果
+        if (processRes.data && processRes.data.answer) {
+          // 累加token和价格消耗
+          const usage = processRes.data.metadata?.usage;
+          if (usage && user) {
+            const tokens = Number(usage.total_tokens) || 0;
+            let currentUser = getUser();
+            currentUser.usage_tokens = (currentUser.usage_tokens || 0) + tokens;
+            setUser(currentUser);
+            await updateUserUsage(currentUser.username, currentUser.usage_tokens);
+          }
+          
+          setMessages([
+            ...newMessages,
+            {
+              role: 'assistant',
+              content: processRes.data.answer,
+              usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
+              tokens: usage?.total_tokens,
+              price: usage?.total_price
+            }
+          ]);
+        } else {
+          setMessages([
+            ...newMessages,
+            {
+              role: 'assistant',
+              content: '处理完成，但未获取到结果数据',
+              usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
+            }
+          ]);
+        }
+      } catch (error) {
+        setMessages([
+          ...newMessages,
+          {
+            role: 'assistant',
+            content: `处理失败: ${error.message}`,
+            usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
+          }
+        ]);
+      }
+      
+      setLoading(false);
+      return;
+    }
+    
+    // 检查是否是处理中状态
+    if (params.status === 'processing') {
+      setMessages([
+        ...newMessages,
+        {
+          role: 'assistant',
+          content: params.message || '正在处理中...',
           usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
         }
       ]);

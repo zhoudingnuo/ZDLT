@@ -1602,7 +1602,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       let answer;
       if (isWorkflow) {
         // Workflow类型：直接使用完整响应数据
-        answer = res.data;
+        answer = res.data.outputs.result;
       } else {
         // Chat类型：提取answer字段
         answer = res.data.answer || (res.data.data && res.data.data.answer) || JSON.stringify(res.data);

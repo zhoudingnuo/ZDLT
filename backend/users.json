@@ -1,12 +1,21 @@
 [
   {
     "id": "1751358665016",
-    "username": "ZDLT",
+    "username": "ZDLT_admin",
     "password": "$2b$10$aKVRRt.30T/U3yZ8N5IIPOu94EACxpiQCPZhDdA3Z/cx5b2Yj0N5u",
     "email": "admin@example.com",
     "usage_tokens": 25892,
     "isAdmin": true,
-    "balance": -0.011601
+    "balance": 0
+  },
+  {
+    "id": "1751358665016",
+    "username": "ZDLT",
+    "password": "$2b$10$aKVRRt.30T/U3yZ8N5IIPOu94EACxpiQCPZhDdA3Z/cx5b2Yj0N5u",
+    "email": "admin@example.com",
+    "usage_tokens": 25892,
+    "isAdmin": false,
+    "balance": 100
   },
   {
     "id": "1751363461645",

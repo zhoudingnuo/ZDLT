@@ -1290,7 +1290,9 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       message.success('参数提交成功！');
       form.resetFields();
       onCancel(); // 关闭弹窗
-      aiStartTimeRef.current = Date.now();
+      
+      // 立即显示用户消息和AI思考气泡，开始计时
+      await onSubmit({ status: 'processing', message: '文件上传成功，正在处理中...' });
       
       // 如果有组装好的数据，调用新的Dify API
       if (res.data && res.data.inputs) {
@@ -1300,21 +1302,18 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
             data: res.data
           });
           console.log('【前端】Dify调用成功:', difyResponse.data);
+          // 更新最终结果
           await onSubmit(difyResponse.data);
         } catch (difyError) {
           console.error('【前端】Dify调用失败:', difyError);
           await onSubmit({ 
             status: 'error', 
-            message: 'Dify调用失败: ' + (difyError.response?.data?.error || difyError.message),
-            usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
+            message: 'Dify调用失败: ' + (difyError.response?.data?.error || difyError.message)
           });
         }
       } else if (res.data && res.data.answer) {
-        // 如果有直接结果，直接显示
+        // 如果有直接结果，更新为最终结果
         await onSubmit(res.data);
-      } else {
-        // 如果没有直接结果，说明是异步处理，在对话框中显示处理中状态
-        await onSubmit({ status: 'processing', message: '正在处理中...' ,usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)});
       }
     } catch (e) {
       console.error('【前端】参数提交失败:', e);
@@ -1709,6 +1708,42 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
 
   // 工作流提交处理
   const handleWorkflowSubmit = async (params) => {
+    // 检查是否是处理中状态
+    if (params.status === 'processing') {
+      // 如果是第一次调用（还没有loading状态），初始化界面
+      if (!loading) {
+        const newMessages = [...messages, { role: 'user', content: `提交参数：图片+其它参数` }];
+        setMessages([...newMessages, { role: 'assistant', content: '', isLoading: true }]); // 立即插入AI正在思考气泡
+        setWorkflowInputVisible(false);
+        
+        // 立即开始计时
+        aiStartTimeRef.current = Date.now();
+        setAiTimer(0);
+        aiTimerRef.current = setInterval(() => {
+          setAiTimer(((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1));
+        }, 100);
+        
+        setLoading(true);
+      }
+      
+      // 更新处理中消息
+      setMessages(msgs => {
+        const lastIdx = msgs.length - 1;
+        if (msgs[lastIdx]?.isLoading) {
+          return [
+            ...msgs.slice(0, lastIdx),
+            {
+              role: 'assistant',
+              content: params.message || '文件上传成功，正在处理中...',
+              usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
+            }
+          ];
+        }
+        return msgs;
+      });
+      return;
+    }
+    
     // 如果已经有loading状态，说明正在处理中，直接返回
     if (loading) {
       console.log('【前端】已有处理中的请求，忽略重复调用');
@@ -1729,20 +1764,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     
     setLoading(true);
     
-    // 检查是否是处理中状态
-    if (params.status === 'processing') {
-      setMessages([
-        ...newMessages,
-        {
-          role: 'assistant',
-          content: '文件上传成功，正在处理中...',
-          usedTime: params.usedTime || ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
-        }
-      ]);
-      // 继续让计时器运行，不要立即停止loading
-      // 注意：这里不return，让计时器继续运行
-      return; // 但是要return，避免后续逻辑执行
-    }
+
     
     // 检查是否是错误状态
     if (params.status === 'error') {

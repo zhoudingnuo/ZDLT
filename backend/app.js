@@ -363,23 +363,29 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     
     // 组装最终请求数据
     let result;
-    if (agent.apiUrl && agent.apiUrl.includes('/workflows/')) {
-      // workflow类型
-      result = {
-        inputs,
-        response_mode: response_mode || 'streaming'
-      };
-    } else {
-      // chat类型
-      result = {
-        inputs,
-        query,
-        response_mode: response_mode || 'blocking',
-        conversation_id: conversation_id || '',
-        user: user || 'auto_test'
-      };
-    }
-    
+    // if (agent.apiUrl && agent.apiUrl.includes('/workflows/')) {
+    //   // workflow类型stream
+    //   result = {
+    //     inputs,
+    //     response_mode: response_mode || 'streaming'
+    //   };
+    // } else {
+    //   // chat类型
+    //   result = {
+    //     inputs,
+    //     query,
+    //     response_mode: response_mode || 'blocking',
+    //     conversation_id: conversation_id || '',
+    //     user: user || 'auto_test'
+    //   };
+    // }
+    result = {
+      inputs,
+      query,
+      response_mode: response_mode || 'blocking',
+      conversation_id: conversation_id || '',
+      user: user || 'auto_test'
+    };
     const headers = {
       'Authorization': `Bearer ${agent.apiKey}`,
       'Content-Type': 'application/json'

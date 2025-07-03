@@ -1283,8 +1283,8 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       const res = await axios.post(`${API_BASE}/api/agent/${agent.id}/invoke`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      await onSubmit({ status: 'processing', message: '正在处理中...' });
-      // 文件上传成功，关闭弹窗
+      // await onSubmit({ status: 'processing', message: '正在处理中...' });
+      // // 文件上传成功，关闭弹窗
 
       message.success('参数提交成功！');
       form.resetFields();

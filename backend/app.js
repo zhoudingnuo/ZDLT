@@ -444,14 +444,9 @@ async function uploadFileToDifySimple(file, user, agent) {
   fd.append('user', user || 'auto_test');
   
   // 构建 Dify 文件上传地址
-  let DIFy_API;
-  if (agent.apiUrl && agent.apiUrl.includes('/v1/chat-messages')) {
-    DIFy_API = agent.apiUrl.replace('/v1/chat-messages', '') + '/v1/files/upload';
-  } else if (agent.apiUrl) {
-    DIFy_API = agent.apiUrl.replace(/\/$/, '') + '/v1/files/upload';
-  } else {
-    DIFy_API = 'http://118.145.74.50:24131/v1/files/upload';
-  }
+  
+  DIFy_API = 'http://118.145.74.50:24131/v1/files/upload';
+  
   
   console.log('【UPLOAD】Dify上传地址:', DIFy_API);
   

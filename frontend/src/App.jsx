@@ -1298,11 +1298,14 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       if (res.data && res.data.inputs) {
         console.log('【前端】获取到组装好的数据，开始调用Dify');
         try {
-          const difyResponse = await axios.post(`${API_BASE}/api/agent/${agent.id}/call-dify`, {
-            data: res.data
-          });
+          const isWorkflow = agent?.apiUrl?.includes('workflows/run');
+          let difyResponse;
+          if (isWorkflow) {
+            difyResponse = await axios.post(`${API_BASE}/api/agent/${agent.id}/call-dify`, res.data);
+          } else {
+            difyResponse = await axios.post(`${API_BASE}/api/agent/${agent.id}/call-dify`, { data: res.data });
+          }
           console.log('【前端】Dify调用成功:', difyResponse.data);
-          // 直接更新最终结果，不重新调用onSubmit
           onSubmit(difyResponse.data);
         } catch (difyError) {
           console.error('【前端】Dify调用失败:', difyError);

@@ -362,24 +362,34 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
       }
     
     // 组装最终请求数据
-    const data = {
-      inputs: inputs,
-      query: query,
-      response_mode: response_mode || 'blocking',
-      conversation_id: conversation_id || '',
-      user: user || 'auto_test'
-    };
+    let result;
+    if (agent.apiUrl && agent.apiUrl.includes('/workflows/')) {
+      // workflow类型
+      result = {
+        inputs,
+        response_mode: response_mode || 'streaming'
+      };
+    } else {
+      // chat类型
+      result = {
+        inputs,
+        query,
+        response_mode: response_mode || 'blocking',
+        conversation_id: conversation_id || '',
+        user: user || 'auto_test'
+      };
+    }
     
     const headers = {
       'Authorization': `Bearer ${agent.apiKey}`,
       'Content-Type': 'application/json'
     };
     
-    console.log('【INVOKE】parameter最终请求数据:', JSON.stringify(data, null, 2));
+    console.log('【INVOKE】parameter最终请求数据:', JSON.stringify(result, null, 2));
     console.log('【INVOKE】parameter请求地址:', agent.apiUrl);
     
     // 返回组装好的数据给前端，让前端调用新的API
-    return res.json(data);
+    return res.json(result);
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }

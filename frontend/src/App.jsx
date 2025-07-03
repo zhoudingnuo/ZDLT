@@ -1452,13 +1452,30 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
                           'Generate 产生；生成',
                           'Valuable 有价值的；贵重的'
                         ].join('\n');
+                        
+                        // 使用 React 的方式设置值并触发验证
                         form.setFieldsValue({ [input.name]: example });
-                        setTimeout(() => {
-                          if (window.wordListInput && window.wordListInput.resizableTextArea && window.wordListInput.resizableTextArea.textArea) {
-                            window.wordListInput.resizableTextArea.textArea.value = example;
-                            window.wordListInput.focus();
-                          }
-                        }, 100);
+                        
+                        // 触发表单验证，确保状态正确更新
+                        form.validateFields([input.name]).then(() => {
+                          // 验证成功后，确保输入框获得焦点
+                          setTimeout(() => {
+                            const textArea = window.wordListInput?.resizableTextArea?.textArea;
+                            if (textArea) {
+                              textArea.focus();
+                              // 将光标移到末尾
+                              textArea.setSelectionRange(textArea.value.length, textArea.value.length);
+                            }
+                          }, 100);
+                        }).catch(() => {
+                          // 即使验证失败，也要确保输入框获得焦点
+                          setTimeout(() => {
+                            const textArea = window.wordListInput?.resizableTextArea?.textArea;
+                            if (textArea) {
+                              textArea.focus();
+                            }
+                          }, 100);
+                        });
                       }}
                     >自动填入示例</Button>
                     <div style={{ 

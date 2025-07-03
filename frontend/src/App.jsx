@@ -639,6 +639,7 @@ function ProfileModal({ visible, onCancel, user, theme }) {
           <div>• 用户角色: {currentUser?.isAdmin ? '管理员' : '普通用户'}</div>
           <div style={{ marginTop: 8, fontWeight: 600, color: theme === 'dark' ? '#4f8cff' : mainColorSolid }}>💰 消耗统计</div>
           <div>累计消耗Token：<span style={{ color: theme === 'dark' ? '#fff' : '#222', fontWeight: 700 }}>{currentUser?.usage_tokens !== undefined && currentUser?.usage_tokens !== null ? currentUser.usage_tokens : '--'}</span></div>
+          <div>累计消耗金额：<span style={{ color: theme === 'dark' ? '#fff' : '#222', fontWeight: 700 }}>{currentUser?.usage_price !== undefined && currentUser?.usage_price !== null ? Number(currentUser.usage_price).toFixed(4) : '--'}</span></div>
           <div style={{ marginTop: 8, fontWeight: 600, color: theme === 'dark' ? '#4f8cff' : mainColorSolid }}>💰 账户余额</div>
           <div>• 账户余额: {currentUser?.balance !== undefined && currentUser?.balance !== null ? Number(currentUser.balance).toFixed(2) : '--'}
             <RechargeButton user={currentUser} onSuccess={() => { loadRechargeOrders(); refreshUserInfo(); }} />

@@ -127,7 +127,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
       console.log('【INVOKE】dialogue请求地址:', agent.apiUrl);
       
       try {
-        const response = await axios.post(agent.apiUrl, data, { headers, timeout: 10000 });
+        const response = await axios.post(agent.apiUrl, data, { headers, timeout: 1000000 });
         console.log('【INVOKE】dialogue响应成功');
         return res.json(response.data);
       } catch (err) {
@@ -380,7 +380,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     console.log('【INVOKE】parameter请求地址:', agent.apiUrl);
     
     try {
-      const response = await axios.post(agent.apiUrl, data, { headers, timeout: 10000 });
+      const response = await axios.post(agent.apiUrl, data, { headers, timeout: 1000000 });
       console.log('【INVOKE】parameter响应成功');
       return res.json(response.data);
     } catch (err) {
@@ -568,7 +568,7 @@ async function base64ToImgbbUrl(base64_data) {
       form.toString(),
       {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        timeout: 10000
+        timeout: 1000000
       }
     );
     if (response.status === 200) {

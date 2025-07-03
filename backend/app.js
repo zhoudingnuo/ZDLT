@@ -214,6 +214,10 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
                       console.log('【INVOKE】上传文件到Dify:', file.originalFilename);
                       try {
                         const difyFileObject = await uploadFileToDifySimple(file, user, agent);
+                        // 如果id为null，设置为related_id的值
+                        if (difyFileObject.id === null && difyFileObject.related_id) {
+                          difyFileObject.id = difyFileObject.related_id;
+                        }
                         // 保留完整的Dify文件对象，不要覆盖
                         uploadedFiles[key].push(difyFileObject);
                         console.log('【INVOKE】文件上传成功:', uploadedFiles[key][uploadedFiles[key].length - 1]);
@@ -232,6 +236,10 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
                   console.log('【INVOKE】上传文件到Dify:', file.originalFilename);
                   try {
                     const difyFileObject = await uploadFileToDifySimple(file, user, agent);
+                    // 如果id为null，设置为related_id的值
+                    if (difyFileObject.id === null && difyFileObject.related_id) {
+                      difyFileObject.id = difyFileObject.related_id;
+                    }
                     // 保留完整的Dify文件对象，不要覆盖
                     uploadedFiles[key] = difyFileObject;
                     console.log('【INVOKE】文件上传成功:', uploadedFiles[key]);

@@ -1297,20 +1297,21 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       // 如果有组装好的数据，调用新的Dify API
       if (res.data && res.data.inputs) {
         console.log('【前端】获取到组装好的数据，开始调用Dify');
-        try {
-          // 统一用chat类型的构造方式
-          const difyResponse = await axios.post(`${API_BASE}/api/agent/${agent.id}/call-dify`, { data: res.data }, {
-            timeout: 0  // 0表示无超时限制，或者设置更大的值如 300000 (5分钟)
-          });
-          console.log('【前端】Dify调用成功:', difyResponse.data);
-          onSubmit(difyResponse.data);
-        } catch (difyError) {
-          console.error('【前端】Dify调用失败:', difyError);
-          onSubmit({ 
-            status: 'error', 
-            message: 'Dify调用失败: ' + (difyError.response?.data?.error || difyError.message)
-          });
-        }
+        const difyResponse = await axios.post(`${API_BASE}/api/agent/${agent.id}/call-dify`, { data: res.data });
+        console.log('【前端】Dify调用成功:', difyResponse.data);
+        onSubmit(difyResponse.data);
+        // try {
+        //   // 统一用chat类型的构造方式
+        //   const difyResponse = await axios.post(`${API_BASE}/api/agent/${agent.id}/call-dify`, { data: res.data });
+        //   console.log('【前端】Dify调用成功:', difyResponse.data);
+        //   onSubmit(difyResponse.data);
+        // } catch (difyError) {
+        //   console.error('【前端】Dify调用失败:', difyError);
+        //   onSubmit({ 
+        //     status: 'error', 
+        //     message: 'Dify调用失败: ' + (difyError.response?.data?.error || difyError.message)
+        //   });
+        // }
       } else if (res.data && res.data.answer) {
         // 如果有直接结果，更新为最终结果
         onSubmit(res.data);

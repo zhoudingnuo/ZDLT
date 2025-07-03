@@ -379,20 +379,16 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     console.log('【INVOKE】parameter最终请求数据:', JSON.stringify(data, null, 2));
     console.log('【INVOKE】parameter请求地址:', agent.apiUrl);
     
-    // 继续同步调用Dify，但优化用户体验
-    console.log('【INVOKE】文件上传完成，开始调用Dify');
+    // parameter类型：文件上传完成后立即返回成功，不等待Dify调用
+    console.log('【INVOKE】parameter类型：文件上传完成，立即返回成功');
     
-    try {
-      const response = await axios.post(agent.apiUrl, data, { headers, timeout: 1000000 });
-      console.log('【INVOKE】parameter响应成功');
-      return res.json(response.data);
-    } catch (err) {
-      console.error('【INVOKE】parameter请求失败:', err.message);
-      if (err.response) {
-        console.error('【INVOKE】parameter响应错误:', err.response.data);
-      }
-      return res.status(500).json({ error: err.message, detail: err.response?.data });
-    }
+    return res.json({
+      status: 'upload_success',
+      message: '文件上传成功，正在处理中...',
+      uploadedFiles: Object.keys(uploadedFiles),
+      inputs: inputs,
+      query: query
+    });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }

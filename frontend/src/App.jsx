@@ -1290,11 +1290,21 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       form.resetFields();
       onCancel(); // 关闭弹窗
       
-      // 如果有响应数据，直接显示结果
-      if (res.data && res.data.answer) {
+      // 检查响应状态
+      if (res.data && res.data.status === 'upload_success') {
+        // 文件上传成功，显示处理中状态
+        await onSubmit({ 
+          status: 'processing', 
+          message: res.data.message || '文件上传成功，正在处理中...',
+          uploadedFiles: res.data.uploadedFiles,
+          inputs: res.data.inputs,
+          query: res.data.query
+        });
+      } else if (res.data && res.data.answer) {
+        // 有直接结果，显示结果
         await onSubmit(res.data);
       } else {
-        // 如果没有直接结果，说明是异步处理，在对话框中显示处理中状态
+        // 其他情况，显示处理中状态
         await onSubmit({ status: 'processing', message: '正在处理中...' });
       }
     } catch (e) {
@@ -1702,11 +1712,22 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     
     // 检查是否是处理中状态
     if (params.status === 'processing') {
+      let content = params.message || '文件上传成功，正在处理中...';
+      
+      // 如果有上传文件信息，显示更详细的内容
+      if (params.uploadedFiles && params.uploadedFiles.length > 0) {
+        content += `\n\n已上传文件：${params.uploadedFiles.join(', ')}`;
+      }
+      
+      if (params.inputs && Object.keys(params.inputs).length > 0) {
+        content += `\n\n参数：${JSON.stringify(params.inputs, null, 2)}`;
+      }
+      
       setMessages([
         ...newMessages,
         {
           role: 'assistant',
-          content: params.message || '文件上传成功，正在处理中...',
+          content: content,
           usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
         }
       ]);

@@ -1296,7 +1296,7 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
         await onSubmit(res.data);
       } else {
         // 如果没有直接结果，说明是异步处理，在对话框中显示处理中状态
-        await onSubmit({ status: 'processing', message: '正在处理中...' });
+        await onSubmit({ status: 'processing', message: '正在处理中...' ,usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)});
       }
     } catch (e) {
       console.error('【前端】参数提交失败:', e);
@@ -1708,11 +1708,12 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         {
           role: 'assistant',
           content: params.message || '文件上传成功，正在处理中...',
-          usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
+          usedTime: params.usedTime || ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
         }
       ]);
-      setLoading(false);
-      return;
+      // 不要立即停止loading，让计时器继续运行
+      // setLoading(false);
+      // return;
     }
     
     let usage = undefined; // 统一定义usage变量

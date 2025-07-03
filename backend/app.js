@@ -251,7 +251,6 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
             }
           }
         }
-        return
       } catch (parseError) {
         console.error('【INVOKE】formidable解析失败:', parseError);
         return res.status(400).json({ error: 'FormData解析失败' });
@@ -378,7 +377,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     
     console.log('【INVOKE】parameter最终请求数据:', JSON.stringify(data, null, 2));
     console.log('【INVOKE】parameter请求地址:', agent.apiUrl);
-    
+    return data;
     // 继续同步调用Dify，但优化用户体验
     console.log('【INVOKE】文件上传完成，开始调用Dify');
     

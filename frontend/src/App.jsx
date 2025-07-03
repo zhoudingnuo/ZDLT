@@ -1711,7 +1711,36 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
           usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
         }
       ]);
-      // 不要设置setLoading(false)，让计时器继续运行
+      setLoading(false);
+      return;
+    }
+    
+    // 检查是否有直接结果（非SSE流程）
+    if (params.answer) {
+      clearInterval(aiTimerRef.current);
+      setAiTimer(0);
+      
+      // 累加token和价格消耗
+      let usage = params.metadata?.usage;
+      if (usage && user) {
+        const tokens = Number(usage.total_tokens) || 0;
+        let currentUser = getUser();
+        currentUser.usage_tokens = (currentUser.usage_tokens || 0) + tokens;
+        setUser(currentUser);
+        await updateUserUsage(currentUser.username, currentUser.usage_tokens);
+      }
+      
+      setMessages([
+        ...newMessages,
+        {
+          role: 'assistant',
+          content: params.answer,
+          usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
+          tokens: usage?.total_tokens,
+          price: usage?.total_price
+        }
+      ]);
+      setLoading(false);
       return;
     }
     

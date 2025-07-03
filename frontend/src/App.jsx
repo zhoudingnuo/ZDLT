@@ -1415,6 +1415,50 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
                   ))}
                 </Select>
               </Form.Item>
+            ) : input.name === 'word_list' ? (
+              <Form.Item
+                key={index}
+                name={input.name}
+                label={<span style={{ color: textColor, fontWeight: 600, fontSize: 16 }}>{input.label}</span>}
+                rules={[{ required: input.required, message: `请输入${input.label}` }]}
+                extra={<>
+                  <Button
+                    style={{ marginTop: 8 }}
+                    onClick={() => {
+                      const example = [
+                        'Achieve 实现；达到',
+                        'Curious 好奇的；求知欲强的',
+                        'Frequent 频繁的；经常的',
+                        'Generate 产生；生成',
+                        'Valuable 有价值的；贵重的'
+                      ].join('\n');
+                      form.setFieldsValue({ [input.name]: example });
+                    }}
+                  >自动填入示例</Button>
+                  <div style={{
+                    color: theme === 'dark' ? '#bbb' : '#888',
+                    fontSize: 13,
+                    marginTop: 4,
+                    whiteSpace: 'pre-line'
+                  }}>
+                    {`每行一个，格式如下：\nAchieve 实现；达到\nCurious 好奇的；求知欲强的\nFrequent 频繁的；经常的\nGenerate 产生；生成\nValuable 有价值的；贵重的`}
+                  </div>
+                </>}
+                style={{ marginBottom: 28 }}
+              >
+                <Input.TextArea
+                  placeholder={`请输入${input.label}`}
+                  rows={6}
+                  style={{
+                    background: theme === 'dark' ? '#3a3d42' : '#fff',
+                    color: textColor,
+                    borderColor: borderColor,
+                    borderRadius: 10,
+                    fontSize: 15,
+                    minHeight: 80
+                  }}
+                />
+              </Form.Item>
             ) : (
               <Form.Item
                 key={index}

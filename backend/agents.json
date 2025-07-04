@@ -184,15 +184,35 @@
       },
       {
         "name": "bool",
-        "type": "text",
+        "type": "select",
         "label": "bool",
-        "required": true
+        "required": true,
+        "options": [
+          {
+            "value": "是",
+            "label": "是"
+          },
+          {
+            "value": "否",
+            "label": "否"
+          }
+        ]
       },
       {
         "name": "gender",
-        "type": "text",
+        "type": "select",
         "label": "gender",
-        "required": true
+        "required": true,
+        "options": [
+          {
+            "value": "男",
+            "label": "男"
+          },
+          {
+            "value": "女",
+            "label": "女"
+          }
+        ]
       },
       {
         "name": "image",
@@ -201,7 +221,8 @@
         "required": true
       }
     ],
-    "approveTime": "2025-07-01T23:22:58.310Z"
+    "approveTime": "2025-07-04T11:41:21.218Z",
+    "inputType": "parameter"
   },
   {
     "id": "high-school-english",
@@ -225,6 +246,7 @@
     "description": "语文作文智能批改",
     "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
     "apiKey": "app-qsWNlbwazjrrry12OGskZGGt",
+    "workflow": true,
     "inputs": [
       {
         "name": "im",
@@ -279,6 +301,7 @@
     "description": "语文课文默写内容智能批改，支持图片上传和参数配置",
     "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
     "apiKey": "app-eBrZ5PhyjyEH1lc1U0eNySMN",
+    "workflow": true,
     "inputs": [
       {
         "name": "image",
@@ -325,33 +348,15 @@
     "status": "configured"
   },
   {
-    "id": "test-workflow",
-    "name": "测试Workflow",
-    "description": "用于测试workflow渲染的智能体",
-    "apiUrl": "http://118.145.74.50:24131/v1/workflows/run",
-    "apiKey": "app-test-workflow-key",
-    "workflow": true,
-    "inputs": [
-      {
-        "name": "input_text",
-        "label": "输入文本",
-        "type": "text",
-        "required": true,
-        "description": "请输入要处理的文本"
-      }
-    ],
-    "inputType": "parameter",
-    "status": "configured"
-  },
-  {
     "id": "teacher-ai",
     "name": "教师AI",
     "description": "教师专用AI助手，支持教学、管理等多场景应用",
     "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
     "apiKey": "app-kaIxmo5WvSCcauu0Vsjk12Bh",
-    "status": "review",
+    "status": "configured",
     "inputs": [],
-    "inputType": "dialogue"
+    "inputType": "dialogue",
+    "approveTime": "2025-07-03T13:46:24.115Z"
   },
   {
     "id": "batch-student-comments",
@@ -413,9 +418,9 @@
     "id": "math-problem-analysis",
     "name": "数学题目解析",
     "description": "数学题目智能解析与讲解",
-    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
+    "apiUrl": "http://118.145.74.50:24131/v1/workflows/run",
     "apiKey": "app-oazekJiNhbRmX61eDDWuStji",
-    "status": "review",
+    "status": "configured",
     "inputs": [
       {
         "name": "grade",
@@ -487,7 +492,8 @@
         "itemType": "file"
       }
     ],
-    "inputType": "parameter"
+    "inputType": "parameter",
+    "approveTime": "2025-07-03T13:53:37.305Z"
   },
   {
     "id": "cross-disciplinary-design",
@@ -822,9 +828,9 @@
     "id": "paper-assistant",
     "name": "论文助手",
     "description": "论文写作与润色助手",
-    "apiUrl": "",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
     "apiKey": "app-26FdbHy27AEEQKlA3AEphYer",
-    "status": "review",
+    "status": "configured",
     "inputs": [
       {
         "name": "subj",
@@ -851,15 +857,16 @@
         "required": false
       }
     ],
-    "inputType": "dialogue"
+    "inputType": "parameter",
+    "approveTime": "2025-07-03T13:55:32.680Z"
   },
   {
     "id": "training-summary",
     "name": "培训心得",
     "description": "教师培训心得体会生成",
-    "apiUrl": "",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
     "apiKey": "app-swFu92Ah0zxL3Or4O14AYFog",
-    "status": "review",
+    "status": "configured",
     "inputs": [
       {
         "name": "iden",
@@ -880,15 +887,16 @@
         "required": false
       }
     ],
-    "inputType": "dialogue"
+    "inputType": "parameter",
+    "approveTime": "2025-07-03T13:56:07.674Z"
   },
   {
     "id": "primary-home-visit",
     "name": "小学家访记录",
     "description": "小学家访记录与管理工具",
-    "apiUrl": "",
+    "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
     "apiKey": "app-XMpiq7AWNqCYDxNZcvPMenHh",
-    "status": "review",
+    "status": "configured",
     "inputs": [
       {
         "name": "sname",
@@ -927,15 +935,16 @@
         "required": false
       }
     ],
-    "inputType": "parameter"
+    "inputType": "parameter",
+    "approveTime": "2025-07-03T14:02:23.728Z"
   },
   {
     "id": "ai-reading",
     "name": "AI 朗读",
     "description": "AI驱动的朗读与语音合成工具",
-    "apiUrl": "",
+    "apiUrl": "http://118.145.74.50:24131/v1/workflows/run",
     "apiKey": "app-1x0aWq9ZFGqgTM2Cp72AKY12",
-    "status": "review",
+    "status": "configured",
     "inputs": [
       {
         "name": "utext",
@@ -956,13 +965,38 @@
         "required": true,
         "options": [
           {
-            "value": "知心姐姐，童声，严厉女声，诙谐男声，情感男声，青年男声，英语女声，英语男声，",
-            "label": "知心姐姐，童声，严厉女声，诙谐男声，情感男声，青年男声，英语女声，英语男声，"
+            "value": "知心姐姐",
+            "label": "知心姐姐"
+          },
+          {
+            "value": "童声",
+            "label": "童声"
+          },
+          {
+            "value": "严厉女生",
+            "label": "严厉女生"
+          },
+          {
+            "value": "诙谐男声",
+            "label": "诙谐男声"
+          },
+          {
+            "value": "情感男声",
+            "label": "情感男声"
+          },
+          {
+            "value": "青年男声",
+            "label": "青年男声"
+          },
+          {
+            "value": "温柔女声",
+            "label": "温柔女声"
           }
         ]
       }
     ],
-    "inputType": "parameter"
+    "inputType": "parameter",
+    "approveTime": "2025-07-03T14:05:47.996Z"
   },
   {
     "id": "kantu",
@@ -970,7 +1004,7 @@
     "description": "看图说话",
     "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
     "apiKey": "app-j7gmpSOO1RK2MZufCu70m1fX",
-    "status": "review",
+    "status": "configured",
     "inputs": [
       {
         "name": "image",
@@ -978,7 +1012,8 @@
         "label": "image",
         "required": true
       }
-    ]
+    ],
+    "approveTime": "2025-07-03T14:06:14.495Z"
   },
   {
     "id": "jiaoansheji",
@@ -986,7 +1021,7 @@
     "description": "教案设计",
     "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
     "apiKey": "app-UKthJ2tCC3XcjLsyOBKopVIv",
-    "status": "review",
+    "status": "configured",
     "inputs": [
       {
         "name": "Lesson_Plan",
@@ -1090,6 +1125,7 @@
         "required": false
       }
     ],
-    "inputType": "parameter"
+    "inputType": "parameter",
+    "approveTime": "2025-07-03T14:08:00.239Z"
   }
 ]

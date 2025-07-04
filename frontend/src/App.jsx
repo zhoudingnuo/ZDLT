@@ -727,7 +727,7 @@ function RechargeReviewModal({ visible, onCancel, theme, onRefreshUsers }) {
     try {
       await axios.post(`${API_BASE}/api/admin/recharge-orders/${orderId}/reject`);
       message.success('已拒绝');
-      // 刷新订单列表
+      // 刷新订单列表1
       const response = await axios.get(`${API_BASE}/api/admin/recharge-orders`);
       setOrders(response.data);
       if (onRefreshUsers) onRefreshUsers();
@@ -2077,7 +2077,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
             agentId: agent.id,
             agentName: agent.name,
             title,
-            messages: messages.filter(m => m.content),
+            messages: messages.filter(m => m.content && m.content.trim()),
             lastUpdate: new Date().toISOString()
           };
           history.push(currentHistory);
@@ -2088,7 +2088,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
           agentId: agent.id,
           agentName: agent.name,
           title,
-          messages: messages.filter(m => m.content),
+          messages: messages.filter(m => m.content && m.content.trim()),
           lastUpdate: new Date().toISOString()
         };
         const existingIndex = history.findIndex(h => h.id === id);

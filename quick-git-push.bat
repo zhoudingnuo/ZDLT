@@ -33,20 +33,9 @@ echo Starting remote git pull with auto-retry for network issues...
 echo Please enter password once, then auto-retry 10 times...
 echo.
 
-REM Step 1: Establish SSH connection with ControlMaster
-echo ========================================
-echo Step 1: Establishing SSH connection (enter password once)...
-echo ========================================
-ssh -o ControlMaster=yes -o ControlPath=~/.ssh/control-%h-%p-%r -o ControlPersist=60s -o ConnectTimeout=3 root@47.107.84.24 "echo 'SSH connection established successfully'"
-if %errorlevel% neq 0 (
-    echo SSH connection failed!
-    goto :end_retry
-)
-
-echo SSH connection established, starting git pull retries...
+echo Starting git pull retries with 3 second timeout...
 echo.
 
-REM Step 2: Reuse SSH connection for multiple git pull attempts
 :retry_loop
 set /a RETRY_COUNT+=1
 echo.
@@ -54,8 +43,8 @@ echo ========================================
 echo Attempt %RETRY_COUNT% of %MAX_RETRIES%: git pull...
 echo ========================================
 
-REM Reuse existing SSH connection for git pull
-ssh -o ControlMaster=no -o ControlPath=~/.ssh/control-%h-%p-%r root@47.107.84.24 "cd %SERVER_PATH% && echo '=== Server Response ===' && git status && echo '--- Attempting git pull ---' && timeout 3 git pull || (echo '--- Pull failed, force sync to GitHub version ---' && git reset --hard HEAD && git clean -fd && timeout 3 git pull && echo '--- Force sync completed ---') && echo '=== Git Pull Completed ==='"
+REM Execute git pull with timeout and force sync
+ssh -o ConnectTimeout=3 root@47.107.84.24 "cd %SERVER_PATH% && echo '=== Server Response ===' && git status && echo '--- Attempting git pull ---' && timeout 3 git pull || (echo '--- Pull failed, force sync to GitHub version ---' && git reset --hard HEAD && git clean -fd && timeout 3 git pull && echo '--- Force sync completed ---') && echo '=== Git Pull Completed ==='"
 set SSH_EXIT_CODE=%errorlevel%
 
 echo.
@@ -80,8 +69,6 @@ if %SSH_EXIT_CODE% equ 0 (
 )
 
 :end_retry
-REM Close SSH connection
-ssh -O exit -o ControlPath=~/.ssh/control-%h-%p-%r root@47.107.84.24 2>nul
 
 if %SUCCESS% equ 1 (
     echo Remote update completed successfully!

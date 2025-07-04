@@ -2476,7 +2476,7 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                 
                 // 检查智能体是否为workflow类型
                 const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/');
-                
+                console.log(msg);
                 if (isWorkflow) {
                   // Workflow类型：从outputs.result中提取内容
                   if (typeof msg?.content === 'string') {

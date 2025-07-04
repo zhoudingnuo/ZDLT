@@ -2477,10 +2477,12 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                 // 检查智能体是否为workflow类型
                 const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/');
                 if (isWorkflow) {
-                  // 调试输出
-                  console.log('【调试】msg.content类型:', typeof msg?.content, msg?.content);
-                  // 1. 先处理字符串（SSE流）
-                  if (typeof msg?.content === 'string') {
+                  // 0. 优先直接用对象的answer
+                  if (typeof msg?.content === 'object' && msg.content.answer) {
+                    text = msg.content.answer;
+                  }
+                  // 1. 处理字符串（SSE流）
+                  if (text === null && typeof msg?.content === 'string') {
                     const lines = msg.content.split('\n');
                     let finalAnswer = null;
                     for (const line of lines) {
@@ -2506,8 +2508,6 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                       text = msg.content.data.outputs.answer;
                     } else if (msg.content?.outputs?.answer) {
                       text = msg.content.outputs.answer;
-                    } else if (msg.content?.answer) {
-                      text = msg.content.answer;
                     }
                   }
                   // 3. 兜底遍历outputs所有字段

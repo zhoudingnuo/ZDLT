@@ -2476,7 +2476,9 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                 // 检查智能体是否为workflow类型
                 const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/');
                 if (isWorkflow) {
-                  // Workflow类型：优先提取SSE流中的answer字段
+                  // 调试输出
+                  console.log('【调试】msg.content类型:', typeof msg?.content, msg?.content);
+                  // 1. 先处理字符串（SSE流）
                   if (typeof msg?.content === 'string') {
                     const lines = msg.content.split('\n');
                     let finalAnswer = null;
@@ -2488,18 +2490,26 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                             finalAnswer = data.data.outputs.answer;
                             break;
                           }
-                        } catch (e) {}
+                        } catch (e) {
+                          // 忽略解析错误
+                        }
                       }
                     }
                     if (finalAnswer) {
                       text = finalAnswer;
                     }
                   }
-                  // 兼容对象格式
-                  if (text === null && typeof msg?.content === 'object' && msg.content.answer) {
-                    text = msg.content.answer;
+                  // 2. 兼容对象格式
+                  if (text === null && typeof msg?.content === 'object') {
+                    if (msg.content?.data?.outputs?.answer) {
+                      text = msg.content.data.outputs.answer;
+                    } else if (msg.content?.outputs?.answer) {
+                      text = msg.content.outputs.answer;
+                    } else if (msg.content?.answer) {
+                      text = msg.content.answer;
+                    }
                   }
-                  // 如果还没有answer，兜底遍历outputs所有字段
+                  // 3. 兜底遍历outputs所有字段
                   if (text === null && typeof msg?.content === 'object' && msg.content.data && msg.content.data.outputs) {
                     const outputs = msg.content.data.outputs;
                     const outputFields = [];
@@ -2518,7 +2528,6 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                       text = outputFields.join('\n\n');
                     }
                   }
-                  // 其它兜底
                   if (text === null && typeof msg?.content === 'object' && msg.content.outputs) {
                     const outputs = msg.content.outputs;
                     const outputFields = [];
@@ -2537,10 +2546,11 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                       text = outputFields.join('\n\n');
                     }
                   }
-                  // 兜底result
                   if (text === null && typeof msg?.content === 'object' && msg.content.result) {
                     text = msg.content.result;
                   }
+                  // 调试输出最终text
+                  console.log('【调试】最终text:', text);
                 } else {
                   // Chat类型：原有逻辑
                   if (typeof msg?.content === 'object' && msg.content.answer !== undefined && msg.content.answer !== null) {

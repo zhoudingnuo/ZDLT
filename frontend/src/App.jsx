@@ -2521,27 +2521,32 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                       text = msg.content;
                     }
                   }
-                  if (!text && typeof msg?.content === 'object' && typeof msg.content.result === 'string') {
-                    text = msg.content.result;
-                  }
-                  if (!text && typeof msg?.result === 'string') {
-                    text = msg.result;
-                  }
-                  if (!text && typeof msg?.content === 'string') {
-                    text = msg.content;
-                  }
+                  // 优先判断 answer 字段
                   if (!text && typeof msg?.content === 'object' && typeof msg.content.answer === 'string') {
                     text = msg.content.answer;
                   }
                   if (!text && typeof msg?.answer === 'string') {
                     text = msg.answer;
                   }
+                  // 兼容 result 字段
+                  if (!text && typeof msg?.content === 'object' && typeof msg.content.result === 'string') {
+                    text = msg.content.result;
+                  }
+                  if (!text && typeof msg?.result === 'string') {
+                    text = msg.result;
+                  }
+                  // 兼容 content 为字符串
+                  if (!text && typeof msg?.content === 'string') {
+                    text = msg.content;
+                  }
+                  // 兼容 text 字段
                   if (!text && typeof msg?.text === 'string') {
                     text = msg.text;
                   }
+                  // 兼容 message 字段
                   if (!text && typeof msg?.message === 'string') {
                     text = msg.message;
-                  }
+                }
                 }
 
                 // 2. 单词消消乐（word-elimination）用小游戏渲染器

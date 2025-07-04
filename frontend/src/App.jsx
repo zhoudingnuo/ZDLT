@@ -2473,10 +2473,10 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
               {messages.map((msg, idx) => {
                 // 1. 根据智能体类型提取text内容
                 let text = null;
-                
+                // 调试：打印原始msg
+                console.log('[调试] 当前msg:', msg);
                 // 检查智能体是否为workflow类型
                 const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/');
-                console.log(msg);
                 if (isWorkflow) {
                   // Workflow类型：从outputs.result中提取内容
                   if (typeof msg?.content === 'string') {
@@ -2484,71 +2484,79 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                       const parsed = JSON.parse(msg.content);
                       if (parsed?.data?.outputs?.result) {
                         text = parsed.data.outputs.result;
+                        console.log('[调试] workflow: parsed.data.outputs.result:', text);
                       } else if (parsed?.outputs?.result) {
                         text = parsed.outputs.result;
+                        console.log('[调试] workflow: parsed.outputs.result:', text);
                       } else if (parsed?.result) {
                         text = parsed.result;
+                        console.log('[调试] workflow: parsed.result:', text);
                       }
                     } catch (e) {
                       // 如果不是JSON，尝试直接解析
                       text = msg.content;
+                      console.log('[调试] workflow: msg.content为字符串:', text);
                     }
                   }
-                  if (!text && typeof msg?.content === 'object') {
+                  if (text === null && typeof msg?.content === 'object') {
                     if (msg.content?.data?.outputs?.result) {
                       text = msg.content.data.outputs.result;
+                      console.log('[调试] workflow: content.data.outputs.result:', text);
                     } else if (msg.content?.outputs?.result) {
                       text = msg.content.outputs.result;
+                      console.log('[调试] workflow: content.outputs.result:', text);
                     } else if (msg.content?.result) {
                       text = msg.content.result;
+                      console.log('[调试] workflow: content.result:', text);
                     }
                   }
-                  if (!text && typeof msg?.data?.outputs?.result === 'string') {
+                  if (text === null && typeof msg?.data?.outputs?.result === 'string') {
                     text = msg.data.outputs.result;
+                    console.log('[调试] workflow: msg.data.outputs.result:', text);
                   }
-                  if (!text && typeof msg?.outputs?.result === 'string') {
+                  if (text === null && typeof msg?.outputs?.result === 'string') {
                     text = msg.outputs.result;
+                    console.log('[调试] workflow: msg.outputs.result:', text);
                   }
                 } else {
                   // Chat类型：使用原有的提取逻辑
-                  if (typeof msg?.content === 'string') {
-                    try {
-                      const parsed = JSON.parse(msg.content);
-                      if (parsed && typeof parsed.result === 'string') {
-                        text = parsed.result;
-                      }
-                    } catch (e) {
-                      text = msg.content;
-                    }
+                  // 1. 优先提取 answer 字段（只要有值就用）
+                  if (typeof msg?.content === 'object' && msg.content.answer !== undefined && msg.content.answer !== null) {
+                    text = String(msg.content.answer);
+                    console.log('[调试] chat: 命中 content.answer:', msg.content.answer);
                   }
-                  // 优先判断 answer 字段
-                  if (!text && typeof msg?.content === 'object' && typeof msg.content.answer === 'string') {
-                    text = msg.content.answer;
+                  // 2. 兼容 result 字段
+                  if (text === null && typeof msg?.content === 'object' && msg.content.result !== undefined && msg.content.result !== null) {
+                    text = String(msg.content.result);
+                    console.log('[调试] chat: 命中 content.result:', msg.content.result);
                   }
-                  if (!text && typeof msg?.answer === 'string') {
-                    text = msg.answer;
-                  }
-                  // 兼容 result 字段
-                  if (!text && typeof msg?.content === 'object' && typeof msg.content.result === 'string') {
-                    text = msg.content.result;
-                  }
-                  if (!text && typeof msg?.result === 'string') {
-                    text = msg.result;
-                  }
-                  // 兼容 content 为字符串
-                  if (!text && typeof msg?.content === 'string') {
+                  // 3. 兼容 content 为字符串
+                  if (text === null && typeof msg?.content === 'string') {
                     text = msg.content;
+                    console.log('[调试] chat: 命中 content 为字符串:', msg.content);
                   }
-                  // 兼容 text 字段
-                  if (!text && typeof msg?.text === 'string') {
-                    text = msg.text;
+                  // 4. 兼容 msg.answer
+                  if (text === null && msg?.answer !== undefined && msg?.answer !== null) {
+                    text = String(msg.answer);
+                    console.log('[调试] chat: 命中 msg.answer:', msg.answer);
                   }
-                  // 兼容 message 字段
-                  if (!text && typeof msg?.message === 'string') {
-                    text = msg.message;
+                  // 5. 兼容 msg.result
+                  if (text === null && msg?.result !== undefined && msg?.result !== null) {
+                    text = String(msg.result);
+                    console.log('[调试] chat: 命中 msg.result:', msg.result);
+                  }
+                  // 6. 兼容 msg.text
+                  if (text === null && msg?.text !== undefined && msg?.text !== null) {
+                    text = String(msg.text);
+                    console.log('[调试] chat: 命中 msg.text:', msg.text);
+                  }
+                  // 7. 兼容 msg.message
+                  if (text === null && msg?.message !== undefined && msg?.message !== null) {
+                    text = String(msg.message);
+                    console.log('[调试] chat: 命中 msg.message:', msg.message);
+                  }
                 }
-                }
-                console.log(text);
+                console.log('[调试] 最终提取到的 text:', text);
                 // 2. 单词消消乐（word-elimination）用小游戏渲染器
                 if (agent && agent.id === 'word-elimination' && typeof text === 'string' && /<html[\s\S]*<\/html>/i.test(text)) {
                   return <GameHtmlRenderer key={idx} htmlString={text} theme={theme} />;

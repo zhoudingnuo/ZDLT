@@ -325,6 +325,25 @@
     "status": "configured"
   },
   {
+    "id": "test-workflow",
+    "name": "测试Workflow",
+    "description": "用于测试workflow渲染的智能体",
+    "apiUrl": "http://118.145.74.50:24131/v1/workflows/run",
+    "apiKey": "app-test-workflow-key",
+    "workflow": true,
+    "inputs": [
+      {
+        "name": "input_text",
+        "label": "输入文本",
+        "type": "text",
+        "required": true,
+        "description": "请输入要处理的文本"
+      }
+    ],
+    "inputType": "parameter",
+    "status": "configured"
+  },
+  {
     "id": "teacher-ai",
     "name": "教师AI",
     "description": "教师专用AI助手，支持教学、管理等多场景应用",

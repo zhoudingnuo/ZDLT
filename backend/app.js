@@ -432,6 +432,7 @@ app.post('/api/agent/:id/call-dify', async (req, res) => {
         
         let responseText = '';
         let finalAnswer = null;
+        let workflowOutputs = null;
         
         // 处理流式响应
         response.data.on('data', (chunk) => {
@@ -444,12 +445,22 @@ app.post('/api/agent/:id/call-dify', async (req, res) => {
             if (line.startsWith('data: ')) {
               try {
                 const eventData = JSON.parse(line.slice(6));
-                if (eventData.event === 'workflow_finished' && eventData.data?.outputs?.answer) {
-                  finalAnswer = eventData.data.outputs.answer;
-                  console.log('【INVOKE】从SSE中提取到answer:', finalAnswer);
+                console.log('【INVOKE】SSE事件:', eventData.event, eventData.data);
+                
+                if (eventData.event === 'workflow_finished') {
+                  // 提取answer和outputs
+                  if (eventData.data?.outputs?.answer) {
+                    finalAnswer = eventData.data.outputs.answer;
+                    console.log('【INVOKE】从SSE中提取到answer:', finalAnswer);
+                  }
+                  if (eventData.data?.outputs) {
+                    workflowOutputs = eventData.data.outputs;
+                    console.log('【INVOKE】从SSE中提取到outputs:', workflowOutputs);
+                  }
                 }
               } catch (e) {
                 // 忽略解析错误
+                console.log('【INVOKE】SSE解析错误:', e.message);
               }
             }
           }
@@ -460,9 +471,10 @@ app.post('/api/agent/:id/call-dify', async (req, res) => {
             console.log('【INVOKE】SSE流结束，完整响应:', responseText);
             
             if (finalAnswer) {
-              // 构造统一的返回格式
+              // 构造统一的返回格式，优先使用answer
               const result = {
                 answer: finalAnswer,
+                outputs: workflowOutputs,
                 files: [],
                 metadata: {
                   usage: {
@@ -473,10 +485,33 @@ app.post('/api/agent/:id/call-dify', async (req, res) => {
               };
               console.log('【INVOKE】返回提取的answer:', result);
               res.json(result);
+            } else if (workflowOutputs) {
+              // 如果没有answer但有outputs，构造outputs格式
+              const result = {
+                outputs: workflowOutputs,
+                files: [],
+                metadata: {
+                  usage: {
+                    total_tokens: 0,
+                    total_price: "0.0000"
+                  }
+                }
+              };
+              console.log('【INVOKE】返回outputs格式:', result);
+              res.json(result);
             } else {
-              // 如果没有找到answer，返回完整响应供前端解析
-              console.log('【INVOKE】未找到answer，返回完整SSE响应');
-              res.json({ content: responseText });
+              // 如果都没有，返回完整响应供前端解析
+              console.log('【INVOKE】未找到answer或outputs，返回完整SSE响应');
+              res.json({ 
+                content: responseText,
+                files: [],
+                metadata: {
+                  usage: {
+                    total_tokens: 0,
+                    total_price: "0.0000"
+                  }
+                }
+              });
             }
           });
           
@@ -496,7 +531,23 @@ app.post('/api/agent/:id/call-dify', async (req, res) => {
         });
         
         console.log('【INVOKE】普通请求响应:', response.data);
-        return res.json(response.data);
+        
+        // 检查响应是否包含workflow格式
+        if (response.data && (response.data.answer || response.data.outputs)) {
+          return res.json(response.data);
+        } else {
+          // 构造统一的返回格式
+          return res.json({
+            answer: response.data,
+            files: [],
+            metadata: {
+              usage: {
+                total_tokens: 0,
+                total_price: "0.0000"
+              }
+            }
+          });
+        }
       }
     } else {
       // Chat类型：普通请求

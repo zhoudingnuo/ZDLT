@@ -2473,12 +2473,46 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                 // 检查智能体是否为workflow类型
                 const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/');
                 if (isWorkflow) {
-                  // 0. 优先直接用对象的answer
+                  console.log('【前端】workflow类型消息处理:', msg);
+                  
+                  // 0. 优先直接用对象的answer字段
                   if (typeof msg?.content === 'object' && msg.content.answer) {
                     text = msg.content.answer;
+                    console.log('【前端】从msg.content.answer提取:', text);
                   }
-                  // 1. 处理字符串（SSE流）
-                  if (text === null && typeof msg?.content === 'string') {
+                  // 1. 处理直接返回的answer字段
+                  else if (msg?.answer) {
+                    text = msg.answer;
+                    console.log('【前端】从msg.answer提取:', text);
+                  }
+                  // 2. 处理outputs格式
+                  else if (typeof msg?.content === 'object' && msg.content.outputs) {
+                    const outputs = msg.content.outputs;
+                    if (outputs.answer) {
+                      text = outputs.answer;
+                      console.log('【前端】从msg.content.outputs.answer提取:', text);
+                    } else {
+                      // 遍历outputs所有字段
+                      const outputFields = [];
+                      for (const [key, value] of Object.entries(outputs)) {
+                        if (value !== null && value !== undefined && value !== '') {
+                          if (typeof value === 'string') {
+                            outputFields.push(`**${key}:**\n${value}`);
+                          } else if (typeof value === 'object') {
+                            outputFields.push(`**${key}:**\n${JSON.stringify(value, null, 2)}`);
+                          } else {
+                            outputFields.push(`**${key}:** ${value}`);
+                          }
+                        }
+                      }
+                      if (outputFields.length > 0) {
+                        text = outputFields.join('\n\n');
+                        console.log('【前端】从outputs字段组合:', text);
+                      }
+                    }
+                  }
+                  // 3. 处理字符串（SSE流）
+                  else if (typeof msg?.content === 'string') {
                     const lines = msg.content.split('\n');
                     let finalAnswer = null;
                     for (const line of lines) {
@@ -2496,58 +2530,20 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                     }
                     if (finalAnswer) {
                       text = finalAnswer;
+                      console.log('【前端】从SSE流提取:', text);
                     }
                   }
-                  // 2. 兼容对象格式
-                  if (text === null && typeof msg?.content === 'object') {
+                  // 4. 兼容旧格式
+                  else if (typeof msg?.content === 'object') {
                     if (msg.content?.data?.outputs?.answer) {
                       text = msg.content.data.outputs.answer;
-                    } else if (msg.content?.outputs?.answer) {
-                      text = msg.content.outputs.answer;
+                    } else if (msg.content?.result) {
+                      text = msg.content.result;
                     }
                   }
-                  // 3. 兜底遍历outputs所有字段
-                  if (text === null && typeof msg?.content === 'object' && msg.content.data && msg.content.data.outputs) {
-                    const outputs = msg.content.data.outputs;
-                    const outputFields = [];
-                    for (const [key, value] of Object.entries(outputs)) {
-                      if (value !== null && value !== undefined && value !== '') {
-                        if (typeof value === 'string') {
-                          outputFields.push(`**${key}:**\n${value}`);
-                        } else if (typeof value === 'object') {
-                          outputFields.push(`**${key}:**\n${JSON.stringify(value, null, 2)}`);
-                        } else {
-                          outputFields.push(`**${key}:** ${value}`);
-                        }
-                      }
-                    }
-                    if (outputFields.length > 0) {
-                      text = outputFields.join('\n\n');
-                    }
-                  }
-                  if (text === null && typeof msg?.content === 'object' && msg.content.outputs) {
-                    const outputs = msg.content.outputs;
-                    const outputFields = [];
-                    for (const [key, value] of Object.entries(outputs)) {
-                      if (value !== null && value !== undefined && value !== '') {
-                        if (typeof value === 'string') {
-                          outputFields.push(`**${key}:**\n${value}`);
-                        } else if (typeof value === 'object') {
-                          outputFields.push(`**${key}:**\n${JSON.stringify(value, null, 2)}`);
-                        } else {
-                          outputFields.push(`**${key}:** ${value}`);
-                        }
-                      }
-                    }
-                    if (outputFields.length > 0) {
-                      text = outputFields.join('\n\n');
-                    }
-                  }
-                  if (text === null && typeof msg?.content === 'object' && msg.content.result) {
-                    text = msg.content.result;
-                  }
+                  
                   // 调试输出最终text
-                  console.log('【调试】最终text:', text);
+                  console.log('【前端】workflow最终text:', text);
                 } else {
                   // Chat类型：原有逻辑
                   if (typeof msg?.content === 'object' && msg.content.answer !== undefined && msg.content.answer !== null) {

@@ -2476,12 +2476,10 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                 // 检查智能体是否为workflow类型
                 const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/');
                 if (isWorkflow) {
-                  // Workflow类型：支持SSE流式响应解析
+                  // Workflow类型：优先提取SSE流中的answer字段
                   if (typeof msg?.content === 'string') {
-                    // 尝试解析SSE流式响应
                     const lines = msg.content.split('\n');
                     let finalAnswer = null;
-                    
                     for (const line of lines) {
                       if (line.startsWith('data: ')) {
                         try {
@@ -2490,91 +2488,79 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                             finalAnswer = data.data.outputs.answer;
                             break;
                           }
-                        } catch (e) {
-                          // 忽略解析错误，继续处理下一行
-                        }
+                        } catch (e) {}
                       }
                     }
-                    
                     if (finalAnswer) {
                       text = finalAnswer;
-                    } else {
-                      // 如果不是SSE格式，尝试直接JSON解析
-                      try {
-                        const parsed = JSON.parse(msg.content);
-                        if (parsed?.data?.outputs?.result) {
-                          text = parsed.data.outputs.result;
-                        } else if (parsed?.outputs?.result) {
-                          text = parsed.outputs.result;
-                        } else if (parsed?.result) {
-                          text = parsed.result;
-                        } else if (parsed?.data?.outputs?.answer) {
-                          text = parsed.data.outputs.answer;
-                        } else if (parsed?.outputs?.answer) {
-                          text = parsed.outputs.answer;
-                        } else if (parsed?.answer) {
-                          text = parsed.answer;
+                    }
+                  }
+                  // 兼容对象格式
+                  if (text === null && typeof msg?.content === 'object' && msg.content.answer) {
+                    text = msg.content.answer;
+                  }
+                  // 如果还没有answer，兜底遍历outputs所有字段
+                  if (text === null && typeof msg?.content === 'object' && msg.content.data && msg.content.data.outputs) {
+                    const outputs = msg.content.data.outputs;
+                    const outputFields = [];
+                    for (const [key, value] of Object.entries(outputs)) {
+                      if (value !== null && value !== undefined && value !== '') {
+                        if (typeof value === 'string') {
+                          outputFields.push(`**${key}:**\n${value}`);
+                        } else if (typeof value === 'object') {
+                          outputFields.push(`**${key}:**\n${JSON.stringify(value, null, 2)}`);
+                        } else {
+                          outputFields.push(`**${key}:** ${value}`);
                         }
-                      } catch (e) {
-                        // 如果不是JSON，尝试直接解析
-                        text = msg.content;
                       }
                     }
-                  }
-                  if (text === null && typeof msg?.content === 'object') {
-                    if (msg.content?.data?.outputs?.answer) {
-                      text = msg.content.data.outputs.answer;
-                    } else if (msg.content?.outputs?.answer) {
-                      text = msg.content.outputs.answer;
-                    } else if (msg.content?.answer) {
-                      text = msg.content.answer;
-                    } else if (msg.content?.data?.outputs?.result) {
-                      text = msg.content.data.outputs.result;
-                    } else if (msg.content?.outputs?.result) {
-                      text = msg.content.outputs.result;
-                    } else if (msg.content?.result) {
-                      text = msg.content.result;
+                    if (outputFields.length > 0) {
+                      text = outputFields.join('\n\n');
                     }
                   }
-                  if (text === null && typeof msg?.data?.outputs?.answer === 'string') {
-                    text = msg.data.outputs.answer;
+                  // 其它兜底
+                  if (text === null && typeof msg?.content === 'object' && msg.content.outputs) {
+                    const outputs = msg.content.outputs;
+                    const outputFields = [];
+                    for (const [key, value] of Object.entries(outputs)) {
+                      if (value !== null && value !== undefined && value !== '') {
+                        if (typeof value === 'string') {
+                          outputFields.push(`**${key}:**\n${value}`);
+                        } else if (typeof value === 'object') {
+                          outputFields.push(`**${key}:**\n${JSON.stringify(value, null, 2)}`);
+                        } else {
+                          outputFields.push(`**${key}:** ${value}`);
+                        }
+                      }
+                    }
+                    if (outputFields.length > 0) {
+                      text = outputFields.join('\n\n');
+                    }
                   }
-                  if (text === null && typeof msg?.outputs?.answer === 'string') {
-                    text = msg.outputs.answer;
-                  }
-                  if (text === null && typeof msg?.data?.outputs?.result === 'string') {
-                    text = msg.data.outputs.result;
-                  }
-                  if (text === null && typeof msg?.outputs?.result === 'string') {
-                    text = msg.outputs.result;
+                  // 兜底result
+                  if (text === null && typeof msg?.content === 'object' && msg.content.result) {
+                    text = msg.content.result;
                   }
                 } else {
-                  // Chat类型：使用原有的提取逻辑
-                  // 1. 优先提取 answer 字段（只要有值就用）
+                  // Chat类型：原有逻辑
                   if (typeof msg?.content === 'object' && msg.content.answer !== undefined && msg.content.answer !== null) {
                     text = String(msg.content.answer);
                   }
-                  // 2. 兼容 result 字段
                   if (text === null && typeof msg?.content === 'object' && msg.content.result !== undefined && msg.content.result !== null) {
                     text = String(msg.content.result);
                   }
-                  // 3. 兼容 content 为字符串
                   if (text === null && typeof msg?.content === 'string') {
                     text = msg.content;
                   }
-                  // 4. 兼容 msg.answer
                   if (text === null && msg?.answer !== undefined && msg?.answer !== null) {
                     text = String(msg.answer);
                   }
-                  // 5. 兼容 msg.result
                   if (text === null && msg?.result !== undefined && msg?.result !== null) {
                     text = String(msg.result);
                   }
-                  // 6. 兼容 msg.text
                   if (text === null && msg?.text !== undefined && msg?.text !== null) {
                     text = String(msg.text);
                   }
-                  // 7. 兼容 msg.message
                   if (text === null && msg?.message !== undefined && msg?.message !== null) {
                     text = String(msg.message);
                   }

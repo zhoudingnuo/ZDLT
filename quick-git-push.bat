@@ -20,41 +20,41 @@ echo ====== Connecting to server, backup project, and running git pull ======
 echo Please manually enter the server password: ZDLT@20250702
 echo.
 
-echo 开始远程git pull，如果网络问题会自动重试...
+echo Starting remote git pull with auto-retry for network issues...
 echo.
 
-REM 设置重试次数和超时
+REM Set retry count and timeout
 set MAX_RETRIES=10
 set RETRY_COUNT=0
 set SUCCESS=0
 
 :retry_loop
 set /a RETRY_COUNT+=1
-echo 第 %RETRY_COUNT% 次尝试 git pull...
+echo Attempt %RETRY_COUNT% of %MAX_RETRIES%: git pull...
 
-REM 使用timeout命令设置5秒超时，如果超时则重试
-timeout /t 5 /nobreak >nul & ssh root@47.107.84.24 "cd %SERVER_PATH% && timeout 5 git pull"
+REM Use timeout command to set 2 second timeout, retry if timeout
+timeout /t 2 /nobreak >nul & ssh root@47.107.84.24 "cd %SERVER_PATH% && timeout 2 git pull"
 if %errorlevel% equ 0 (
-    echo git pull 成功！
+    echo git pull successful!
     set SUCCESS=1
     goto :end_retry
 ) else (
-    echo 第 %RETRY_COUNT% 次尝试失败或超时
+    echo Attempt %RETRY_COUNT% failed or timed out
     if %RETRY_COUNT% lss %MAX_RETRIES% (
-        echo 等待1秒后重试...
+        echo Waiting 1 second before retry...
         timeout /t 1 /nobreak >nul
         goto :retry_loop
     ) else (
-        echo 已重试 %MAX_RETRIES% 次，仍然失败
-        echo 请手动检查网络连接或服务器状态
+        echo Retried %MAX_RETRIES% times, still failed
+        echo Please check network connection or server status manually
     )
 )
 
 :end_retry
 if %SUCCESS% equ 1 (
-    echo 远程更新成功完成！
+    echo Remote update completed successfully!
 ) else (
-    echo 远程更新失败，请手动执行：
+    echo Remote update failed, please execute manually:
     echo ssh root@47.107.84.24
     echo cd /root/ZDLT
     echo git pull

@@ -2048,11 +2048,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
   // 启动时自动清理localStorage中的空历史对话
   useEffect(() => {
     if (agent?.id) {
-      let history = loadChatHistory(agent.id).filter(h => Array.isArray(h.messages) && h.messages.some(m => {
-        // 安全地检查content是否为字符串且有内容
-        const content = m.content;
-        return content && typeof content === 'string' && content.trim && content.trim() && (m.role === 'user' || m.role === 'assistant');
-      }));
+      let history = loadChatHistory(agent.id).filter(h => Array.isArray(h.messages) && h.messages.some(m => typeof m.content === 'string' && m.content.trim() && (m.role === 'user' || m.role === 'assistant')));
       saveChatHistory(history, agent.id);
       setChatHistory(history);
     }
@@ -2063,17 +2059,10 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     if (
       agent?.id &&
       messages.length > 0 &&
-      messages.some(m => {
-        // 安全地检查content是否为字符串且有内容
-        const content = m.content;
-        return content && typeof content === 'string' && content.trim && content.trim() && (m.role === 'user' || m.role === 'assistant');
-      })
+      messages.some(m => typeof m.content === 'string' && m.content.trim() && (m.role === 'user' || m.role === 'assistant'))
     ) {
       // 生成历史标题：首条用户消息前20字或'新对话'
-      const firstUserMsg = messages.find(m => {
-        const content = m.content;
-        return m.role === 'user' && content && typeof content === 'string' && content.trim && content.trim();
-      });
+      const firstUserMsg = messages.find(m => m.role === 'user' && typeof m.content === 'string' && m.content.trim());
       const title = firstUserMsg ? firstUserMsg.content.slice(0, 20) : '新对话';
       let history = loadChatHistory(agent.id);
       let id = currentHistoryId;
@@ -2088,10 +2077,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
             agentId: agent.id,
             agentName: agent.name,
             title,
-            messages: messages.filter(m => {
-              const content = m.content;
-              return content && typeof content === 'string' && content.trim && content.trim();
-            }),
+            messages: messages.filter(m => typeof m.content === 'string' && m.content.trim()),
             lastUpdate: new Date().toISOString()
           };
           history.push(currentHistory);
@@ -2102,10 +2088,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
           agentId: agent.id,
           agentName: agent.name,
           title,
-          messages: messages.filter(m => {
-            const content = m.content;
-            return content && typeof content === 'string' && content.trim && content.trim();
-          }),
+          messages: messages.filter(m => typeof m.content === 'string' && m.content.trim()),
           lastUpdate: new Date().toISOString()
         };
         const existingIndex = history.findIndex(h => h.id === id);
@@ -2567,7 +2550,7 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                 }
 
                 // 3. 其它所有智能体（包括语文默写批改）统一用ReactMarkdown渲染
-                if (typeof text === 'string' && text.trim && text.trim()) {
+                if (typeof text === 'string' && text.trim() && text.trim()) {
                   const isUser = msg.role === 'user';
                   return (
                     <div

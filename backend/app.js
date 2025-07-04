@@ -416,14 +416,100 @@ app.post('/api/agent/:id/call-dify', async (req, res) => {
       return res.status(400).json({ error: 'Agent not configured' });
     }
     
-    const response = await axios.post(agent.apiUrl, data, {
-      headers: { 'Authorization': `Bearer ${agent.apiKey}`, 'Content-Type': 'application/json' },
-      timeout: 1000000
-    });
-    console.log(agent.apiKey);
-    console.log('【INVOKE】call-dify响应数据:', response.data);
+    // 检查是否为workflow类型
+    const isWorkflow = agent.workflow === true || agent.apiUrl.includes('/workflows/');
     
-    return res.json(response.data);
+    if (isWorkflow) {
+      // Workflow类型：处理SSE流式响应
+      console.log('【INVOKE】workflow类型，使用流式响应');
+      
+      try {
+        const response = await axios.post(agent.apiUrl, data, {
+          headers: { 'Authorization': `Bearer ${agent.apiKey}`, 'Content-Type': 'application/json' },
+          timeout: 1000000,
+          responseType: 'stream'
+        });
+        
+        let responseText = '';
+        let finalAnswer = null;
+        
+        // 处理流式响应
+        response.data.on('data', (chunk) => {
+          const chunkText = chunk.toString();
+          responseText += chunkText;
+          
+          // 解析SSE数据
+          const lines = chunkText.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const eventData = JSON.parse(line.slice(6));
+                if (eventData.event === 'workflow_finished' && eventData.data?.outputs?.answer) {
+                  finalAnswer = eventData.data.outputs.answer;
+                  console.log('【INVOKE】从SSE中提取到answer:', finalAnswer);
+                }
+              } catch (e) {
+                // 忽略解析错误
+              }
+            }
+          }
+        });
+        
+        return new Promise((resolve, reject) => {
+          response.data.on('end', () => {
+            console.log('【INVOKE】SSE流结束，完整响应:', responseText);
+            
+            if (finalAnswer) {
+              // 构造统一的返回格式
+              const result = {
+                answer: finalAnswer,
+                files: [],
+                metadata: {
+                  usage: {
+                    total_tokens: 0,
+                    total_price: "0.0000"
+                  }
+                }
+              };
+              console.log('【INVOKE】返回提取的answer:', result);
+              res.json(result);
+            } else {
+              // 如果没有找到answer，返回完整响应供前端解析
+              console.log('【INVOKE】未找到answer，返回完整SSE响应');
+              res.json({ content: responseText });
+            }
+          });
+          
+          response.data.on('error', (error) => {
+            console.error('【INVOKE】SSE流错误:', error);
+            reject(error);
+          });
+        });
+        
+      } catch (streamError) {
+        console.error('【INVOKE】流式请求失败，尝试普通请求:', streamError.message);
+        
+        // 如果流式请求失败，回退到普通请求
+        const response = await axios.post(agent.apiUrl, data, {
+          headers: { 'Authorization': `Bearer ${agent.apiKey}`, 'Content-Type': 'application/json' },
+          timeout: 1000000
+        });
+        
+        console.log('【INVOKE】普通请求响应:', response.data);
+        return res.json(response.data);
+      }
+    } else {
+      // Chat类型：普通请求
+      console.log('【INVOKE】chat类型，使用普通请求');
+      
+      const response = await axios.post(agent.apiUrl, data, {
+        headers: { 'Authorization': `Bearer ${agent.apiKey}`, 'Content-Type': 'application/json' },
+        timeout: 1000000
+      });
+      
+      console.log('【INVOKE】call-dify响应数据:', response.data);
+      return res.json(response.data);
+    }
   } catch (err) {
     console.error('【INVOKE】call-dify请求失败:', err.message, err.response?.data);
     return res.status(500).json({ error: err.message });

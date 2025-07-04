@@ -2077,7 +2077,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
             agentId: agent.id,
             agentName: agent.name,
             title,
-            messages: messages.filter(m => m.content && m.content.trim()),
+            messages: messages.filter(m => m.content),
             lastUpdate: new Date().toISOString()
           };
           history.push(currentHistory);
@@ -2088,7 +2088,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
           agentId: agent.id,
           agentName: agent.name,
           title,
-          messages: messages.filter(m => m.content && m.content.trim()),
+          messages: messages.filter(m => m.content),
           lastUpdate: new Date().toISOString()
         };
         const existingIndex = history.findIndex(h => h.id === id);

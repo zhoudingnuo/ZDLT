@@ -2056,7 +2056,39 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     if (
       agent?.id &&
       messages.length > 0 &&
-      messages.some(m => m.content && m.content.trim() && (m.role === 'user' || m.role === 'assistant'))
+      messages.some(m => {
+        if (!m.content) return false;
+        if (typeof m.content === 'string') {
+          return m.content.trim() && (m.role === 'user' || m.role === 'assistant');
+        }
+        // 尝试解析JSON字符串
+        if (typeof m.content === 'object') {
+          // 优先提取outputs.text/outputs.answer/outputs.result
+          if (m.content.outputs && (m.content.outputs.text || m.content.outputs.answer || m.content.outputs.result)) {
+            return !!(m.content.outputs.text || m.content.outputs.answer || m.content.outputs.result) && (m.role === 'user' || m.role === 'assistant');
+          }
+          if (m.content.text || m.content.answer || m.content.result) {
+            return !!(m.content.text || m.content.answer || m.content.result) && (m.role === 'user' || m.role === 'assistant');
+          }
+          return JSON.stringify(m.content).trim() && (m.role === 'user' || m.role === 'assistant');
+        }
+        // 兜底：尝试解析为JSON字符串
+        if (typeof m.content === 'string') {
+          try {
+            const parsed = JSON.parse(m.content);
+            if (parsed.outputs && (parsed.outputs.text || parsed.outputs.answer || parsed.outputs.result)) {
+              return !!(parsed.outputs.text || parsed.outputs.answer || parsed.outputs.result) && (m.role === 'user' || m.role === 'assistant');
+            }
+            if (parsed.text || parsed.answer || parsed.result) {
+              return !!(parsed.text || parsed.answer || parsed.result) && (m.role === 'user' || m.role === 'assistant');
+            }
+            return m.content.trim() && (m.role === 'user' || m.role === 'assistant');
+          } catch {
+            return m.content.trim() && (m.role === 'user' || m.role === 'assistant');
+          }
+        }
+        return false;
+      })
     ) {
       // 生成历史标题：首条用户消息前20字或'新对话'
       const firstUserMsg = messages.find(m => m.role === 'user' && m.content && m.content.trim());

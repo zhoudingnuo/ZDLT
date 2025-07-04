@@ -2470,27 +2470,53 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
               {messages.map((msg, idx) => {
                 // 1. 统一提取text内容（不区分workflow/chat）
                 let text = null;
+                console.log('【前端调试】开始提取text，原始msg:', msg);
+                
                 if (typeof msg?.content === 'object' && msg.content.answer !== undefined && msg.content.answer !== null) {
                   text = String(msg.content.answer);
+                  console.log('【前端调试】从msg.content.answer提取:', text);
                 }
                 if (text === null && typeof msg?.content === 'object' && msg.content.result !== undefined && msg.content.result !== null) {
                   text = String(msg.content.result);
+                  console.log('【前端调试】从msg.content.result提取:', text);
                 }
                 if (text === null && typeof msg?.content === 'string') {
                   text = msg.content;
+                  console.log('【前端调试】从msg.content(字符串)提取:', text);
                 }
                 if (text === null && msg?.answer !== undefined && msg?.answer !== null) {
                   text = String(msg.answer);
+                  console.log('【前端调试】从msg.answer提取:', text);
                 }
                 if (text === null && msg?.result !== undefined && msg?.result !== null) {
                   text = String(msg.result);
+                  console.log('【前端调试】从msg.result提取:', text);
                 }
                 if (text === null && msg?.text !== undefined && msg?.text !== null) {
                   text = String(msg.text);
+                  console.log('【前端调试】从msg.text提取:', text);
                 }
                 if (text === null && msg?.message !== undefined && msg?.message !== null) {
                   text = String(msg.message);
+                  console.log('【前端调试】从msg.message提取:', text);
                 }
+                
+                // 兜底：如果所有提取都失败，尝试显示原始内容
+                if (text === null) {
+                  if (typeof msg?.content === 'object') {
+                    text = JSON.stringify(msg.content, null, 2);
+                    console.log('【前端调试】兜底：显示msg.content对象:', text);
+                  } else if (msg?.content) {
+                    text = String(msg.content);
+                    console.log('【前端调试】兜底：显示msg.content:', text);
+                  } else {
+                    text = JSON.stringify(msg, null, 2);
+                    console.log('【前端调试】兜底：显示完整msg:', text);
+                  }
+                }
+                
+                console.log('【前端调试】最终text值:', text, '类型:', typeof text, 'trim后:', text ? text.trim() : 'null');
+                console.log('【前端调试】条件判断:', typeof text === 'string' && text.trim());
                 // 2. 单词消消乐（word-elimination）用小游戏渲染器
                 if (agent && agent.id === 'word-elimination' && typeof text === 'string' && /<html[\s\S]*<\/html>/i.test(text)) {
                   return <GameHtmlRenderer key={idx} htmlString={text} theme={theme} />;

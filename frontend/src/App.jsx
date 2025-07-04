@@ -1374,10 +1374,6 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       
       // 如果有组装好的数据，调用新的Dify API
       if (res.data && res.data.inputs) {
-        console.log('【前端】获取到组装好的数据，开始调用Dify');
-        // const difyResponse = await axios.post(`${API_BASE}/api/agent/${agent.id}/call-dify`, { data: res.data });
-        // console.log('【前端】Dify调用成功:', difyResponse.data);
-        // onSubmit(difyResponse.data);
         try {
           // 统一用chat类型的构造方式
           const difyResponse = await axios.post(`${API_BASE}/api/agent/${agent.id}/call-dify`, { data: res.data });

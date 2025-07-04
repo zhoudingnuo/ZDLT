@@ -21,6 +21,7 @@ echo Please manually enter the server password: ZDLT@20250702
 echo.
 
 echo Starting remote git pull with auto-retry for network issues...
+echo Please enter password once, then auto-retry 10 times...
 echo.
 
 REM Set retry count and timeout
@@ -28,12 +29,16 @@ set MAX_RETRIES=10
 set RETRY_COUNT=0
 set SUCCESS=0
 
+REM Create SSH connection with ControlMaster for connection reuse
+echo Establishing SSH connection (enter password once)...
+ssh -o ControlMaster=yes -o ControlPath=~/.ssh/control-%h-%p-%r -o ControlPersist=60s root@47.107.84.24 "echo 'SSH connection established'"
+
 :retry_loop
 set /a RETRY_COUNT+=1
 echo Attempt %RETRY_COUNT% of %MAX_RETRIES%: git pull...
 
-REM Use timeout command to set 2 second timeout, retry if timeout
-timeout /t 2 /nobreak >nul & ssh root@47.107.84.24 "cd %SERVER_PATH% && timeout 2 git pull"
+REM Use existing SSH connection with ControlMaster
+ssh -o ControlMaster=no -o ControlPath=~/.ssh/control-%h-%p-%r root@47.107.84.24 "cd %SERVER_PATH% && timeout 2 git pull"
 if %errorlevel% equ 0 (
     echo git pull successful!
     set SUCCESS=1
@@ -51,6 +56,9 @@ if %errorlevel% equ 0 (
 )
 
 :end_retry
+REM Close SSH connection
+ssh -O exit -o ControlPath=~/.ssh/control-%h-%p-%r root@47.107.84.24 2>nul
+
 if %SUCCESS% equ 1 (
     echo Remote update completed successfully!
 ) else (

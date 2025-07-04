@@ -84,5 +84,10 @@ if %SUCCESS% equ 1 (
     echo git pull
 )
 
+echo.
+echo ========================================
 echo Local commit and push to GitHub done. Remote backup and git pull triggered: %msg%
-pause
+echo ========================================
+echo.
+echo Press any key to close this window...
+pause >nul

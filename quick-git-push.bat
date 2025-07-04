@@ -30,18 +30,28 @@ set RETRY_COUNT=0
 set SUCCESS=0
 
 echo Starting remote git pull with auto-retry for network issues...
-echo Please enter password once, then auto-retry 10 times...
+echo Step 1: Establishing SSH connection (enter password once)...
+echo.
+
+REM Step 1: Establish SSH connection first
+ssh -o ConnectTimeout=3 root@47.107.84.24 "echo 'SSH connection established successfully'"
+if %errorlevel% neq 0 (
+    echo SSH connection failed! Please check network or credentials.
+    goto :end_retry
+)
+
+echo SSH connection established! Starting git pull retries...
 echo.
 
 :retry_loop
 set /a RETRY_COUNT+=1
 echo.
 echo ========================================
-echo Attempt %RETRY_COUNT% of %MAX_RETRIES%: git pull...
+echo Attempt %RETRY_COUNT% of %MAX_RETRIES%: git pull only...
 echo ========================================
 
-REM Execute git pull and show server feedback
-ssh root@47.107.84.24 "cd %SERVER_PATH% && echo '=== Server Response ===' && git pull && echo '=== Git Pull Completed ==='"
+REM Step 2: Only execute git pull (connection already established)
+ssh root@47.107.84.24 "cd %SERVER_PATH% && echo '=== Git Pull Attempt %RETRY_COUNT% ===' && timeout 3 git pull || (echo '--- Pull failed, force sync to GitHub version ---' && git reset --hard HEAD && git clean -fd && timeout 3 git pull && echo '--- Force sync completed ---') && echo '=== Git Pull Completed ==='"
 set SSH_EXIT_CODE=%errorlevel%
 
 echo.

@@ -246,7 +246,6 @@
     "description": "语文作文智能批改",
     "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
     "apiKey": "app-qsWNlbwazjrrry12OGskZGGt",
-    "workflow": true,
     "inputs": [
       {
         "name": "im",
@@ -301,7 +300,6 @@
     "description": "语文课文默写内容智能批改，支持图片上传和参数配置",
     "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
     "apiKey": "app-eBrZ5PhyjyEH1lc1U0eNySMN",
-    "workflow": true,
     "inputs": [
       {
         "name": "image",

@@ -83,45 +83,45 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     console.log('【INVOKE】Content-Type:', req.headers['content-type']);
     console.log('【INVOKE】请求体长度:', req.headers['content-length']);
     
-    // 直接从 agents.json 文件读取最新的 agent 配置
-    let agents = [];
-    if (fs.existsSync(agentsPath)) {
-      agents = JSON.parse(fs.readFileSync(agentsPath, 'utf-8'));
-    }
-    const agent = agents.find(a => a.id === req.params.id);
+  // 直接从 agents.json 文件读取最新的 agent 配置
+  let agents = [];
+  if (fs.existsSync(agentsPath)) {
+    agents = JSON.parse(fs.readFileSync(agentsPath, 'utf-8'));
+  }
+  const agent = agents.find(a => a.id === req.params.id);
     if (!agent) {
       console.error('【INVOKE】Agent not found:', req.params.id);
       return res.status(404).json({ error: 'Agent not found' });
     }
-    if (!agent.apiKey || !agent.apiUrl) {
+  if (!agent.apiKey || !agent.apiUrl) {
       console.error('【INVOKE】Agent not configured:', req.params.id);
-      return res.status(400).json({ error: 'Agent not configured. Please configure API key and URL first.' });
-    }
+    return res.status(400).json({ error: 'Agent not configured. Please configure API key and URL first.' });
+  }
     
     console.log('【INVOKE】找到Agent:', agent.name, 'inputType:', agent.inputType);
 
-    // 1. 先判断 inputType 是否为 dialogue
-    if (agent.inputType === 'dialogue') {
+  // 1. 先判断 inputType 是否为 dialogue
+  if (agent.inputType === 'dialogue') {
       console.log('【INVOKE】dialogue类型，直接处理');
       
-      // 直接用 req.body 组装参数，不用 formidable
-      let inputs = {};
-      try {
-        inputs = req.body.inputs || {};
-      } catch {
-        inputs = {};
-      }
-      const data = {
-        inputs: inputs,
-        query: req.body.query,
-        response_mode: req.body.response_mode || 'blocking',
-        conversation_id: req.body.conversation_id || '',
-        user: req.body.user || 'auto_test'
-      };
-      const headers = {
-        'Authorization': `Bearer ${agent.apiKey}`,
-        'Content-Type': 'application/json'
-      };
+    // 直接用 req.body 组装参数，不用 formidable
+    let inputs = {};
+    try {
+      inputs = req.body.inputs || {};
+    } catch {
+      inputs = {};
+    }
+    const data = {
+      inputs: inputs,
+      query: req.body.query,
+      response_mode: req.body.response_mode || 'blocking',
+      conversation_id: req.body.conversation_id || '',
+      user: req.body.user || 'auto_test'
+    };
+    const headers = {
+      'Authorization': `Bearer ${agent.apiKey}`,
+      'Content-Type': 'application/json'
+    };
       
       console.log('【INVOKE】dialogue请求数据:', JSON.stringify(data, null, 2));
       console.log('【INVOKE】dialogue请求地址:', agent.apiUrl);
@@ -130,9 +130,9 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
         const response = await axios.post(agent.apiUrl, data, { headers, timeout: 1000000 });
         console.log('【INVOKE】dialogue响应成功');
         return res.json(response.data);
-      } catch (err) {
+    } catch (err) {
         console.error('【INVOKE】dialogue请求失败:', err.message);
-        if (err.response) {
+      if (err.response) {
           console.error('【INVOKE】dialogue响应错误:', err.response.data);
         }
         return res.status(500).json({ error: err.message, detail: err.response?.data });
@@ -150,7 +150,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
       console.log('【INVOKE】检测到FormData，使用formidable解析');
       
       // 使用formidable解析FormData
-      const form = new formidable.IncomingForm({ multiples: true });
+  const form = new formidable.IncomingForm({ multiples: true });
       
       try {
         const [fields, files] = await new Promise((resolve, reject) => {
@@ -333,23 +333,23 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     });
     
         // 处理文件上传和拼接 - 使用已上传的文件对象
-      if (Array.isArray(agent.inputs)) {
+    if (Array.isArray(agent.inputs)) {
         console.log('【INVOKE】开始处理智能体输入定义:', agent.inputs.length, '个字段');
-        
-        for (const inputDef of agent.inputs) {
-          const key = inputDef.name;
+      
+      for (const inputDef of agent.inputs) {
+        const key = inputDef.name;
           console.log('【INVOKE】处理字段:', key, '类型:', inputDef.type);
-          
-          if (
-            inputDef.type === 'file' ||
-            inputDef.type === 'upload' ||
-            (inputDef.type === 'array' && inputDef.itemType === 'file')
-          ) {
+        
+        if (
+          inputDef.type === 'file' ||
+          inputDef.type === 'upload' ||
+          (inputDef.type === 'array' && inputDef.itemType === 'file')
+        ) {
             // 使用已上传的文件对象，直接传递完整对象
             if (uploadedFiles[key]) {
               inputs[key] = uploadedFiles[key];
               console.log('【INVOKE】使用已上传的完整文件对象:', key, inputs[key]);
-            } else {
+              } else {
               console.log('【INVOKE】字段', key, '未找到上传的文件');
             }
           } else {
@@ -499,7 +499,7 @@ app.post('/api/agent/:id/call-dify', async (req, res) => {
               };
               console.log('【INVOKE】返回outputs格式:', result);
               res.json(result);
-            } else {
+        } else {
               // 如果都没有，返回完整响应供前端解析
               console.log('【INVOKE】未找到answer或outputs，返回完整SSE响应');
               res.json({ 
@@ -611,7 +611,7 @@ async function uploadFileToDifySimple(file, user, agent) {
   console.log('【UPLOAD】Dify上传地址:', DIFy_API);
   
   // 准备请求头 - 完全参照Python requests格式
-  const headers = {
+    const headers = {
     ...fd.getHeaders(),
     'Authorization': `Bearer ${agent.apiKey}`
   };
@@ -874,10 +874,10 @@ app.post('/api/upload-file-for-agent', async (req, res) => {
       
     } catch (uploadError) {
       console.error('【UPLOAD-FOR-AGENT】上传失败:', uploadError.message);
-      res.status(500).json({
+      res.status(500).json({ 
         success: false,
         error: uploadError.message,
-        detail: uploadError.response?.data
+        detail: uploadError.response?.data 
       });
     }
   });

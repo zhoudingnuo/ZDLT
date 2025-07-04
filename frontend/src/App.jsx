@@ -2548,7 +2548,7 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                     text = msg.message;
                 }
                 }
-
+                console.log(text);
                 // 2. 单词消消乐（word-elimination）用小游戏渲染器
                 if (agent && agent.id === 'word-elimination' && typeof text === 'string' && /<html[\s\S]*<\/html>/i.test(text)) {
                   return <GameHtmlRenderer key={idx} htmlString={text} theme={theme} />;

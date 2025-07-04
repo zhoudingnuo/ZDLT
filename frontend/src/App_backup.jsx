@@ -404,7 +404,7 @@ function ChatPage({ onBack, agent }) {
   };
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input || typeof input !== 'string' || !input.trim()) return;
     setLoading(true);
     const newMessages = [...messages, { role: 'user', content: input }];
     setMessages(newMessages);

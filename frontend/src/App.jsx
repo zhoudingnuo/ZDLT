@@ -332,7 +332,7 @@ const globalDarkStyles = `
 function fixMarkdownTable(md) {
   // 1. 找到所有连续的"|"分隔的多行，自动补全分隔线
   return md.replace(/((^|\n)(\|[^\n]+\|\n){2,})/g, (block) => {
-    const lines = block.trim().split('\n');
+    const lines = (block && typeof block === 'string' ? block.trim() : '').split('\n');
     if (lines.length < 2) return block;
     // 检查第二行是否为分隔线
     if (/^\|\s*-+\s*(\|\s*-+\s*)+\|$/.test(lines[1])) return block;
@@ -1642,7 +1642,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
 
   const sendMessage = async () => {
     let usage = undefined; // 统一定义
-    if (!input.trim()) return;
+    if (!input || typeof input !== 'string' || !input.trim()) return;
     // 余额判断
     const currentUser = getUser();
     if (!currentUser) {
@@ -1667,7 +1667,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       });
       
       const res = await axios.post(`/api/agent/${agent.id}/invoke`, {
-        query: input.trim(),
+        query: input && typeof input === 'string' ? input.trim() : '',
         inputs: {},
       });
       
@@ -1761,7 +1761,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         details = e.message;
       }
       
-      const fullErrorMsg = `${errMsg}\n\n详细信息:\n${details}\n\n请求URL: ${agent.apiUrl}\nAPI Key: ${agent.apiKey ? agent.apiKey.substring(0, 10) + '...' : '未设置'}`;
+      const fullErrorMsg = `${errMsg}\n\n详细信息:\n${details}\n\n请求URL: ${agent.apiUrl}\nAPI Key: ${agent.apiKey && typeof agent.apiKey === 'string' ? agent.apiKey.substring(0, 10) + '...' : '未设置'}`;
       
       setMessages(msgs => {
         const lastIdx = msgs.length - 1;
@@ -1960,7 +1960,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     diagnosisResults.push('=== 网络诊断开始 ===');
     diagnosisResults.push(`诊断时间: ${new Date().toLocaleString()}`);
     diagnosisResults.push(`目标服务器: ${agent.apiUrl}`);
-    diagnosisResults.push(`API Key: ${agent.apiKey ? agent.apiKey.substring(0, 10) + '...' : '未设置'}`);
+    diagnosisResults.push(`API Key: ${agent.apiKey && typeof agent.apiKey === 'string' ? agent.apiKey.substring(0, 10) + '...' : '未设置'}`);
     
     try {
       // 测试基本连接
@@ -2048,7 +2048,11 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
   // 启动时自动清理localStorage中的空历史对话
   useEffect(() => {
     if (agent?.id) {
-      let history = loadChatHistory(agent.id).filter(h => Array.isArray(h.messages) && h.messages.some(m => m.content && m.content.trim() && (m.role === 'user' || m.role === 'assistant')));
+      let history = loadChatHistory(agent.id).filter(h => Array.isArray(h.messages) && h.messages.some(m => {
+        // 安全地检查content是否为字符串且有内容
+        const content = m.content;
+        return content && typeof content === 'string' && content.trim && content.trim() && (m.role === 'user' || m.role === 'assistant');
+      }));
       saveChatHistory(history, agent.id);
       setChatHistory(history);
     }
@@ -2059,10 +2063,17 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     if (
       agent?.id &&
       messages.length > 0 &&
-      messages.some(m => m.content && m.content.trim() && (m.role === 'user' || m.role === 'assistant'))
+      messages.some(m => {
+        // 安全地检查content是否为字符串且有内容
+        const content = m.content;
+        return content && typeof content === 'string' && content.trim && content.trim() && (m.role === 'user' || m.role === 'assistant');
+      })
     ) {
       // 生成历史标题：首条用户消息前20字或'新对话'
-      const firstUserMsg = messages.find(m => m.role === 'user' && m.content && m.content.trim());
+      const firstUserMsg = messages.find(m => {
+        const content = m.content;
+        return m.role === 'user' && content && typeof content === 'string' && content.trim && content.trim();
+      });
       const title = firstUserMsg ? firstUserMsg.content.slice(0, 20) : '新对话';
       let history = loadChatHistory(agent.id);
       let id = currentHistoryId;
@@ -2077,7 +2088,10 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
             agentId: agent.id,
             agentName: agent.name,
             title,
-            messages: messages.filter(m => m.content && m.content.trim()),
+            messages: messages.filter(m => {
+              const content = m.content;
+              return content && typeof content === 'string' && content.trim && content.trim();
+            }),
             lastUpdate: new Date().toISOString()
           };
           history.push(currentHistory);
@@ -2088,7 +2102,10 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
           agentId: agent.id,
           agentName: agent.name,
           title,
-          messages: messages.filter(m => m.content && m.content.trim()),
+          messages: messages.filter(m => {
+            const content = m.content;
+            return content && typeof content === 'string' && content.trim && content.trim();
+          }),
           lastUpdate: new Date().toISOString()
         };
         const existingIndex = history.findIndex(h => h.id === id);
@@ -2550,7 +2567,7 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                 }
 
                 // 3. 其它所有智能体（包括语文默写批改）统一用ReactMarkdown渲染
-                if (typeof text === 'string' && text.trim()) {
+                if (typeof text === 'string' && text.trim && text.trim()) {
                   const isUser = msg.role === 'user';
                   return (
                     <div
@@ -2861,7 +2878,7 @@ const categories = [
 ];
 // 分类映射函数
 const getAgentCategories = (agent) => {
-  const agentName = agent.name.toLowerCase();
+  const agentName = typeof agent.name === 'string' ? agent.name.toLowerCase() : '';
   const cats = [];
   if (agentName.includes('作文') || agentName.includes('批改') || agentName.includes('默写') || agentName.includes('同步')) cats.push('essay');
   if (agentName.includes('教学') || agentName.includes('老师') || agentName.includes('课程') || agentName.includes('智能问答')) cats.push('teaching');
@@ -3257,7 +3274,7 @@ return (
                 >创建智能体</Button>
               </div>
               {agentsByCategory[tabKey]
-                      .filter(a => a.name.includes(search) || a.description.includes(search))
+                      .filter(a => (typeof a.name === 'string' && a.name.includes(search)) || (typeof a.description === 'string' && a.description.includes(search)))
                       .sort((a, b) => (statusOrder[a.status] ?? 3) - (statusOrder[b.status] ?? 3))
                       .map((agent, i) => (
                         <div

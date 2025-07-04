@@ -2468,112 +2468,35 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
           <div style={{ ...mainCardStyle, marginTop: 30 }}>
             <div style={chatContentStyle} ref={chatRef}>
               {messages.map((msg, idx) => {
-                // 1. 根据智能体类型提取text内容
+                // 1. 统一提取text内容（不区分workflow/chat）
                 let text = null;
-                // 检查智能体是否为workflow类型
-                const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/');
-                if (isWorkflow) {
-                  console.log('【前端】workflow类型消息处理:', msg);
-                  
-                  // 0. 优先直接用对象的answer字段
-                  if (typeof msg?.content === 'object' && msg.content.answer) {
-                    text = msg.content.answer;
-                    console.log('【前端】从msg.content.answer提取:', text);
-                  }
-                  // 1. 处理直接返回的answer字段
-                  else if (msg?.answer) {
-                    text = msg.answer;
-                    console.log('【前端】从msg.answer提取:', text);
-                  }
-                  // 2. 处理outputs格式
-                  else if (typeof msg?.content === 'object' && msg.content.outputs) {
-                    const outputs = msg.content.outputs;
-                    if (outputs.answer) {
-                      text = outputs.answer;
-                      console.log('【前端】从msg.content.outputs.answer提取:', text);
-                    } else {
-                      // 遍历outputs所有字段
-                      const outputFields = [];
-                      for (const [key, value] of Object.entries(outputs)) {
-                        if (value !== null && value !== undefined && value !== '') {
-                          if (typeof value === 'string') {
-                            outputFields.push(`**${key}:**\n${value}`);
-                          } else if (typeof value === 'object') {
-                            outputFields.push(`**${key}:**\n${JSON.stringify(value, null, 2)}`);
-                          } else {
-                            outputFields.push(`**${key}:** ${value}`);
-                          }
-                        }
-                      }
-                      if (outputFields.length > 0) {
-                        text = outputFields.join('\n\n');
-                        console.log('【前端】从outputs字段组合:', text);
-                      }
-                    }
-                  }
-                  // 3. 处理字符串（SSE流）
-                  else if (typeof msg?.content === 'string') {
-                    const lines = msg.content.split('\n');
-                    let finalAnswer = null;
-                    for (const line of lines) {
-                      if (line.startsWith('data: ')) {
-                        try {
-                          const data = JSON.parse(line.slice(6));
-                          if (data.event === 'workflow_finished' && data.data?.outputs?.answer) {
-                            finalAnswer = data.data.outputs.answer;
-                            break;
-                          }
-                        } catch (e) {
-                          // 忽略解析错误
-                        }
-                      }
-                    }
-                    if (finalAnswer) {
-                      text = finalAnswer;
-                      console.log('【前端】从SSE流提取:', text);
-                    }
-                  }
-                  // 4. 兼容旧格式
-                  else if (typeof msg?.content === 'object') {
-                    if (msg.content?.data?.outputs?.answer) {
-                      text = msg.content.data.outputs.answer;
-                    } else if (msg.content?.result) {
-                      text = msg.content.result;
-                    }
-                  }
-                  
-                  // 调试输出最终text
-                  console.log('【前端】workflow最终text:', text);
-                } else {
-                  // Chat类型：原有逻辑
-                  if (typeof msg?.content === 'object' && msg.content.answer !== undefined && msg.content.answer !== null) {
-                    text = String(msg.content.answer);
-                  }
-                  if (text === null && typeof msg?.content === 'object' && msg.content.result !== undefined && msg.content.result !== null) {
-                    text = String(msg.content.result);
-                  }
-                  if (text === null && typeof msg?.content === 'string') {
-                    text = msg.content;
-                  }
-                  if (text === null && msg?.answer !== undefined && msg?.answer !== null) {
-                    text = String(msg.answer);
-                  }
-                  if (text === null && msg?.result !== undefined && msg?.result !== null) {
-                    text = String(msg.result);
-                  }
-                  if (text === null && msg?.text !== undefined && msg?.text !== null) {
-                    text = String(msg.text);
-                  }
-                  if (text === null && msg?.message !== undefined && msg?.message !== null) {
-                    text = String(msg.message);
-                  }
+                if (typeof msg?.content === 'object' && msg.content.answer !== undefined && msg.content.answer !== null) {
+                  text = String(msg.content.answer);
+                }
+                if (text === null && typeof msg?.content === 'object' && msg.content.result !== undefined && msg.content.result !== null) {
+                  text = String(msg.content.result);
+                }
+                if (text === null && typeof msg?.content === 'string') {
+                  text = msg.content;
+                }
+                if (text === null && msg?.answer !== undefined && msg?.answer !== null) {
+                  text = String(msg.answer);
+                }
+                if (text === null && msg?.result !== undefined && msg?.result !== null) {
+                  text = String(msg.result);
+                }
+                if (text === null && msg?.text !== undefined && msg?.text !== null) {
+                  text = String(msg.text);
+                }
+                if (text === null && msg?.message !== undefined && msg?.message !== null) {
+                  text = String(msg.message);
                 }
                 // 2. 单词消消乐（word-elimination）用小游戏渲染器
                 if (agent && agent.id === 'word-elimination' && typeof text === 'string' && /<html[\s\S]*<\/html>/i.test(text)) {
                   return <GameHtmlRenderer key={idx} htmlString={text} theme={theme} />;
                 }
 
-                // 3. 其它所有智能体（包括语文默写批改）统一用ReactMarkdown渲染
+                // 3. 其它所有智能体（包括语文默写批改/作文批改/Workflow）统一用ReactMarkdown渲染
                 if (typeof text === 'string' && text.trim()) {
                   const isUser = msg.role === 'user';
                   return (

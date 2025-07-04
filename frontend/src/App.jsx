@@ -2468,37 +2468,32 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
           <div style={{ ...mainCardStyle, marginTop: 30 }}>
             <div style={chatContentStyle} ref={chatRef}>
               {messages.map((msg, idx) => {
-                // 1. 统一提取text内容（不区分workflow/chat）
-                let text = null;
-                console.log('【前端调试】开始提取text，原始msg:', msg);
-                
-                if (typeof msg?.content === 'object' && msg.content.answer !== undefined && msg.content.answer !== null) {
-                  text = String(msg.content.answer);
-                  console.log('【前端调试】从msg.content.answer提取:', text);
-                }
-                if (text === null && typeof msg?.content === 'object' && msg.content.result !== undefined && msg.content.result !== null) {
-                  text = String(msg.content.result);
-                  console.log('【前端调试】从msg.content.result提取:', text);
-                }
-                if (text === null && typeof msg?.content === 'string') {
-                  text = msg.content;
-                  console.log('【前端调试】从msg.content(字符串)提取:', text);
-                }
-                if (text === null && msg?.answer !== undefined && msg?.answer !== null) {
-                  text = String(msg.answer);
-                  console.log('【前端调试】从msg.answer提取:', text);
-                }
-                if (text === null && msg?.result !== undefined && msg?.result !== null) {
-                  text = String(msg.result);
-                  console.log('【前端调试】从msg.result提取:', text);
-                }
-                if (text === null && msg?.text !== undefined && msg?.text !== null) {
-                  text = String(msg.text);
-                  console.log('【前端调试】从msg.text提取:', text);
-                }
-                if (text === null && msg?.message !== undefined && msg?.message !== null) {
-                  text = String(msg.message);
-                  console.log('【前端调试】从msg.message提取:', text);
+                // 自动兼容content为字符串、JSON字符串、对象
+                let text = '';
+                let rawContent = msg?.content;
+                if (typeof rawContent === 'string') {
+                  try {
+                    const parsed = JSON.parse(rawContent);
+                    if (parsed.outputs && (parsed.outputs.text || parsed.outputs.answer || parsed.outputs.result)) {
+                      text = parsed.outputs.text || parsed.outputs.answer || parsed.outputs.result;
+                    } else if (parsed.text || parsed.answer || parsed.result) {
+                      text = parsed.text || parsed.answer || parsed.result;
+                    } else {
+                      text = rawContent;
+                    }
+                  } catch {
+                    text = rawContent;
+                  }
+                } else if (typeof rawContent === 'object' && rawContent !== null) {
+                  if (rawContent.outputs && (rawContent.outputs.text || rawContent.outputs.answer || rawContent.outputs.result)) {
+                    text = rawContent.outputs.text || rawContent.outputs.answer || rawContent.outputs.result;
+                  } else if (rawContent.text || rawContent.answer || rawContent.result) {
+                    text = rawContent.text || rawContent.answer || rawContent.result;
+                  } else {
+                    text = JSON.stringify(rawContent, null, 2);
+                  }
+                } else {
+                  text = String(rawContent);
                 }
                 
                 // 兜底：如果所有提取都失败，尝试显示原始内容

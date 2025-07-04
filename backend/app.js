@@ -382,7 +382,7 @@ app.post('/api/agent/:id/invoke', async (req, res) => {
     result = {
       inputs,
       query,
-      response_mode: response_mode || 'streaming',
+      response_mode: response_mode || 'blocking',
       conversation_id: conversation_id || '',
       user: user || 'auto_test'
     };

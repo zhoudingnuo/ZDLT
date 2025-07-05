@@ -3968,5 +3968,7 @@ function getMessageText(m) {
   }
   // 解码转义的Unicode字符串
   text = decodeUnicode(text);
+  // 保证text为字符串，防止text.trim报错
+  if (typeof text !== 'string') text = String(text ?? '');
   return text;
 }

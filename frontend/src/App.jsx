@@ -2069,8 +2069,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       agent?.id &&
       messages.length > 0 &&
       messages.some(m => {
-        const text = getMessageText(m);
-        return text && text.trim();
+        return m.content && (typeof m.content === 'string' ? m.content.trim() : true);
       })
     ) {
       // 生成历史标题：首条用户消息前20字或'新对话'
@@ -2090,8 +2089,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
             agentName: agent.name,
             title,
             messages: messages.filter(m => {
-              const text = getMessageText(m);
-              return text && text.trim();
+              return m.content && (typeof m.content === 'string' ? m.content.trim() : true);
             }),
             lastUpdate: new Date().toISOString()
           };

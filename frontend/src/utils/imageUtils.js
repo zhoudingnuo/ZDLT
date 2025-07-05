@@ -11,9 +11,8 @@
  */
 export const convertImageToPng = (file, quality = 0.9) => {
   return new Promise((resolve, reject) => {
-    // 检查是否为图片文件
     if (!file.type.startsWith('image/')) {
-      // 非图片文件直接返回原文件
+      console.log('【图片调试】不是图片文件，直接返回', file.name, file.type);
       resolve(file);
       return;
     }
@@ -22,54 +21,56 @@ export const convertImageToPng = (file, quality = 0.9) => {
     const ctx = canvas.getContext('2d');
     const img = new Image();
 
+    let timeout = setTimeout(() => {
+      reject(new Error('图片转换超时'));
+      console.error('【图片调试】图片转换超时', file.name);
+    }, 5000);
+
     img.onload = () => {
+      clearTimeout(timeout);
+      console.log('【图片调试】图片加载完成', file.name, img.width, img.height);
       try {
-        // 设置canvas尺寸
         canvas.width = img.width;
         canvas.height = img.height;
-        
-        // 绘制图片到canvas
         ctx.drawImage(img, 0, 0);
-        
-        // 转换为PNG格式的Blob
+        console.log('【图片调试】已绘制到canvas，准备toBlob', file.name);
         canvas.toBlob((blob) => {
           if (blob) {
-            // 创建新的File对象，保持原文件名但改为.png扩展名
             const originalName = file.name;
             const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.'));
             const newFileName = nameWithoutExt + '.png';
-            
             const convertedFile = new File([blob], newFileName, {
               type: 'image/png',
               lastModified: Date.now()
             });
-            
-            console.log('【图片转换】', originalName, '->', newFileName, '大小:', blob.size, 'bytes');
+            console.log('【图片调试】转换成功:', newFileName, '大小:', blob.size);
             resolve(convertedFile);
           } else {
+            console.error('【图片调试】canvas.toBlob失败', file.name);
             reject(new Error('图片转换失败'));
           }
         }, 'image/png', quality);
       } catch (error) {
+        clearTimeout(timeout);
+        console.error('【图片调试】canvas绘制或toBlob异常', error, file.name);
         reject(error);
       }
     };
 
-    img.onerror = () => {
+    img.onerror = (e) => {
+      clearTimeout(timeout);
+      console.error('【图片调试】图片加载失败', file.name, e);
       reject(new Error('图片加载失败'));
     };
 
-    // 从文件创建图片URL
     const url = URL.createObjectURL(file);
     img.src = url;
-    
-    // 清理URL对象
     img.onload = () => {
-      // 延迟清理，确保图片加载完成
       setTimeout(() => {
         URL.revokeObjectURL(url);
       }, 100);
     };
+    console.log('【图片调试】开始加载图片', file.name, file.type, file.size);
   });
 };
 

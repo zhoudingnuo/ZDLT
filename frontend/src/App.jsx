@@ -2486,12 +2486,45 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
           <div style={{ ...mainCardStyle, marginTop: 30 }}>
             <div style={chatContentStyle} ref={chatRef}>
               {messages.map((msg, idx) => {
-                // 只输出原始JSON内容
-                return (
-                  <pre key={idx} style={{ color: theme === 'dark' ? '#eee' : '#222', fontSize: 15, background: 'none', border: 'none', boxShadow: 'none', padding: 0 }}>
-                    {JSON.stringify(msg.content, null, 2)}
-                  </pre>
-                );
+                // 纯文本渲染为气泡框，其它类型用<pre>原样输出
+                if (typeof msg.content === 'string') {
+                  const isUser = msg.role === 'user';
+                  return (
+                    <div
+                      key={idx}
+                      style={{
+                        display: 'flex',
+                        justifyContent: isUser ? 'flex-end' : 'flex-start',
+                        margin: '12px 0'
+                      }}
+                    >
+                      <div
+                        style={{
+                          maxWidth: '70%',
+                          background: isUser
+                            ? 'linear-gradient(90deg, #4f8cff 0%, #6f6fff 100%)'
+                            : (theme === 'dark' ? '#23262e' : '#f5f6fa'),
+                          color: isUser ? '#fff' : (theme === 'dark' ? '#eee' : '#333'),
+                          borderRadius: 18,
+                          padding: '16px 22px',
+                          fontSize: 16,
+                          boxShadow: theme === 'dark' ? '0 2px 12px 0 rgba(0,0,0,0.13)' : '0 2px 8px 0 rgba(79,140,255,0.08)',
+                          whiteSpace: 'pre-line',
+                          overflowX: 'auto',
+                          border: theme === 'dark' ? '1.5px solid #23262e' : 'none',
+                        }}
+                      >
+                        {msg.content}
+                      </div>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <pre key={idx} style={{ color: theme === 'dark' ? '#eee' : '#222', fontSize: 15, background: 'none', border: 'none', boxShadow: 'none', padding: 0 }}>
+                      {JSON.stringify(msg.content, null, 2)}
+                    </pre>
+                  );
+                }
               })}
             </div>
             <div style={{ display: 'flex', gap: 12 }}>

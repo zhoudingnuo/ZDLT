@@ -2101,10 +2101,9 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
           agentId: agent.id,
           agentName: agent.name,
           title,
-          messages: messages.filter(m => {
-            const text = getMessageText(m);
-            return text && text.trim();
-          }),
+                      messages: messages.filter(m => {
+              return m.content && (typeof m.content === 'string' ? m.content.trim() : true);
+            }),
           lastUpdate: new Date().toISOString()
         };
         const existingIndex = history.findIndex(h => h.id === id);

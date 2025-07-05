@@ -1873,9 +1873,6 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         await updateUserUsage(currentUser.username, currentUser.usage_tokens);
       }
       
-      // 检查智能体是否为workflow类型
-      const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/');
-      
       // 更新最终结果，保持计时器运行
       setMessages(msgs => {
         const lastIdx = msgs.length - 1;
@@ -1884,7 +1881,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
             ...msgs.slice(0, lastIdx),
             {
               role: 'assistant',
-              content: isWorkflow ? params : (params.answer || params.content || '处理完成'),
+              content: params,
               usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
               tokens: params.metadata?.usage?.total_tokens || params.data?.total_tokens,
               price: params.metadata?.usage?.total_price
@@ -1926,33 +1923,11 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     setAiTimer(0);
     setMessages([
       ...newMessages,
-              {
-          role: 'assistant',
-          content: (() => {
-            // 自动提取outputs中的所有内容
-            if (params.data && params.data.outputs) {
-              const outputs = params.data.outputs;
-              const outputFields = [];
-              
-              // 遍历outputs中的所有字段
-              for (const [key, value] of Object.entries(outputs)) {
-                if (value !== null && value !== undefined && value !== '') {
-                  if (typeof value === 'string') {
-                    outputFields.push(`**${key}:**\n${value}`);
-                  } else if (typeof value === 'object') {
-                    outputFields.push(`**${key}:**\n${JSON.stringify(value, null, 2)}`);
-                  } else {
-                    outputFields.push(`**${key}:** ${value}`);
-                  }
-                }
-              }
-              
-              return outputFields.length > 0 ? outputFields.join('\n\n') : '处理已经完成';
-            }
-            return '处理已经完成';
-          })(),
-          usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
-        }
+      {
+        role: 'assistant',
+        content: params,
+        usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
+      }
     ]);
     setLoading(false);
   };

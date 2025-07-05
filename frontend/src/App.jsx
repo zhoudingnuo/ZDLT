@@ -1382,7 +1382,7 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       onCancel(); // 关闭弹窗
       
       // 立即显示用户消息和AI思考气泡，开始计时
-      await onSubmit({ status: 'processing', message: '文件上传成功，正在处理中...' });
+      await onSubmit({ status: 'processing', message: '参数提交成功，正在处理中...' });
       
       // 如果有组装好的数据，调用新的Dify API
       if (res.data && res.data.inputs) {
@@ -1664,6 +1664,9 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     }
     aiStartTimeRef.current = Date.now();
     setAiTimer(0);
+    aiTimerRef.current = setInterval(() => {
+      setAiTimer(((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1));
+    }, 100);
     setLoading(true);
     const newMessages = [...messages, { role: 'user', content: input }];
     // 立即插入AI loading气泡

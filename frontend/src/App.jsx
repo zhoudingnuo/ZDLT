@@ -1683,17 +1683,8 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       console.log('API响应状态:', res.status);
       console.log('API响应数据:', res.data);
       
-      // 检查智能体是否为workflow类型
-      const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/');
-      
-      let answer;
-      if (isWorkflow) {
-        // Workflow类型：直接使用完整响应数据
-        answer = res.data.outputs.result;
-      } else {
-        // Chat类型：提取answer字段
-        answer = res.data.answer || (res.data.data && res.data.data.answer) || JSON.stringify(res.data);
-      }
+      // 直接使用完整响应数据，不提取任何字段
+      const answer = res.data;
       
       // 累加token和价格消耗
       usage = res.data.metadata?.usage || res.data.data;

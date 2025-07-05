@@ -1335,25 +1335,19 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
             // 多文件处理
             if (fileList && fileList.length > 0) {
               const originalFiles = fileList.map(fileItem => fileItem.originFileObj).filter(Boolean);
-              console.log('【图片调试】多文件原始：', originalFiles.map(f => ({ name: f.name, type: f.type, size: f.size })));
               // 转换所有图片为PNG格式
               const convertedFiles = await convertImagesToPng(originalFiles);
-              console.log('【图片调试】多文件转换后：', convertedFiles.map(f => ({ name: f.name, type: f.type, size: f.size })));
               convertedFiles.forEach((fileObj, index) => {
                 formData.append(input.name, fileObj);
-                console.log('【FormData调试】添加转换后的多文件:', fileObj.name, '类型:', fileObj.type, '大小:', fileObj.size);
               });
             }
           } else {
             // 单文件处理
             const fileObj = fileList && fileList[0] && fileList[0].originFileObj;
             if (fileObj) {
-              console.log('【图片调试】单文件原始：', fileObj.name, fileObj.type, fileObj.size);
               // 转换图片为PNG格式
               const convertedFile = await convertImageToPng(fileObj);
-              console.log('【图片调试】单文件转换后：', convertedFile.name, convertedFile.type, convertedFile.size);
               formData.append(input.name, convertedFile);
-              console.log('【FormData调试】添加转换后的单文件:', convertedFile.name, '类型:', convertedFile.type, '大小:', convertedFile.size);
             }
           }
         } else if (values[input.name] !== undefined) {
@@ -3931,43 +3925,48 @@ const handleSave = async () => {
 
 // 在文件顶部添加工具函数
 function getMessageText(m) {
-  if (!m || !m.content) return '';
-  if (typeof m.content === 'string') {
+  // 递归解析多层JSON字符串
+  function safeJsonParse(str) {
     try {
-      const parsed = JSON.parse(m.content);
-      if (parsed.outputs && (parsed.outputs.text || parsed.outputs.answer || parsed.outputs.result)) {
-        return parsed.outputs.text || parsed.outputs.answer || parsed.outputs.result;
-      }
-      if (parsed.text || parsed.answer || parsed.result) {
-        return parsed.text || parsed.answer || parsed.result;
-      }
-      return m.content;
+      const obj = JSON.parse(str);
+      if (typeof obj === 'string') return safeJsonParse(obj);
+      return obj;
     } catch {
-      return m.content;
+      return str;
     }
   }
-  if (typeof m.content === 'object') {
-    if (m.content.outputs && (m.content.outputs.text || m.content.outputs.answer || m.content.outputs.result)) {
-      return m.content.outputs.text || m.content.outputs.answer || m.content.outputs.result;
-    }
-    if (m.content.text || m.content.answer || m.content.result) {
-      return m.content.text || m.content.answer || m.content.result;
-    }
-    if (m.content.content) {
-      try {
-        const parsed = JSON.parse(m.content.content);
-        if (parsed.outputs && (parsed.outputs.text || parsed.outputs.answer || parsed.outputs.result)) {
-          return parsed.outputs.text || parsed.outputs.answer || parsed.outputs.result;
-        }
-        if (parsed.text || parsed.answer || parsed.result) {
-          return parsed.text || parsed.answer || parsed.result;
-        }
-        return m.content.content;
-      } catch {
-        return m.content.content;
-      }
-    }
-    return JSON.stringify(m.content);
+  // 解码转义的Unicode字符串
+  function decodeUnicode(str) {
+    if (typeof str !== 'string') return str;
+    // 兼容 \uXXXX 和 \\uXXXX
+    return str.replace(/\\u([0-9a-fA-F]{4})/g, (m, g1) => String.fromCharCode(parseInt(g1, 16)))
+              .replace(/\u([0-9a-fA-F]{4})/g, (m, g1) => String.fromCharCode(parseInt(g1, 16)));
   }
-  return String(m.content);
+  if (!m || !m.content) return '';
+  let content = m.content;
+  if (typeof content === 'string') {
+    content = safeJsonParse(content);
+  }
+  // 递归处理对象中的content字段
+  if (typeof content === 'object' && content !== null && content.content) {
+    content.content = safeJsonParse(content.content);
+  }
+  // 提取answer/outputs等
+  let text = '';
+  if (typeof content === 'object' && content !== null) {
+    if (content.outputs && (content.outputs.text || content.outputs.answer || content.outputs.result)) {
+      text = content.outputs.text || content.outputs.answer || content.outputs.result;
+    } else if (content.text || content.answer || content.result) {
+      text = content.text || content.answer || content.result;
+    } else if (content.content) {
+      text = content.content;
+    } else {
+      text = JSON.stringify(content);
+    }
+  } else {
+    text = content;
+  }
+  // 解码转义的Unicode字符串
+  text = decodeUnicode(text);
+  return text;
 }

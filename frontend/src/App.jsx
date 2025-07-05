@@ -3938,8 +3938,13 @@ function getMessageText(m) {
   // 解码转义的Unicode字符串
   function decodeUnicode(str) {
     if (typeof str !== 'string') return str;
-    return str.replace(/\\u([0-9a-fA-F]{4})/g, (m, g1) => String.fromCharCode(parseInt(g1, 16)))
-              .replace(/\u([0-9a-fA-F]{4})/g, (m, g1) => String.fromCharCode(parseInt(g1, 16)));
+    let prev;
+    do {
+      prev = str;
+      str = str.replace(/\\u([0-9a-fA-F]{4})/g, (m, g1) => String.fromCharCode(parseInt(g1, 16)))
+               .replace(/\u([0-9a-fA-F]{4})/g, (m, g1) => String.fromCharCode(parseInt(g1, 16)));
+    } while (str !== prev);
+    return str;
   }
   if (!m || !m.content) return '';
   let content = m.content;
@@ -3973,5 +3978,6 @@ function getMessageText(m) {
   }
   let text = extractText(content);
   if (typeof text !== 'string') text = String(text ?? '');
+  console.log('【调试】最终text内容：', text, typeof text);
   return text;
 }

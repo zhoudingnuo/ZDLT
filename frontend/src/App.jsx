@@ -2480,8 +2480,22 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
           <div style={{ ...mainCardStyle, marginTop: 30 }}>
             <div style={chatContentStyle} ref={chatRef}>
               {messages.map((msg, idx) => {
-                // 纯文本渲染为气泡框，其它类型用<pre>原样输出
+                // 处理嵌套JSON content的情况
+                let displayContent = msg.content;
                 if (typeof msg.content === 'string') {
+                  try {
+                    const parsed = JSON.parse(msg.content);
+                    if (parsed.content) {
+                      displayContent = parsed.content;
+                    }
+                  } catch {
+                    // 如果不是JSON，保持原样
+                    displayContent = msg.content;
+                  }
+                }
+                
+                // 纯文本渲染为气泡框，其它类型用<pre>原样输出
+                if (typeof displayContent === 'string') {
                   const isUser = msg.role === 'user';
                   return (
                     <div
@@ -2508,7 +2522,7 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                           border: theme === 'dark' ? '1.5px solid #23262e' : 'none',
                         }}
                       >
-                        {msg.content}
+                        {displayContent}
                         {/* 显示token、price和用时 */}
                         {!isUser && !msg.isLoading && (msg.tokens !== undefined || msg.price !== undefined || msg.usedTime) && (
                           <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -2549,7 +2563,7 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                 } else {
                   return (
                     <pre key={idx} style={{ color: theme === 'dark' ? '#eee' : '#222', fontSize: 15, background: 'none', border: 'none', boxShadow: 'none', padding: 0 }}>
-                      {JSON.stringify(msg.content, null, 2)}
+                      {JSON.stringify(displayContent, null, 2)}
                     </pre>
                   );
                 }

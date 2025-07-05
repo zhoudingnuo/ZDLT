@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片格式转换测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            background: #fafafa;
+        }
+        .upload-area.dragover {
+            border-color: #4f8cff;
+            background: #eaf3ff;
+        }
+        .file-input {
+            display: none;
+        }
+        .btn {
+            background: #4f8cff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        .btn:hover {
+            background: #3a7ce0;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .file-list {
+            margin: 20px 0;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            margin: 10px 0;
+            background: #f9f9f9;
+        }
+        .file-info {
+            flex: 1;
+        }
+        .file-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .file-details {
+            font-size: 12px;
+            color: #666;
+        }
+        .file-preview {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.original {
+            background: #e6f7ff;
+            color: #1890ff;
+        }
+        .status.converted {
+            background: #f6ffed;
+            color: #52c41a;
+        }
+        .status.error {
+            background: #fff2f0;
+            color: #ff4d4f;
+        }
+        .progress {
+            width: 100%;
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #4f8cff;
+            transition: width 0.3s ease;
+        }
+        .log {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ 图片格式转换测试</h1>
+        <p>支持将各种图片格式（JPG、JPEG、GIF、WEBP、BMP等）统一转换为PNG格式</p>
+        
+        <div class="upload-area" id="uploadArea">
+            <p>拖拽图片文件到此处，或点击选择文件</p>
+            <input type="file" id="fileInput" class="file-input" multiple accept="image/*">
+            <button class="btn" onclick="document.getElementById('fileInput').click()">选择图片文件</button>
+        </div>
+        
+        <div class="file-list" id="fileList"></div>
+        
+        <button class="btn" id="convertBtn" onclick="convertAllImages()" disabled>转换所有图片为PNG</button>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        // 图片转换工具函数
+        const convertImageToPng = (file, quality = 0.9) => {
+            return new Promise((resolve, reject) => {
+                // 检查是否为图片文件
+                if (!file.type.startsWith('image/')) {
+                    resolve(file);
+                    return;
+                }
+
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+
+                img.onload = () => {
+                    try {
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+                        
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                const originalName = file.name;
+                                const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.'));
+                                const newFileName = nameWithoutExt + '.png';
+                                
+                                const convertedFile = new File([blob], newFileName, {
+                                    type: 'image/png',
+                                    lastModified: Date.now()
+                                });
+                                
+                                log(`✅ 转换成功: ${originalName} -> ${newFileName} (${blob.size} bytes)`);
+                                resolve(convertedFile);
+                            } else {
+                                reject(new Error('图片转换失败'));
+                            }
+                        }, 'image/png', quality);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+
+                img.onerror = () => {
+                    reject(new Error('图片加载失败'));
+                };
+
+                const url = URL.createObjectURL(file);
+                img.src = url;
+                
+                img.onload = () => {
+                    setTimeout(() => {
+                        URL.revokeObjectURL(url);
+                    }, 100);
+                };
+            });
+        };
+
+        let selectedFiles = [];
+
+        // 日志函数
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // 文件选择处理
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+        
+        // 拖拽处理
+        const uploadArea = document.getElementById('uploadArea');
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+            handleFiles(files);
+        });
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            selectedFiles = files;
+            displayFiles(files);
+            document.getElementById('convertBtn').disabled = files.length === 0;
+            log(`📁 选择了 ${files.length} 个图片文件`);
+        }
+
+        function displayFiles(files) {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            
+            files.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const preview = document.createElement('img');
+                preview.className = 'file-preview';
+                preview.src = URL.createObjectURL(file);
+                
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'file-info';
+                
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                fileName.textContent = file.name;
+                
+                const fileDetails = document.createElement('div');
+                fileDetails.className = 'file-details';
+                fileDetails.textContent = `${file.type} | ${(file.size / 1024).toFixed(1)} KB`;
+                
+                const status = document.createElement('div');
+                status.className = 'status original';
+                status.textContent = '原始文件';
+                
+                fileInfo.appendChild(fileName);
+                fileInfo.appendChild(fileDetails);
+                fileItem.appendChild(preview);
+                fileItem.appendChild(fileInfo);
+                fileItem.appendChild(status);
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        async function convertAllImages() {
+            const convertBtn = document.getElementById('convertBtn');
+            convertBtn.disabled = true;
+            convertBtn.textContent = '转换中...';
+            
+            log('🔄 开始转换所有图片...');
+            
+            const convertedFiles = [];
+            
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                try {
+                    log(`🔄 正在转换: ${file.name}`);
+                    const convertedFile = await convertImageToPng(file);
+                    convertedFiles.push(convertedFile);
+                    
+                    // 更新文件项状态
+                    const fileItems = document.querySelectorAll('.file-item');
+                    if (fileItems[i]) {
+                        const status = fileItems[i].querySelector('.status');
+                        status.className = 'status converted';
+                        status.textContent = '已转换';
+                    }
+                } catch (error) {
+                    log(`❌ 转换失败: ${file.name} - ${error.message}`);
+                    convertedFiles.push(file);
+                    
+                    const fileItems = document.querySelectorAll('.file-item');
+                    if (fileItems[i]) {
+                        const status = fileItems[i].querySelector('.status');
+                        status.className = 'status error';
+                        status.textContent = '转换失败';
+                    }
+                }
+            }
+            
+            log(`✅ 转换完成！共处理 ${selectedFiles.length} 个文件`);
+            
+            // 创建下载链接
+            if (convertedFiles.length > 0) {
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'btn';
+                downloadBtn.textContent = '下载转换后的文件';
+                downloadBtn.onclick = () => downloadFiles(convertedFiles);
+                document.getElementById('fileList').appendChild(downloadBtn);
+            }
+            
+            convertBtn.disabled = false;
+            convertBtn.textContent = '转换所有图片为PNG';
+        }
+
+        function downloadFiles(files) {
+            files.forEach(file => {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(file);
+                link.download = file.name;
+                link.click();
+                URL.revokeObjectURL(link.href);
+            });
+            log('📥 文件下载已开始');
+        }
+
+        // 初始化
+        log('🚀 图片格式转换工具已加载');
+    </script>
+</body>
+</html> 

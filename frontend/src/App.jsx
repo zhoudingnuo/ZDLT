@@ -21,6 +21,7 @@ import {
   getAllUsersFromServer,
   updateUserBalance
 } from './utils/userUtils';
+import { convertImageToPng, convertImagesToPng } from './utils/imageUtils';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
@@ -1306,6 +1307,8 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
     });
   };
 
+
+
     const handleSubmit = async () => {
     try {
       setLoading(true);
@@ -1325,26 +1328,30 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       // 处理文件和非文件参数
       for (const input of agent.inputs || []) {
         if (input.type === 'file' || input.type === 'upload' || (input.type === 'array' && input.itemType === 'file')) {
-          // 文件参数，直接添加到FormData
+          // 文件参数，先转换图片格式，再添加到FormData
           const fileList = form.getFieldValue(input.name);
           
           if (input.type === 'array' && input.itemType === 'file') {
             // 多文件处理
             if (fileList && fileList.length > 0) {
-              fileList.forEach((fileItem, index) => {
-                const fileObj = fileItem.originFileObj;
-                if (fileObj) {
-                  formData.append(input.name, fileObj);
-                  console.log('【前端】添加多文件:', fileObj.name);
-                }
+              const originalFiles = fileList.map(fileItem => fileItem.originFileObj).filter(Boolean);
+              
+              // 转换所有图片为PNG格式
+              const convertedFiles = await convertImagesToPng(originalFiles);
+              
+              convertedFiles.forEach((fileObj, index) => {
+                formData.append(input.name, fileObj);
+                console.log('【前端】添加转换后的多文件:', fileObj.name, '类型:', fileObj.type);
               });
             }
           } else {
             // 单文件处理
             const fileObj = fileList && fileList[0] && fileList[0].originFileObj;
             if (fileObj) {
-              formData.append(input.name, fileObj);
-              console.log('【前端】添加单文件:', fileObj.name);
+              // 转换图片为PNG格式
+              const convertedFile = await convertImageToPng(fileObj);
+              formData.append(input.name, convertedFile);
+              console.log('【前端】添加转换后的单文件:', convertedFile.name, '类型:', convertedFile.type);
             }
           }
         } else if (values[input.name] !== undefined) {
@@ -1356,7 +1363,7 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       // 将非文件参数序列化后添加到FormData
       formData.append('inputs', JSON.stringify(inputs));
       
-      console.log('【前端】发送FormData到后端，包含文件和非文件参数');
+      console.log('【前端】发送FormData到后端，包含转换后的PNG图片和非文件参数');
       
       const res = await axios.post(`${API_BASE}/api/agent/${agent.id}/invoke`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -1430,7 +1437,7 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
                 valuePropName="fileList"
                 getValueFromEvent={e => Array.isArray(e) ? e : e && e.fileList}
                 rules={[{ required: input.required, message: `请先选择${input.label}` }]}
-                extra={<span style={{ color: theme === 'dark' ? '#bbb' : '#666', fontSize: 13 }}>{input.description || '支持文档上传到Dify'}</span>}
+                extra={<span style={{ color: theme === 'dark' ? '#bbb' : '#666', fontSize: 13 }}>{input.description || '支持文档上传到Dify，图片将自动转换为PNG格式'}</span>}
                 style={{ marginBottom: 28 }}
               >
                 <Upload beforeUpload={() => false} maxCount={1}>
@@ -1445,7 +1452,7 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
                 valuePropName="fileList"
                 getValueFromEvent={e => Array.isArray(e) ? e : e && e.fileList}
                 rules={[{ required: input.required, message: `请先选择${input.label}` }]}
-                extra={<span style={{ color: theme === 'dark' ? '#bbb' : '#666', fontSize: 13 }}>{input.description}</span>}
+                extra={<span style={{ color: theme === 'dark' ? '#bbb' : '#666', fontSize: 13 }}>{input.description || '支持图片文件，将自动转换为PNG格式'}</span>}
                 style={{ marginBottom: 28 }}
               >
                 <Upload beforeUpload={() => false} maxCount={1}>
@@ -1460,7 +1467,7 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
                 valuePropName="fileList"
                 getValueFromEvent={e => Array.isArray(e) ? e : e && e.fileList}
                 rules={[{ required: input.required, message: `请先选择${input.label}` }]}
-                extra={<span style={{ color: theme === 'dark' ? '#bbb' : '#666', fontSize: 13 }}>{input.description || '支持多文件上传'}</span>}
+                extra={<span style={{ color: theme === 'dark' ? '#bbb' : '#666', fontSize: 13 }}>{input.description || '支持多文件上传，图片将自动转换为PNG格式'}</span>}
                 style={{ marginBottom: 28 }}
               >
                 <Upload beforeUpload={() => false} multiple>

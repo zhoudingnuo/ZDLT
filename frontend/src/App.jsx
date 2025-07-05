@@ -2515,6 +2515,40 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                         }}
                       >
                         {msg.content}
+                        {/* 显示token、price和用时 */}
+                        {!isUser && !msg.isLoading && (msg.tokens !== undefined || msg.price !== undefined || msg.usedTime) && (
+                          <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                            {msg.usedTime && (
+                              <span style={{ color: theme === 'dark' ? '#bbb' : '#888', fontSize: 13 }}>
+                                用时: {msg.usedTime}s
+                              </span>
+                            )}
+                            {msg.tokens !== undefined && (
+                              <span style={{
+                                display: 'inline-block',
+                                background: theme === 'dark' ? '#262a32' : '#eaf3ff',
+                                color: theme === 'dark' ? '#4f8cff' : '#4f8cff',
+                                borderRadius: 8,
+                                fontSize: 12,
+                                padding: '2px 8px'
+                              }}>
+                                Token: {msg.tokens !== null ? msg.tokens : '--'}
+                              </span>
+                            )}
+                            {msg.price !== undefined && (
+                              <span style={{
+                                display: 'inline-block',
+                                background: theme === 'dark' ? '#262a32' : '#eaf3ff',
+                                color: theme === 'dark' ? '#4f8cff' : '#4f8cff',
+                                borderRadius: 8,
+                                fontSize: 12,
+                                padding: '2px 8px'
+                              }}>
+                                金额: ¥{msg.price !== null ? Number(msg.price).toFixed(4) : '--'}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );

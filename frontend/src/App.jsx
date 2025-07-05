@@ -1669,8 +1669,8 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     }, 100);
     setLoading(true);
     const newMessages = [...messages, { role: 'user', content: input }];
-    // 立即插入AI loading气泡
-    setMessages([...newMessages, { role: 'assistant', content: '', isLoading: true }]);
+    // 立即插入AI loading气泡，显示思考消息
+    setMessages([...newMessages, { role: 'assistant', content: 'AI正在思考🤔', isLoading: true }]);
     setInput('');
     try {
       console.log('普通消息调用信息:', {
@@ -1826,7 +1826,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
             ...msgs.slice(0, lastIdx),
             {
               role: 'assistant',
-              content: params.message || '文件上传成功，正在处理中...',
+              content: params.message || 'AI正在思考🤔',
               isLoading: true, // 保持isLoading状态，让计时器继续显示
               usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1)
             }
@@ -2484,7 +2484,14 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                         }}
                       >
                         {msg.content}
-                        {/* 显示token、price和用时 */}
+                        {/* 显示token、price和用时，或者实时计时器 */}
+                        {!isUser && msg.isLoading && (
+                          <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                            <span style={{ color: theme === 'dark' ? '#bbb' : '#888', fontSize: 13 }}>
+                              用时: {aiTimer}s
+                            </span>
+                          </div>
+                        )}
                         {!isUser && !msg.isLoading && (msg.tokens !== undefined || msg.price !== undefined || msg.usedTime) && (
                           <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                             {msg.usedTime && (

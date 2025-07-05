@@ -26,6 +26,8 @@ export const convertImageToPng = (file, quality = 0.9) => {
       console.error('【图片调试】图片转换超时', file.name);
     }, 5000);
 
+    const url = URL.createObjectURL(file);
+
     img.onload = () => {
       clearTimeout(timeout);
       console.log('【图片调试】图片加载完成', file.name, img.width, img.height);
@@ -54,6 +56,10 @@ export const convertImageToPng = (file, quality = 0.9) => {
         clearTimeout(timeout);
         console.error('【图片调试】canvas绘制或toBlob异常', error, file.name);
         reject(error);
+      } finally {
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 100);
       }
     };
 
@@ -61,16 +67,13 @@ export const convertImageToPng = (file, quality = 0.9) => {
       clearTimeout(timeout);
       console.error('【图片调试】图片加载失败', file.name, e);
       reject(new Error('图片加载失败'));
-    };
-
-    const url = URL.createObjectURL(file);
-    img.src = url;
-    img.onload = () => {
       setTimeout(() => {
         URL.revokeObjectURL(url);
       }, 100);
     };
+
     console.log('【图片调试】开始加载图片', file.name, file.type, file.size);
+    img.src = url;
   });
 };
 

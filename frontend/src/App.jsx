@@ -1335,23 +1335,25 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
             // 多文件处理
             if (fileList && fileList.length > 0) {
               const originalFiles = fileList.map(fileItem => fileItem.originFileObj).filter(Boolean);
-              
+              console.log('【图片调试】多文件原始：', originalFiles.map(f => ({ name: f.name, type: f.type, size: f.size })));
               // 转换所有图片为PNG格式
               const convertedFiles = await convertImagesToPng(originalFiles);
-              
+              console.log('【图片调试】多文件转换后：', convertedFiles.map(f => ({ name: f.name, type: f.type, size: f.size })));
               convertedFiles.forEach((fileObj, index) => {
                 formData.append(input.name, fileObj);
-                console.log('【前端】添加转换后的多文件:', fileObj.name, '类型:', fileObj.type);
+                console.log('【FormData调试】添加转换后的多文件:', fileObj.name, '类型:', fileObj.type, '大小:', fileObj.size);
               });
             }
           } else {
             // 单文件处理
             const fileObj = fileList && fileList[0] && fileList[0].originFileObj;
             if (fileObj) {
+              console.log('【图片调试】单文件原始：', fileObj.name, fileObj.type, fileObj.size);
               // 转换图片为PNG格式
               const convertedFile = await convertImageToPng(fileObj);
+              console.log('【图片调试】单文件转换后：', convertedFile.name, convertedFile.type, convertedFile.size);
               formData.append(input.name, convertedFile);
-              console.log('【前端】添加转换后的单文件:', convertedFile.name, '类型:', convertedFile.type);
+              console.log('【FormData调试】添加转换后的单文件:', convertedFile.name, '类型:', convertedFile.type, '大小:', convertedFile.size);
             }
           }
         } else if (values[input.name] !== undefined) {
@@ -1363,13 +1365,22 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       // 将非文件参数序列化后添加到FormData
       formData.append('inputs', JSON.stringify(inputs));
       
+      // 打印FormData所有内容
+      for (let pair of formData.entries()) {
+        if (pair[1] instanceof File) {
+          console.log('【FormData调试】FormData文件字段:', pair[0], pair[1].name, pair[1].type, pair[1].size);
+        } else {
+          console.log('【FormData调试】FormData字段:', pair[0], pair[1]);
+        }
+      }
+      
       console.log('【前端】发送FormData到后端，包含转换后的PNG图片和非文件参数');
       
       const res = await axios.post(`${API_BASE}/api/agent/${agent.id}/invoke`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
-      console.log('【前端】axios.post成功返回，响应数据:', res.data);
+      console.log('【上传调试】axios.post成功返回，响应数据:', res.data);
       
       // 文件上传成功，关闭弹窗
       message.success('参数提交成功！');
@@ -1384,10 +1395,10 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
         try {
           // 统一用chat类型的构造方式
           const difyResponse = await axios.post(`${API_BASE}/api/agent/${agent.id}/call-dify`, { data: res.data });
-          console.log('【前端】Dify调用成功:', difyResponse.data);
+          console.log('【上传调试】Dify调用成功:', difyResponse.data);
           onSubmit(difyResponse.data);
         } catch (difyError) {
-          console.error('【前端】Dify调用失败:', difyError);
+          console.error('【上传调试】Dify调用失败:', difyError);
           onSubmit({ 
             status: 'error', 
             message: 'Dify调用失败: ' + (difyError.response?.data?.error || difyError.message)

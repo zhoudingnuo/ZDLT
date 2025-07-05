@@ -31,7 +31,7 @@ import { UserListProvider, useUserList } from './contexts/UserListContext';
 import './nav-btn.css';
 import './category-tab.css';
 import API_BASE from './utils/apiConfig';
-console.warn = () => {};
+
 
 const { Header, Content, Sider } = Layout;
 const { Search } = Input;
@@ -380,7 +380,6 @@ function LoginModal({ visible, onCancel, onLogin, onRegister, theme }) {
       
       form.resetFields();
     } catch (e) {
-      console.error('登录/注册失败:', e);
       message.error('操作失败，请重试');
     } finally {
       setLoading(false);
@@ -539,7 +538,7 @@ function ProfileModal({ visible, onCancel, user, theme }) {
       // 充值记录变化后刷新用户信息
       refreshUserInfo();
     } catch (error) {
-      console.error('加载充值记录失败:', error);
+      // 忽略错误
     } finally {
       setRechargeLoading(false);
     }
@@ -568,7 +567,6 @@ function ProfileModal({ visible, onCancel, user, theme }) {
       message.success('个人信息更新成功！');
       onCancel();
     } catch (error) {
-      console.error('更新失败:', error);
       message.error('更新失败，请重试');
     } finally {
       setLoading(false);
@@ -1085,7 +1083,6 @@ function AgentReviewModal({ visible, onCancel, theme }) {
       const response = await axios.get(`${API_BASE}/api/admin/agents/status`);
       setAgentsByStatus(response.data);
     } catch (error) {
-      console.error('获取智能体状态失败:', error);
       message.error('获取智能体状态失败');
     } finally {
       setLoading(false);
@@ -1359,22 +1356,13 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
       // 将非文件参数序列化后添加到FormData
       formData.append('inputs', JSON.stringify(inputs));
       
-      // 打印FormData所有内容
-      for (let pair of formData.entries()) {
-        if (pair[1] instanceof File) {
-          console.log('【FormData调试】FormData文件字段:', pair[0], pair[1].name, pair[1].type, pair[1].size);
-        } else {
-          console.log('【FormData调试】FormData字段:', pair[0], pair[1]);
-        }
-      }
-      
-      console.log('【前端】发送FormData到后端，包含转换后的PNG图片和非文件参数');
+
       
       const res = await axios.post(`${API_BASE}/api/agent/${agent.id}/invoke`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
-      console.log('【上传调试】axios.post成功返回，响应数据:', res.data);
+
       
       // 文件上传成功，关闭弹窗
       message.success('参数提交成功！');
@@ -1389,10 +1377,9 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
         try {
           // 统一用chat类型的构造方式
           const difyResponse = await axios.post(`${API_BASE}/api/agent/${agent.id}/call-dify`, { data: res.data });
-          console.log('【上传调试】Dify调用成功:', difyResponse.data);
+
           onSubmit(difyResponse.data);
         } catch (difyError) {
-          console.error('【上传调试】Dify调用失败:', difyError);
           onSubmit({ 
             status: 'error', 
             message: 'Dify调用失败: ' + (difyError.response?.data?.error || difyError.message)
@@ -1403,7 +1390,6 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
         onSubmit(res.data);
       }
     } catch (e) {
-      console.error('【前端】参数提交失败:', e);
       message.error('参数提交失败: ' + (e.response?.data?.error || e.message));
     } finally {
       setLoading(false);
@@ -1582,6 +1568,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
   const [loginVisible, setLoginVisible] = useState(false);
   const [profileVisible, setProfileVisible] = useState(false);
   const [workflowInputVisible, setWorkflowInputVisible] = useState(false);
+  const [outputMode, setOutputMode] = useState('rendered'); // 新增：输出模式开关 'rendered' | 'json'
   const chatRef = useRef(null);
   const [aiTimer, setAiTimer] = useState(0);
   const aiTimerRef = useRef(null);
@@ -2165,6 +2152,76 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     }
   }, [user]);
 
+  // 新增：内容提取和渲染函数
+  const extractAndRenderContent = (content) => {
+    if (outputMode === 'json') {
+      // JSON模式：直接返回原始内容
+      return typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+    }
+
+    // 渲染模式：根据智能体类型处理内容
+    const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/');
+    
+    if (isWorkflow) {
+      // Workflow类型：提取data.outputs中的内容
+      if (content && typeof content === 'object') {
+        const data = content.data || content;
+        const outputs = data.outputs;
+        
+        if (outputs) {
+          let renderedContent = '';
+          
+          // 提取outputs中的各种字段
+          if (outputs.result) {
+            renderedContent += `结果：${outputs.result}\n\n`;
+          }
+          if (outputs.text) {
+            renderedContent += `文本：${outputs.text}\n\n`;
+          }
+          if (outputs.file) {
+            renderedContent += `文件：${outputs.file}\n\n`;
+          }
+          if (outputs.answer) {
+            renderedContent += `答案：${outputs.answer}\n\n`;
+          }
+          
+          // 如果没有找到特定字段，遍历所有outputs内容
+          if (!renderedContent) {
+            for (const [key, value] of Object.entries(outputs)) {
+              if (value && typeof value === 'string' && value.trim()) {
+                renderedContent += `${key}：${value}\n\n`;
+              }
+            }
+          }
+          
+          return renderedContent.trim() || '处理完成，但未找到可显示的内容';
+        }
+      }
+      return 'Workflow处理完成';
+    } else {
+      // Chat类型
+      const isDialogue = agent?.inputType === 'dialogue';
+      
+      if (isDialogue) {
+        // Dialogue类型：直接提取answer
+        if (content && typeof content === 'object') {
+          return content.answer || content.data?.answer || '未找到答案内容';
+        }
+        return typeof content === 'string' ? content : '未找到答案内容';
+      } else {
+        // Parameter类型：先提取content，再提取answer
+        if (content && typeof content === 'object') {
+          const contentData = content.content || content.data?.content;
+          if (contentData) {
+            return contentData.answer || contentData.data?.answer || '未找到答案内容';
+          }
+          return content.answer || content.data?.answer || '未找到答案内容';
+        }
+        return typeof content === 'string' ? content : '未找到答案内容';
+      }
+    }
+  };
+
   return (
     <Layout key={chatPageKey} style={{ minHeight: '100vh', fontFamily, background: theme === 'dark' ? '#18191c' : undefined, paddingTop: 20 }}>
       <style>{forceDesktopStyles}</style>
@@ -2416,7 +2473,20 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
       <Layout style={{ background: theme === 'dark' ? '#18191c' : undefined }}>
         <Header style={{ background: theme === 'dark' ? '#23262e' : '#f5f6fa', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: 64, marginTop: 0 }}>
           <span style={{ flex: 1, textAlign: 'center', fontWeight: 700, fontSize: 26, color: mainColorSolid, letterSpacing: 1 }}>{agent?.name || ''}</span>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {/* 输出模式开关 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ color: theme === 'dark' ? '#eee' : '#333', fontSize: 14 }}>输出模式:</span>
+              <Select
+                value={outputMode}
+                onChange={setOutputMode}
+                size="small"
+                style={{ width: 100 }}
+              >
+                <Select.Option value="rendered">渲染模式</Select.Option>
+                <Select.Option value="json">JSON模式</Select.Option>
+              </Select>
+            </div>
             <Tooltip title={user ? user.username : '未登录'}>
             <Dropdown 
               overlay={
@@ -2455,10 +2525,21 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
           <div style={{ ...mainCardStyle, marginTop: 30 }}>
             <div style={chatContentStyle} ref={chatRef}>
               {messages.map((msg, idx) => {
-                // 纯文本渲染为气泡框，其它类型用<pre>原样输出
-                if (typeof msg.content === 'string') {
-                  const isUser = msg.role === 'user';
+                // 根据输出模式处理内容
+                const processedContent = extractAndRenderContent(msg.content);
+                const isUser = msg.role === 'user';
+                
+                // 如果是JSON模式且内容不是字符串，使用<pre>标签
+                if (outputMode === 'json' && typeof msg.content !== 'string' && !isUser) {
                   return (
+                    <pre key={idx} style={{ color: theme === 'dark' ? '#eee' : '#222', fontSize: 15, background: 'none', border: 'none', boxShadow: 'none', padding: 0 }}>
+                      {processedContent}
+                    </pre>
+                  );
+                }
+                
+                // 其他情况使用气泡框
+                return (
                     <div
                       key={idx}
                       style={{
@@ -2483,7 +2564,7 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                           border: theme === 'dark' ? '1.5px solid #23262e' : 'none',
                         }}
                       >
-                        {msg.content}
+                        {processedContent}
                         {/* 显示token、price和用时，或者实时计时器 */}
                         {!isUser && msg.isLoading && (
                           <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -2528,13 +2609,6 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                       </div>
                     </div>
                   );
-                } else {
-                  return (
-                    <pre key={idx} style={{ color: theme === 'dark' ? '#eee' : '#222', fontSize: 15, background: 'none', border: 'none', boxShadow: 'none', padding: 0 }}>
-                      {JSON.stringify(msg.content, null, 2)}
-                    </pre>
-                  );
-                }
               })}
             </div>
             <div style={{ display: 'flex', gap: 12 }}>

@@ -3938,7 +3938,6 @@ function getMessageText(m) {
   // 解码转义的Unicode字符串
   function decodeUnicode(str) {
     if (typeof str !== 'string') return str;
-    // 兼容 \uXXXX 和 \\uXXXX
     return str.replace(/\\u([0-9a-fA-F]{4})/g, (m, g1) => String.fromCharCode(parseInt(g1, 16)))
               .replace(/\u([0-9a-fA-F]{4})/g, (m, g1) => String.fromCharCode(parseInt(g1, 16)));
   }
@@ -3947,28 +3946,32 @@ function getMessageText(m) {
   if (typeof content === 'string') {
     content = safeJsonParse(content);
   }
-  // 递归处理对象中的content字段
-  if (typeof content === 'object' && content !== null && content.content) {
-    content.content = safeJsonParse(content.content);
-  }
-  // 提取answer/outputs等
-  let text = '';
-  if (typeof content === 'object' && content !== null) {
-    if (content.outputs && (content.outputs.text || content.outputs.answer || content.outputs.result)) {
-      text = content.outputs.text || content.outputs.answer || content.outputs.result;
-    } else if (content.text || content.answer || content.result) {
-      text = content.text || content.answer || content.result;
-    } else if (content.content) {
-      text = content.content;
-    } else {
-      text = JSON.stringify(content);
+  // 递归提取answer字段
+  function extractText(obj) {
+    if (!obj) return '';
+    if (typeof obj === 'string') {
+      // 递归解析字符串
+      const parsed = safeJsonParse(obj);
+      if (parsed !== obj) return extractText(parsed);
+      return decodeUnicode(obj);
     }
-  } else {
-    text = content;
+    if (typeof obj === 'object') {
+      // 优先提取answer/outputs等
+      if (obj.outputs && (obj.outputs.text || obj.outputs.answer || obj.outputs.result)) {
+        return extractText(obj.outputs.text || obj.outputs.answer || obj.outputs.result);
+      }
+      if (obj.text || obj.answer || obj.result) {
+        return extractText(obj.text || obj.answer || obj.result);
+      }
+      if (obj.content) {
+        return extractText(obj.content);
+      }
+      // 如果没有这些字段，降级为字符串
+      return decodeUnicode(JSON.stringify(obj));
+    }
+    return String(obj ?? '');
   }
-  // 解码转义的Unicode字符串
-  text = decodeUnicode(text);
-  // 保证text为字符串，防止text.trim报错
+  let text = extractText(content);
   if (typeof text !== 'string') text = String(text ?? '');
   return text;
 }

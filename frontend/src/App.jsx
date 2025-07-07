@@ -1639,7 +1639,10 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       if (usage && user) {
         const tokens = Number(usage.total_tokens) || 0;
         const priceRaw = Number(usage.total_price) || 0;
-        const price = priceRaw === 0 ? 0.5 : priceRaw;
+        let price = priceRaw === 0 ? 0.005 : priceRaw;
+        if (agent?.id === 'word-to-song') {
+          price += 1.5;
+        }
         let currentUser = getUser();
         currentUser.usage_tokens = (currentUser.usage_tokens || 0) + tokens;
         currentUser.usage_price = (currentUser.usage_price || 0) + price;
@@ -1651,7 +1654,10 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       setMessages(msgs => {
         const lastIdx = msgs.length - 1;
         const priceRaw = Number(usage?.total_price) || 0;
-        const price = priceRaw === 0 ? 0.5 : priceRaw;
+        let price = priceRaw === 0 ? 0.005 : priceRaw;
+        if (agent?.id === 'word-to-song') {
+          price += 1.5;
+        }
         if (msgs[lastIdx]?.isLoading) {
           clearInterval(aiTimerRef.current);
           setAiTimer(0);
@@ -1721,7 +1727,10 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       setMessages(msgs => {
         const lastIdx = msgs.length - 1;
         const priceRaw = Number(usage?.total_price) || 0;
-        const price = priceRaw === 0 ? 0.5 : priceRaw;
+        let price = priceRaw === 0 ? 0.005 : priceRaw;
+        if (agent?.id === 'word-to-song') {
+          price += 1.5;
+        }
         if (msgs[lastIdx]?.isLoading) {
           clearInterval(aiTimerRef.current);
           setAiTimer(0);
@@ -1822,7 +1831,10 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       if (params.metadata?.usage && user) {
         const tokens = Number(params.metadata.usage.total_tokens) || 0;
         const priceRaw = Number(params.metadata.usage.total_price) || 0;
-        const price = priceRaw === 0 ? 0.5 : priceRaw;
+        let price = priceRaw === 0 ? 0.005 : priceRaw;
+        if (agent?.id === 'word-to-song') {
+          price += 1.5;
+        }
         let currentUser = getUser();
         currentUser.usage_tokens = (currentUser.usage_tokens || 0) + tokens;
         currentUser.usage_price = (currentUser.usage_price || 0) + price;
@@ -1836,7 +1848,10 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       setMessages(msgs => {
         const lastIdx = msgs.length - 1;
         const priceRaw = Number(params.metadata?.usage?.total_price) || 0;
-        const price = priceRaw === 0 ? 0.5 : priceRaw;
+        let price = priceRaw === 0 ? 0.005 : priceRaw;
+        if (agent?.id === 'word-to-song') {
+          price += 1.5;
+        }
         if (msgs[lastIdx]?.isLoading) {
           return [
             ...msgs.slice(0, lastIdx),

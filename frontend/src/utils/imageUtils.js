@@ -3,6 +3,8 @@
  * 支持将各种图片格式统一转换为PNG格式
  */
 
+import UPNG from 'upng-js';
+
 /**
  * 将图片文件转换为PNG格式
  * @param {File} file - 原始图片文件
@@ -73,6 +75,45 @@ export const convertImageToPng = (file, quality = 0.9) => {
     };
 
     console.log('【图片调试】开始加载图片', file.name, file.type, file.size);
+    img.src = url;
+  });
+};
+
+/**
+ * 使用upng-js将图片文件转换为最基础的PNG格式
+ * @param {File} file - 原始图片文件
+ * @returns {Promise<File>} 转换后的PNG文件
+ */
+export const convertImageToPngUPNG = (file) => {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith('image/')) {
+      resolve(file);
+      return;
+    }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const imgData = ctx.getImageData(0, 0, img.width, img.height);
+        // 用upng-js编码
+        const pngBuffer = UPNG.encode([imgData.data.buffer], img.width, img.height, 0);
+        const newFile = new File([pngBuffer], file.name.replace(/\.[^.]+$/, '.png'), { type: 'image/png', lastModified: Date.now() });
+        resolve(newFile);
+      } catch (e) {
+        reject(e);
+      } finally {
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+      }
+    };
+    img.onerror = (e) => {
+      reject(e);
+      setTimeout(() => URL.revokeObjectURL(url), 100);
+    };
     img.src = url;
   });
 };

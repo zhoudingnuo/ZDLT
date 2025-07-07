@@ -12,6 +12,7 @@
         "dotenv": "^17.0.1",
         "express": "^4.19.2",
         "formidable": "^3.5.4",
+        "upng-js": "^2.1.0",
         "winston": "^3.17.0"
     },
     "devDependencies": {

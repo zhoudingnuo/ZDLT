@@ -475,8 +475,9 @@ function ProfileModal({ visible, onCancel, user, theme }) {
       setCurrentUser(response.data);
       setUser && setUser(response.data); // 新增：同步全局user
       localStorage.setItem('user', JSON.stringify(response.data));
+      console.log('[个人中心] 刷新用户信息成功:', response.data);
     } catch (error) {
-      // 忽略
+      console.error('[个人中心] 刷新用户信息失败:', error);
     }
   };
 
@@ -2135,6 +2136,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     // 新增：自动检测HTML内容
     function isHtmlContent(text) {
       if (typeof text !== 'string') return false;
+      console.log('检测到html内容，渲染iframe', text);
       return /<(html|body|div|table|img|iframe|span|p|a)[\s>]/i.test(text.trim());
     }
 
@@ -2143,40 +2145,40 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       console.log('检测到html内容，渲染iframe', content);
       const bgColor = theme === 'dark' ? '#2f3136' : '#fff';
       const iframeBgColor = theme === 'dark' ? '#2f3136' : '#fff';
-      // return (
-      //   <div
-      //     style={{
-      //       width: '100%',
-      //       maxWidth: 900,
-      //       margin: '32px auto',
-      //       display: 'flex',
-      //       justifyContent: 'center',
-      //       alignItems: 'flex-start',
-      //       minHeight: 500,
-      //       background: bgColor,
-      //       borderRadius: 18,
-      //       boxShadow: '0 4px 24px 0 rgba(79,140,255,0.10)',
-      //       overflow: 'hidden', // 只显示iframe内容，不让内容撑破主页面
-      //       padding: 0
-      //     }}
-      //   >
-      //     <iframe
-      //       style={{
-      //         width: '100%',
-      //         minHeight: 500,
-      //         background: iframeBgColor,
-      //         borderRadius: 18,
-      //         border: 'none',
-      //         boxShadow: '0 2px 8px 0 rgba(79,140,255,0.08)',
-      //         display: 'block',
-      //         overflow: 'auto'
-      //       }}
-      //       srcDoc={content}
-      //       sandbox="allow-scripts allow-same-origin"
-      //       title="HTML内容"
-      //     />
-      //   </div>
-      // );
+      return (
+        <div
+          style={{
+            width: '100%',
+            maxWidth: 900,
+            margin: '32px auto',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+            minHeight: 500,
+            background: bgColor,
+            borderRadius: 18,
+            boxShadow: '0 4px 24px 0 rgba(79,140,255,0.10)',
+            overflow: 'hidden', // 只显示iframe内容，不让内容撑破主页面
+            padding: 0
+          }}
+        >
+          <iframe
+            style={{
+              width: '100%',
+              minHeight: 500,
+              background: iframeBgColor,
+              borderRadius: 18,
+              border: 'none',
+              boxShadow: '0 2px 8px 0 rgba(79,140,255,0.08)',
+              display: 'block',
+              overflow: 'auto'
+            }}
+            srcDoc={content}
+            sandbox="allow-scripts allow-same-origin"
+            title="HTML内容"
+          />
+        </div>
+      );
     }
 
     // Workflow类型：提取data.outputs中的内容
@@ -2206,6 +2208,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
             }
           }
           // markdown渲染
+          console.log('renderedContent', renderedContent);
           return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(renderedContent.trim() || '处理完成，但未找到可显示的内容')}</ReactMarkdown>;
         }
       }

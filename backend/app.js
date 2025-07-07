@@ -802,8 +802,10 @@ app.get('/api/user/:username', (req, res) => {
   const users = readJson(USERS_FILE);
   const user = users.find(u => u.username === req.params.username);
   if (user) {
+    console.log('[后端] 查询用户信息:', { username: user.username, usage_tokens: user.usage_tokens, usage_price: user.usage_price });
     res.json({ ...user, password: undefined });
   } else {
+    console.log('[后端] 用户不存在:', req.params.username);
     res.status(404).json({ error: '用户不存在' });
   }
 });
@@ -811,14 +813,17 @@ app.get('/api/user/:username', (req, res) => {
 // 更新消耗
 app.post('/api/user/usage', (req, res) => {
   const { username, usage_tokens, usage_price } = req.body;
+  console.log('[后端] 更新消耗请求:', { username, usage_tokens, usage_price });
   let users = readJson(USERS_FILE);
   const idx = users.findIndex(u => u.username === username);
   if (idx !== -1) {
     users[idx].usage_tokens = usage_tokens;
     users[idx].usage_price = usage_price;
     writeJson(USERS_FILE, users);
+    console.log('[后端] 消耗更新成功:', { username, usage_tokens, usage_price });
     res.json({ success: true });
   } else {
+    console.log('[后端] 用户不存在:', username);
     res.status(404).json({ error: '用户不存在' });
   }
 });
@@ -837,9 +842,21 @@ app.post('/api/user/balance', (req, res) => {
   }
 });
 
-// 自动初始化管理员账号
+// 自动初始化管理员账号和修复用户数据
 function initAdminUser() {
   let users = readJson(USERS_FILE);
+  let changed = false;
+  
+  // 确保所有用户都有usage_price字段
+  users.forEach(user => {
+    if (user.usage_price === undefined) {
+      user.usage_price = 0;
+      changed = true;
+      console.log('[后端] 为用户添加usage_price字段:', user.username);
+    }
+  });
+  
+  // 添加管理员账号
   if (!users.find(u => u.username === 'ZDLT')) {
     users.push({
       id: Date.now().toString(),
@@ -850,7 +867,12 @@ function initAdminUser() {
       usage_price: 0,
       isAdmin: true
     });
+    changed = true;
+  }
+  
+  if (changed) {
     writeJson(USERS_FILE, users);
+    console.log('[后端] 用户数据修复完成');
   }
 }
 initAdminUser();

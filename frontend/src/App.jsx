@@ -21,7 +21,7 @@ import {
   getAllUsersFromServer,
   updateUserBalance
 } from './utils/userUtils';
-import { convertImageToPng, convertImagesToPng, convertImageToPngUPNG } from './utils/imageUtils';
+import { convertImageToPng, convertImagesToPng } from './utils/imageUtils';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
@@ -1285,7 +1285,7 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
             if (fileList && fileList.length > 0) {
               const originalFiles = fileList.map(fileItem => fileItem.originFileObj).filter(Boolean);
               // 转换所有图片为PNG格式
-              const convertedFiles = await Promise.all(originalFiles.map(f => convertImageToPngUPNG(f)));
+              const convertedFiles = await convertImagesToPng(originalFiles);
               convertedFiles.forEach((fileObj, index) => {
                 formData.append(input.name, fileObj);
               });
@@ -1295,7 +1295,7 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
             const fileObj = fileList && fileList[0] && fileList[0].originFileObj;
             if (fileObj) {
               // 转换图片为PNG格式
-              const convertedFile = await convertImageToPngUPNG(fileObj);
+              const convertedFile = await convertImageToPng(fileObj);
               formData.append(input.name, convertedFile);
             }
           }

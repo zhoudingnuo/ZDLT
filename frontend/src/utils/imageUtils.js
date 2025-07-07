@@ -80,79 +80,26 @@ export const convertImageToPng = (file, quality = 0.9) => {
 };
 
 /**
- * 使用upng-js将图片文件转换为最基础的PNG格式
- * @param {File} file - 原始图片文件
- * @returns {Promise<File>} 转换后的PNG文件
- */
-export const convertImageToPngUPNG = (file) => {
-  return new Promise((resolve, reject) => {
-    if (!file.type.startsWith('image/')) {
-      resolve(file);
-      return;
-    }
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        const imgData = ctx.getImageData(0, 0, img.width, img.height);
-        // 调试输出
-        console.log('[UPNG调试] width:', img.width, 'height:', img.height);
-        console.log('[UPNG调试] imgData.data.length:', imgData.data.length, '应为:', img.width * img.height * 4);
-        console.log('[UPNG调试] imgData.data类型:', imgData.data.constructor.name);
-        // 用upng-js编码
-        const pngBuffer = UPNG.encode([imgData.data.buffer], img.width, img.height, 0);
-        console.log('[UPNG调试] UPNG.encode参数:', {
-          bufferLength: imgData.data.buffer.byteLength,
-          width: img.width,
-          height: img.height,
-          channels: 4,
-          bufferType: imgData.data.buffer.constructor.name
-        });
-        console.log('[UPNG调试] pngBuffer长度:', pngBuffer.byteLength);
-        const newFile = new File([pngBuffer], file.name.replace(/\.[^.]+$/, '.png'), { type: 'image/png', lastModified: Date.now() });
-        console.log('[UPNG调试] newFile:', newFile);
-        resolve(newFile);
-      } catch (e) {
-        reject(e);
-      } finally {
-        setTimeout(() => URL.revokeObjectURL(url), 100);
-      }
-    };
-    img.onerror = (e) => {
-      reject(e);
-      setTimeout(() => URL.revokeObjectURL(url), 100);
-    };
-    img.src = url;
-  });
-};
-
-/**
- * 批量转换图片文件为PNG格式
+ * 批量转换图片文件为兼容后端的PNG格式
  * @param {File[]} files - 文件数组
- * @param {number} quality - 转换质量 (0-1)，默认0.9
  * @returns {Promise<File[]>} 转换后的文件数组
  */
-export const convertImagesToPng = async (files, quality = 0.9) => {
+export const convertImagesToPngCompatible = async (files) => {
   const convertedFiles = [];
-  
   for (const file of files) {
     try {
-      const convertedFile = await convertImageToPng(file, quality);
+      const convertedFile = await convertImageToPngCompatible(file);
       convertedFiles.push(convertedFile);
     } catch (error) {
-      console.error('图片转换失败:', error);
-      // 转换失败时使用原文件
+      console.error('图片兼容PNG转换失败:', error);
       convertedFiles.push(file);
     }
   }
-  
   return convertedFiles;
 };
+
+// 替换原有批量PNG转换逻辑为兼容后端的实现
+export const convertImagesToPng = convertImagesToPngCompatible;
 
 /**
  * 检查文件是否为图片
@@ -340,4 +287,45 @@ export const processImage = async (file, options = {}) => {
   }
 
   return processedFile;
+};
+
+/**
+ * 用upng-js生成最基础的8位RGBA非交错PNG，兼容后端手撸解析
+ * @param {File} file - 原始图片文件
+ * @returns {Promise<File>} 转换后的PNG文件
+ */
+export const convertImageToPngCompatible = (file) => {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith('image/')) {
+      resolve(file);
+      return;
+    }
+    const img = new window.Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const imgData = ctx.getImageData(0, 0, img.width, img.height);
+        // upng-js 只接受ArrayBuffer
+        const rgba = new Uint8Array(imgData.data.buffer);
+        const pngBuffer = UPNG.encode([rgba.buffer], img.width, img.height, 0); // 0=无损
+        const newFile = new File([pngBuffer], file.name.replace(/\.[\w]+$/, '.png'), { type: 'image/png' });
+        resolve(newFile);
+      } catch (e) {
+        reject(e);
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    };
+    img.onerror = (e) => {
+      URL.revokeObjectURL(url);
+      reject(e);
+    };
+    img.src = url;
+  });
 }; 

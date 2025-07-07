@@ -2183,7 +2183,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     }
 
     // Workflow类型：提取data.outputs中的内容
-    if (isWorkflow && !isHtmlContent(content)) {
+    if (isWorkflow) {
       if (content && typeof content === 'object') {
         const data = content.data || content;
         const outputs = data.outputs;
@@ -2208,9 +2208,53 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
               }
             }
           }
+          
+          const finalContent = renderedContent.trim() || '处理完成，但未找到可显示的内容';
+          console.log('Workflow提取的内容:', finalContent);
+          
+          // 对提取到的内容进行HTML检测
+          if (outputMode === 'rendered' && isHtmlContent(finalContent)) {
+            console.log('检测到HTML内容，渲染iframe:', finalContent);
+            const bgColor = theme === 'dark' ? '#2f3136' : '#fff';
+            const iframeBgColor = theme === 'dark' ? '#2f3136' : '#fff';
+            return (
+              <div
+                style={{
+                  width: '100%',
+                  maxWidth: 900,
+                  margin: '32px auto',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'flex-start',
+                  minHeight: 500,
+                  background: bgColor,
+                  borderRadius: 18,
+                  boxShadow: '0 4px 24px 0 rgba(79,140,255,0.10)',
+                  overflow: 'hidden',
+                  padding: 0
+                }}
+              >
+                <iframe
+                  style={{
+                    width: '100%',
+                    minHeight: 500,
+                    background: iframeBgColor,
+                    borderRadius: 18,
+                    border: 'none',
+                    boxShadow: '0 2px 8px 0 rgba(79,140,255,0.08)',
+                    display: 'block',
+                    overflow: 'auto'
+                  }}
+                  srcDoc={finalContent}
+                  sandbox="allow-scripts allow-same-origin"
+                  title="HTML内容"
+                />
+              </div>
+            );
+          }
+          
           // markdown渲染
-          console.log('renderedContent', renderedContent);
-          return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(renderedContent.trim() || '处理完成，但未找到可显示的内容')}</ReactMarkdown>;
+          return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(finalContent)}</ReactMarkdown>;
         }
       }
       // 没有outputs时，直接返回原始content（如问候语）

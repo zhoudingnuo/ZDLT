@@ -2551,11 +2551,25 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
           <div style={{ ...mainCardStyle, marginTop: 30 }}>
             <div style={chatContentStyle} ref={chatRef}>
               {messages.map((msg, idx) => {
-                // 根据输出模式处理内容
                 const processedContent = extractAndRenderContent(msg.content);
                 const isUser = msg.role === 'user';
-                // 判断是否为HTML内容
-                const isHtml = typeof msg.content === 'string' && /<(html|body|div|table|img|iframe|span|p|a)[\s>]/i.test(msg.content.trim());
+
+                // 判断是否为iframe HTML内容（即extractAndRenderContent返回的div里有iframe）
+                if (
+                  React.isValidElement(processedContent) &&
+                  processedContent.type === 'div' &&
+                  processedContent.props.children &&
+                  React.isValidElement(processedContent.props.children) &&
+                  processedContent.props.children.type === 'iframe'
+                ) {
+                  // 直接全宽渲染，不包裹在气泡里
+                  return (
+                    <div key={idx} style={{ width: '100%', margin: '24px 0' }}>
+                      {processedContent}
+                    </div>
+                  );
+                }
+
                 // 如果是JSON模式且内容不是字符串，使用<pre>标签
                 if (outputMode === 'json' && typeof msg.content !== 'string' && !isUser) {
                   return (
@@ -2564,89 +2578,78 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                     </pre>
                   );
                 }
+
                 // 其他情况使用气泡框
                 return (
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      justifyContent: isUser ? 'flex-end' : 'flex-start',
+                      margin: '12px 0'
+                    }}
+                  >
                     <div
-                      key={idx}
                       style={{
-                        display: 'flex',
-                        justifyContent: isUser ? 'flex-end' : 'flex-start',
-                        margin: '12px 0'
+                        maxWidth: '70%',
+                        background: isUser
+                          ? 'linear-gradient(90deg, #4f8cff 0%, #6f6fff 100%)'
+                          : (theme === 'dark' ? '#23262e' : '#f5f6fa'),
+                        color: isUser ? '#fff' : (theme === 'dark' ? '#eee' : '#333'),
+                        borderRadius: 18,
+                        padding: '16px 22px',
+                        fontSize: 16,
+                        boxShadow: theme === 'dark' ? '0 2px 12px 0 rgba(0,0,0,0.13)' : '0 2px 8px 0 rgba(79,140,255,0.08)',
+                        whiteSpace: 'pre-line',
+                        overflowX: 'auto',
+                        border: theme === 'dark' ? '1.5px solid #23262e' : 'none',
                       }}
                     >
-                      <div
-                        style={
-                          isHtml
-                            ? {
-                                width: '100%',
-                                maxWidth: '100%',
-                                background: 'transparent',
-                                boxShadow: 'none',
-                                padding: 0,
-                                borderRadius: 0,
-                                overflow: 'visible'
-                              }
-                            : {
-                                maxWidth: '70%',
-                                background: isUser
-                                  ? 'linear-gradient(90deg, #4f8cff 0%, #6f6fff 100%)'
-                                  : (theme === 'dark' ? '#23262e' : '#f5f6fa'),
-                                color: isUser ? '#fff' : (theme === 'dark' ? '#eee' : '#333'),
-                                borderRadius: 18,
-                                padding: '16px 22px',
-                                fontSize: 16,
-                                boxShadow: theme === 'dark' ? '0 2px 12px 0 rgba(0,0,0,0.13)' : '0 2px 8px 0 rgba(79,140,255,0.08)',
-                                whiteSpace: 'pre-line',
-                                overflowX: 'auto',
-                                border: theme === 'dark' ? '1.5px solid #23262e' : 'none',
-                              }
-                        }
-                      >
-                        {processedContent}
-                        {/* 显示token、price和用时，或者实时计时器 */}
-                        {!isUser && msg.isLoading && !isHtml && (
-                          <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                      {processedContent}
+                      {/* 显示token、price和用时，或者实时计时器 */}
+                      {!isUser && msg.isLoading && (
+                        <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                          <span style={{ color: theme === 'dark' ? '#bbb' : '#888', fontSize: 13 }}>
+                            用时: {aiTimer}s
+                          </span>
+                        </div>
+                      )}
+                      {!isUser && !msg.isLoading && (msg.tokens !== undefined || msg.price !== undefined || msg.usedTime) && (
+                        <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                          {msg.usedTime && (
                             <span style={{ color: theme === 'dark' ? '#bbb' : '#888', fontSize: 13 }}>
-                              用时: {aiTimer}s
+                              用时: {msg.usedTime}s
                             </span>
-                          </div>
-                        )}
-                        {!isUser && !msg.isLoading && (msg.tokens !== undefined || msg.price !== undefined || msg.usedTime) && !isHtml && (
-                          <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                            {msg.usedTime && (
-                              <span style={{ color: theme === 'dark' ? '#bbb' : '#888', fontSize: 13 }}>
-                                用时: {msg.usedTime}s
-                              </span>
-                            )}
-                            {msg.tokens !== undefined && (
-                              <span style={{
-                                display: 'inline-block',
-                                background: theme === 'dark' ? '#262a32' : '#eaf3ff',
-                                color: theme === 'dark' ? '#4f8cff' : '#4f8cff',
-                                borderRadius: 8,
-                                fontSize: 12,
-                                padding: '2px 8px'
-                              }}>
-                                Token: {msg.tokens !== null ? msg.tokens : '--'}
-                              </span>
-                            )}
-                            {msg.price !== undefined && (
-                              <span style={{
-                                display: 'inline-block',
-                                background: theme === 'dark' ? '#262a32' : '#eaf3ff',
-                                color: theme === 'dark' ? '#4f8cff' : '#4f8cff',
-                                borderRadius: 8,
-                                fontSize: 12,
-                                padding: '2px 8px'
-                              }}>
-                                金额: ¥{msg.price !== null ? Number(msg.price).toFixed(4) : '--'}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
+                          )}
+                          {msg.tokens !== undefined && (
+                            <span style={{
+                              display: 'inline-block',
+                              background: theme === 'dark' ? '#262a32' : '#eaf3ff',
+                              color: theme === 'dark' ? '#4f8cff' : '#4f8cff',
+                              borderRadius: 8,
+                              fontSize: 12,
+                              padding: '2px 8px'
+                            }}>
+                              Token: {msg.tokens !== null ? msg.tokens : '--'}
+                            </span>
+                          )}
+                          {msg.price !== undefined && (
+                            <span style={{
+                              display: 'inline-block',
+                              background: theme === 'dark' ? '#262a32' : '#eaf3ff',
+                              color: theme === 'dark' ? '#4f8cff' : '#4f8cff',
+                              borderRadius: 8,
+                              fontSize: 12,
+                              padding: '2px 8px'
+                            }}>
+                              金额: ¥{msg.price !== null ? Number(msg.price).toFixed(4) : '--'}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  );
+                  </div>
+                );
               })}
             </div>
             <div style={{ display: 'flex', gap: 12 }}>

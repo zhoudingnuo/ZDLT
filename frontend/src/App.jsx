@@ -2135,6 +2135,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     
     // 新增：自动检测HTML内容
     function isHtmlContent(text) {
+      console.log('isHtmlContent', text);
       if (typeof text !== 'string') return false;
       console.log('检测到html内容，渲染iframe', text);
       return /<(html|body|div|table|img|iframe|span|p|a)[\s>]/i.test(text.trim());

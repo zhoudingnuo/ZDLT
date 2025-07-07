@@ -2255,7 +2255,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     
           return (
             <div>
-              <pre style={{ whiteSpace: 'pre-wrap', fontSize: 16 }}>{textPart}</pre>
+              <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(textPart)}</ReactMarkdown>
               {imgBase64 && (
                 <div style={{ margin: '16px 0', textAlign: 'center' }}>
                   <img src={imgBase64} alt="默写批改" style={{ maxWidth: '100%' }} />

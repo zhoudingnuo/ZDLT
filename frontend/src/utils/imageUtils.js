@@ -297,7 +297,7 @@ export const processImage = async (file, options = {}) => {
  */
 export function processImageWithWavesAndText(img, waves, text) {
   // 1. 计算新画布尺寸
-  const expandWidth = 100;
+  const expandWidth = Math.round(img.width * 0.3);
   const canvas = document.createElement('canvas');
   canvas.width = img.width + expandWidth;
   canvas.height = img.height;
@@ -330,13 +330,38 @@ export function processImageWithWavesAndText(img, waves, text) {
     ctx.stroke();
   }
 
-  // 5. 添加文字（放在右侧扩展区中间）
+  // 5. 添加文字（放在拓展区域正中间）
   if (text) {
     ctx.font = '24px sans-serif';
     ctx.fillStyle = '#333';
-    ctx.textBaseline = 'middle';
+    ctx.textBaseline = 'top';
     ctx.textAlign = 'center';
-    ctx.fillText(text, img.width + expandWidth / 2, canvas.height / 2);
+    // 文字x坐标为拓展区中心，y坐标从顶部开始
+    const textX = img.width + expandWidth / 2;
+    const textY = 20; // 从顶部留20px边距开始
+    const maxWidth = expandWidth - 20; // 左右各留10px边距
+    
+    // 自动换行
+    const words = text.split('');
+    let line = '';
+    let y = textY;
+    const lineHeight = 30;
+    
+    for (let i = 0; i < words.length; i++) {
+      const testLine = line + words[i];
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && line !== '') {
+        ctx.fillText(line, textX, y);
+        line = words[i];
+        y += lineHeight;
+      } else {
+        line = testLine;
+      }
+    }
+    // 绘制最后一行
+    if (line) {
+      ctx.fillText(line, textX, y);
+    }
   }
 
   // 6. 返回base64

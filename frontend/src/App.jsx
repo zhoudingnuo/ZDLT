@@ -2208,7 +2208,8 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
           return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(renderedContent.trim() || '处理完成，但未找到可显示的内容')}</ReactMarkdown>;
         }
       }
-      return 'Workflow处理完成';
+      // 没有outputs时，直接返回原始content（如问候语）
+      return typeof content === 'string' ? content : '';
     } else {
       // Chat类型
       const isDialogue = agent?.inputType === 'dialogue';

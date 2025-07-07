@@ -2178,7 +2178,8 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
             return (
               <div
                 style={{
-                  width: '100%',
+                  width: '80%',
+                  margin: '0 auto',
                   height: '100%',
                   display: 'flex',
                   justifyContent: 'center',
@@ -2553,7 +2554,8 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                 // 根据输出模式处理内容
                 const processedContent = extractAndRenderContent(msg.content);
                 const isUser = msg.role === 'user';
-                
+                // 判断是否为HTML内容
+                const isHtml = typeof msg.content === 'string' && /<(html|body|div|table|img|iframe|span|p|a)[\s>]/i.test(msg.content.trim());
                 // 如果是JSON模式且内容不是字符串，使用<pre>标签
                 if (outputMode === 'json' && typeof msg.content !== 'string' && !isUser) {
                   return (
@@ -2562,7 +2564,6 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                     </pre>
                   );
                 }
-                
                 // 其他情况使用气泡框
                 return (
                     <div
@@ -2574,31 +2575,43 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                       }}
                     >
                       <div
-                        style={{
-                          maxWidth: '70%',
-                          background: isUser
-                            ? 'linear-gradient(90deg, #4f8cff 0%, #6f6fff 100%)'
-                            : (theme === 'dark' ? '#23262e' : '#f5f6fa'),
-                          color: isUser ? '#fff' : (theme === 'dark' ? '#eee' : '#333'),
-                          borderRadius: 18,
-                          padding: '16px 22px',
-                          fontSize: 16,
-                          boxShadow: theme === 'dark' ? '0 2px 12px 0 rgba(0,0,0,0.13)' : '0 2px 8px 0 rgba(79,140,255,0.08)',
-                          whiteSpace: 'pre-line',
-                          overflowX: 'auto',
-                          border: theme === 'dark' ? '1.5px solid #23262e' : 'none',
-                        }}
+                        style={
+                          isHtml
+                            ? {
+                                width: '100%',
+                                maxWidth: '100%',
+                                background: 'transparent',
+                                boxShadow: 'none',
+                                padding: 0,
+                                borderRadius: 0,
+                                overflow: 'visible'
+                              }
+                            : {
+                                maxWidth: '70%',
+                                background: isUser
+                                  ? 'linear-gradient(90deg, #4f8cff 0%, #6f6fff 100%)'
+                                  : (theme === 'dark' ? '#23262e' : '#f5f6fa'),
+                                color: isUser ? '#fff' : (theme === 'dark' ? '#eee' : '#333'),
+                                borderRadius: 18,
+                                padding: '16px 22px',
+                                fontSize: 16,
+                                boxShadow: theme === 'dark' ? '0 2px 12px 0 rgba(0,0,0,0.13)' : '0 2px 8px 0 rgba(79,140,255,0.08)',
+                                whiteSpace: 'pre-line',
+                                overflowX: 'auto',
+                                border: theme === 'dark' ? '1.5px solid #23262e' : 'none',
+                              }
+                        }
                       >
                         {processedContent}
                         {/* 显示token、price和用时，或者实时计时器 */}
-                        {!isUser && msg.isLoading && (
+                        {!isUser && msg.isLoading && !isHtml && (
                           <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                             <span style={{ color: theme === 'dark' ? '#bbb' : '#888', fontSize: 13 }}>
                               用时: {aiTimer}s
                             </span>
                           </div>
                         )}
-                        {!isUser && !msg.isLoading && (msg.tokens !== undefined || msg.price !== undefined || msg.usedTime) && (
+                        {!isUser && !msg.isLoading && (msg.tokens !== undefined || msg.price !== undefined || msg.usedTime) && !isHtml && (
                           <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                             {msg.usedTime && (
                               <span style={{ color: theme === 'dark' ? '#bbb' : '#888', fontSize: 13 }}>

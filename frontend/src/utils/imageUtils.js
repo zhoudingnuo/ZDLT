@@ -3,8 +3,6 @@
  * 支持将各种图片格式统一转换为PNG格式
  */
 
-import UPNG from 'upng-js';
-
 /**
  * 将图片文件转换为PNG格式
  * @param {File} file - 原始图片文件
@@ -80,26 +78,27 @@ export const convertImageToPng = (file, quality = 0.9) => {
 };
 
 /**
- * 批量转换图片文件为兼容后端的PNG格式
+ * 批量转换图片文件为PNG格式
  * @param {File[]} files - 文件数组
+ * @param {number} quality - 转换质量 (0-1)，默认0.9
  * @returns {Promise<File[]>} 转换后的文件数组
  */
-export const convertImagesToPngCompatible = async (files) => {
+export const convertImagesToPng = async (files, quality = 0.9) => {
   const convertedFiles = [];
+  
   for (const file of files) {
     try {
-      const convertedFile = await convertImageToPngCompatible(file);
+      const convertedFile = await convertImageToPng(file, quality);
       convertedFiles.push(convertedFile);
     } catch (error) {
-      console.error('图片兼容PNG转换失败:', error);
+      console.error('图片转换失败:', error);
+      // 转换失败时使用原文件
       convertedFiles.push(file);
     }
   }
+  
   return convertedFiles;
 };
-
-// 替换原有批量PNG转换逻辑为兼容后端的实现
-export const convertImagesToPng = convertImagesToPngCompatible;
 
 /**
  * 检查文件是否为图片
@@ -290,42 +289,56 @@ export const processImage = async (file, options = {}) => {
 };
 
 /**
- * 用upng-js生成最基础的8位RGBA非交错PNG，兼容后端手撸解析
- * @param {File} file - 原始图片文件
- * @returns {Promise<File>} 转换后的PNG文件
+ * 对图片进行扩展、画波浪线、添加文字
+ * @param {HTMLImageElement} img - 已加载的图片对象
+ * @param {Array} waves - 波浪线坐标数组，每4个为一组[top, left, width, height]
+ * @param {string} text - 需要添加的文字
+ * @returns {string} 处理后的图片base64
  */
-export const convertImageToPngCompatible = (file) => {
-  return new Promise((resolve, reject) => {
-    if (!file.type.startsWith('image/')) {
-      resolve(file);
-      return;
-    }
-    const img = new window.Image();
-    const url = URL.createObjectURL(file);
+export function processImageWithWavesAndText(img, waves, text) {
+  // 1. 计算新画布尺寸
+  const expandWidth = 100;
+  const canvas = document.createElement('canvas');
+  canvas.width = img.width + expandWidth;
+  canvas.height = img.height;
+  const ctx = canvas.getContext('2d');
 
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        const imgData = ctx.getImageData(0, 0, img.width, img.height);
-        // upng-js 只接受ArrayBuffer
-        const rgba = new Uint8Array(imgData.data.buffer);
-        const pngBuffer = UPNG.encode([rgba.buffer], img.width, img.height, 0); // 0=无损
-        const newFile = new File([pngBuffer], file.name.replace(/\.[\w]+$/, '.png'), { type: 'image/png' });
-        resolve(newFile);
-      } catch (e) {
-        reject(e);
-      } finally {
-        URL.revokeObjectURL(url);
-      }
-    };
-    img.onerror = (e) => {
-      URL.revokeObjectURL(url);
-      reject(e);
-    };
-    img.src = url;
-  });
-}; 
+  // 2. 填充白色背景
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // 3. 绘制原图
+  ctx.drawImage(img, 0, 0);
+
+  // 4. 绘制波浪线
+  ctx.strokeStyle = '#FF0000';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < waves.length; i += 4) {
+    const top = waves[i];
+    const left = waves[i + 1];
+    const width = waves[i + 2];
+    const height = waves[i + 3];
+    ctx.beginPath();
+    for (let x = 0; x <= width; x++) {
+      // 波浪算法：y = top + height/2 + 振幅 * sin(2πx/波长)
+      const amplitude = height / 2;
+      const wavelength = width / 2;
+      const y = top + amplitude + amplitude * Math.sin((x / wavelength) * 2 * Math.PI);
+      if (x === 0) ctx.moveTo(left + x, y);
+      else ctx.lineTo(left + x, y);
+    }
+    ctx.stroke();
+  }
+
+  // 5. 添加文字（放在右侧扩展区中间）
+  if (text) {
+    ctx.font = '24px sans-serif';
+    ctx.fillStyle = '#333';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.fillText(text, img.width + expandWidth / 2, canvas.height / 2);
+  }
+
+  // 6. 返回base64
+  return canvas.toDataURL('image/png');
+} 

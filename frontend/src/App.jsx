@@ -21,7 +21,7 @@ import {
   getAllUsersFromServer,
   updateUserBalance
 } from './utils/userUtils';
-import { convertImageToPng, convertImagesToPng } from './utils/imageUtils';
+import { convertImageToPng, convertImagesToPng, processImageWithWavesAndText } from './utils/imageUtils';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
@@ -1297,6 +1297,12 @@ function WorkflowInputModal({ visible, onCancel, onSubmit, agent, theme }) {
               // 转换图片为PNG格式
               const convertedFile = await convertImageToPng(fileObj);
               formData.append(input.name, convertedFile);
+
+              // 新增：保存图片到全局，供后续P图
+              const base64 = await fileToBase64(convertedFile);
+              const img = new window.Image();
+              img.src = base64;
+              window.lastUploadedImage = img;
             }
           }
         } else if (values[input.name] !== undefined) {
@@ -2245,6 +2251,36 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       setOutputMode('rendered');
     }
   }, [user]);
+
+  // 默写批改P图分支
+  if (typeof content === 'string' && content.includes('oppo')) {
+    const parts = content.split('oppo');
+    const textPart = parts[0]?.trim();
+    const pText = parts[1]?.trim();
+    const coordsStr = parts[2]?.trim();
+
+    let waves = [];
+    if (coordsStr) {
+      const arr = coordsStr.replace(/\[|\]/g, '').split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
+      if (arr.length % 4 === 0) waves = arr;
+    }
+
+    let imgBase64 = '';
+    if (window.lastUploadedImage && waves.length > 0) {
+      imgBase64 = processImageWithWavesAndText(window.lastUploadedImage, waves, pText);
+    }
+
+    return (
+      <div>
+        <pre style={{ whiteSpace: 'pre-wrap', fontSize: 16 }}>{textPart}</pre>
+        {imgBase64 && (
+          <div style={{ margin: '16px 0', textAlign: 'center' }}>
+            <img src={imgBase64} alt="默写批改" style={{ maxWidth: '100%' }} />
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <Layout key={chatPageKey} style={{ minHeight: '100vh', fontFamily, background: theme === 'dark' ? '#18191c' : undefined, paddingTop: 20 }}>

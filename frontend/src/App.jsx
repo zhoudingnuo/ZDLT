@@ -2147,36 +2147,6 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       return /<(html|body|div|table|img|iframe|span|p|a)[\s>]/i.test(text.trim());
     }
     // 默写批改P图分支
-    if (typeof content === 'string' && content.includes('*op*po*')) {
-      console.log('检测到默写批改P图内容', content);
-      const parts = content.split('*op*po*');
-      const textPart = parts[0]?.trim();
-      const pText = parts[1]?.trim();
-      const coordsStr = parts[2]?.trim();
-
-      let waves = [];
-      if (coordsStr) {
-        const arr = coordsStr.replace(/\[|\]/g, '').split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
-        if (arr.length % 4 === 0) waves = arr;
-        console.log('waves', waves);
-      }
-
-      let imgBase64 = '';
-      if (window.lastUploadedImage && waves.length > 0) {
-        imgBase64 = processImageWithWavesAndText(window.lastUploadedImage, waves, pText);
-      }
-
-      return (
-        <div>
-          <pre style={{ whiteSpace: 'pre-wrap', fontSize: 16 }}>{textPart}</pre>
-          {imgBase64 && (
-            <div style={{ margin: '16px 0', textAlign: 'center' }}>
-              <img src={imgBase64} alt="默写批改" style={{ maxWidth: '100%' }} />
-            </div>
-          )}
-        </div>
-      );
-    }
     // Workflow类型：提取data.outputs中的内容
     if (isWorkflow) {
       if (content && typeof content === 'object') {
@@ -2264,6 +2234,36 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         }
         return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(typeof content === 'string' ? content : '未找到答案内容')}</ReactMarkdown>;
       } else {
+        if (typeof content.answer === 'string' && content.answer.includes('*op*po*')) {
+          console.log('检测到默写批改P图内容', content);
+          const parts = content.answer.split('*op*po*');
+          const textPart = parts[0]?.trim();
+          const pText = parts[1]?.trim();
+          const coordsStr = parts[2]?.trim();
+    
+          let waves = [];
+          if (coordsStr) {
+            const arr = coordsStr.replace(/\[|\]/g, '').split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
+            if (arr.length % 4 === 0) waves = arr;
+            console.log('waves', waves);
+          }
+    
+          let imgBase64 = '';
+          if (window.lastUploadedImage && waves.length > 0) {
+            imgBase64 = processImageWithWavesAndText(window.lastUploadedImage, waves, pText);
+          }
+    
+          return (
+            <div>
+              <pre style={{ whiteSpace: 'pre-wrap', fontSize: 16 }}>{textPart}</pre>
+              {imgBase64 && (
+                <div style={{ margin: '16px 0', textAlign: 'center' }}>
+                  <img src={imgBase64} alt="默写批改" style={{ maxWidth: '100%' }} />
+                </div>
+              )}
+            </div>
+          );
+        }
         if (content && typeof content === 'object') {
           const contentData = content.content || content.data?.content;
           if (contentData) {

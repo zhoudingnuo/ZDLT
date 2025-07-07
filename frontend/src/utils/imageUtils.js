@@ -100,9 +100,22 @@ export const convertImageToPngUPNG = (file) => {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
         const imgData = ctx.getImageData(0, 0, img.width, img.height);
+        // 调试输出
+        console.log('[UPNG调试] width:', img.width, 'height:', img.height);
+        console.log('[UPNG调试] imgData.data.length:', imgData.data.length, '应为:', img.width * img.height * 4);
+        console.log('[UPNG调试] imgData.data类型:', imgData.data.constructor.name);
         // 用upng-js编码
         const pngBuffer = UPNG.encode([imgData.data.buffer], img.width, img.height, 0);
+        console.log('[UPNG调试] UPNG.encode参数:', {
+          bufferLength: imgData.data.buffer.byteLength,
+          width: img.width,
+          height: img.height,
+          channels: 4,
+          bufferType: imgData.data.buffer.constructor.name
+        });
+        console.log('[UPNG调试] pngBuffer长度:', pngBuffer.byteLength);
         const newFile = new File([pngBuffer], file.name.replace(/\.[^.]+$/, '.png'), { type: 'image/png', lastModified: Date.now() });
+        console.log('[UPNG调试] newFile:', newFile);
         resolve(newFile);
       } catch (e) {
         reject(e);

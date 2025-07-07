@@ -2140,6 +2140,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
 
     if (outputMode === 'rendered' && typeof content === 'string' && isHtmlContent(content)) {
       // 优化iframe隔离渲染
+      console.log('检测到html内容，渲染iframe', content);
       const bgColor = theme === 'dark' ? '#2f3136' : '#fff';
       const iframeBgColor = theme === 'dark' ? '#2f3136' : '#fff';
       // return (

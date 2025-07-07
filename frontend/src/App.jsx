@@ -2182,7 +2182,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     }
 
     // Workflow类型：提取data.outputs中的内容
-    if (isWorkflow) {
+    if (isWorkflow && !isHtmlContent(content)) {
       if (content && typeof content === 'object') {
         const data = content.data || content;
         const outputs = data.outputs;

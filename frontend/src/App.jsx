@@ -3784,9 +3784,9 @@ function AgentConfigModal({ visible, onCancel, agents, onSave, editingAgent, set
       const oldName = newInputs[idx].name;
       if (!newInputs[idx].label || newInputs[idx].label === oldName) {
         newInputs[idx].label = value;
+        console.log('同步label', newInputs[idx].label);
       }
     }
-    newInputs[idx].label = value;
     newInputs[idx][key] = value;
     setInputs(newInputs);
   };

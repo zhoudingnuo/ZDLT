@@ -7,40 +7,165 @@
     "apiKey": "app-NeEPfElCVkBZeiaups0X2CGm",
     "inputs": [
       {
-        "name": "identity",
+        "name": "words",
         "type": "text",
-        "label": "identity",
-        "required": false
-      },
-      {
-        "name": "style",
-        "type": "text",
-        "label": "style",
+        "label": "words",
         "required": true
       },
       {
-        "name": "toidentity",
-        "type": "text",
-        "label": "toidentity",
-        "required": true
+        "name": "Timbre",
+        "type": "select",
+        "label": "Timbre",
+        "required": true,
+        "options": [
+          {
+            "value": "Warm",
+            "label": "Warm"
+          },
+          {
+            "value": "Bright",
+            "label": "Bright"
+          },
+          {
+            "value": "Husky",
+            "label": "Husky"
+          },
+          {
+            "value": "Electrified voice",
+            "label": "Electrified voice"
+          },
+          {
+            "value": "Sweet AUDIO_TIMBRE",
+            "label": "Sweet AUDIO_TIMBRE"
+          },
+          {
+            "value": "Cute AUDIO_TIMBRE",
+            "label": "Cute AUDIO_TIMBRE"
+          },
+          {
+            "value": "Loud and sonorous",
+            "label": "Loud and sonorous"
+          },
+          {
+            "value": "Powerful",
+            "label": "Powerful"
+          },
+          {
+            "value": "Sexy/Lazy",
+            "label": "Sexy/Lazy"
+          }
+        ]
       },
       {
-        "name": "doc",
-        "type": "file",
-        "label": "doc",
-        "required": true
+        "name": "Genre",
+        "type": "select",
+        "label": "Genre",
+        "required": true,
+        "options": [
+          {
+            "value": "Hip Hop/Rap",
+            "label": "Hip Hop/Rap"
+          },
+          {
+            "value": "Folk",
+            "label": "Folk"
+          },
+          {
+            "value": "Pop",
+            "label": "Pop"
+          },
+          {
+            "value": "Rock",
+            "label": "Rock"
+          },
+          {
+            "value": "Chinese Style",
+            "label": "Chinese Style"
+          },
+          {
+            "value": "R&B/Soul",
+            "label": "R&B/Soul"
+          },
+          {
+            "value": "Electronic",
+            "label": "Electronic"
+          },
+          {
+            "value": "Jazz",
+            "label": "Jazz"
+          },
+          {
+            "value": "Trap Rap",
+            "label": "Trap Rap"
+          }
+        ]
       },
       {
-        "name": "theirmes",
-        "type": "text",
-        "label": "theirmes",
-        "required": true
+        "name": "Gender",
+        "type": "select",
+        "label": "Gender",
+        "required": true,
+        "options": [
+          {
+            "value": "Female",
+            "label": "Female"
+          },
+          {
+            "value": "Male",
+            "label": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Mood",
+        "type": "select",
+        "label": "Mood",
+        "required": true,
+        "options": [
+          {
+            "value": "Dynamic/Energetic",
+            "label": "Dynamic/Energetic"
+          },
+          {
+            "value": "Sentimental/Melancholic/Lonely",
+            "label": "Sentimental/Melancholic/Lonely"
+          },
+          {
+            "value": "Inspirational/Hopeful",
+            "label": "Inspirational/Hopeful"
+          },
+          {
+            "value": "Nostalgic/Memory",
+            "label": "Nostalgic/Memory"
+          },
+          {
+            "value": "Excited",
+            "label": "Excited"
+          },
+          {
+            "value": "Sorrow/Sad",
+            "label": "Sorrow/Sad"
+          },
+          {
+            "value": "Chill",
+            "label": "Chill"
+          },
+          {
+            "value": "Romantic",
+            "label": "Romantic"
+          },
+          {
+            "value": "Miss",
+            "label": "Miss"
+          }
+        ]
       }
     ],
     "inputType": "parameter",
-    "status": "pending",
+    "status": "configured",
     "rejectTime": "2025-07-01T20:46:07.347Z",
-    "rejectReason": "配置不符合要求"
+    "rejectReason": "配置不符合要求",
+    "approveTime": "2025-07-07T12:07:03.418Z"
   },
   {
     "id": "audio-to-text",

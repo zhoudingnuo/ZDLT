@@ -19,7 +19,8 @@ import {
   getUserFromServer,
   updateUserUsage,
   getAllUsersFromServer,
-  updateUserBalance
+  updateUserBalance,
+  getAgentBaseFee
 } from './utils/userUtils';
 import { convertImageToPng, convertImagesToPng, processImageWithWavesAndText } from './utils/imageUtils';
 import ReactMarkdown from 'react-markdown';
@@ -2681,7 +2682,12 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                               fontSize: 12,
                               padding: '2px 8px'
                             }}>
-                              金额: ¥{msg.price !== null ? Number(msg.price).toFixed(4) : '--'}
+                              金额: ¥{
+                                msg.role === 'assistant' && agent?.id ?
+                                  (Number(msg.price) + getAgentBaseFee(agent.id)).toFixed(4)
+                                  :
+                                  (msg.price !== null ? Number(msg.price).toFixed(4) : '--')
+                              }
                             </span>
                           )}
                         </div>
@@ -2849,6 +2855,18 @@ function ThemeSwitch({ theme, setTheme }) {
 function saveChatHistory(history, agentId) {
   const key = `chatHistory_${agentId}`;
   localStorage.setItem(key, JSON.stringify(history));
+  // 新增：对话归档时计入基础费用
+  try {
+    const baseFee = getAgentBaseFee(agentId);
+    let user = getUser();
+    if (user && baseFee > 0) {
+      user.usage_price = (user.usage_price || 0) + baseFee;
+      setUser(user);
+      updateUserUsage(user.username, user.usage_tokens || 0, user.usage_price || 0);
+    }
+  } catch (e) {
+    console.warn('基础费用计费失败', e);
+  }
 }
 function loadChatHistory(agentId) {
   const key = `chatHistory_${agentId}`;
@@ -4021,30 +4039,3 @@ const forceDesktopStyles = `
     }
   }
 `;
-
-// 文件名提取函数
-function getFileNameFromUrl(url) {
-  try {
-    return decodeURIComponent(url.split('/').pop());
-  } catch {
-    return url;
-  }
-}
-
-// 自定义 a 标签渲染
-const markdownComponents = {
-  a: ({ href, children }) => {
-    const fileExts = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.zip', '.rar', '.7z', '.jpg', '.jpeg', '.png', '.gif', '.mp3', '.mp4', '.txt'];
-    const isFile = href && fileExts.some(ext => href.toLowerCase().endsWith(ext));
-    if (isFile) {
-      return (
-        <a href={href} download style={{ padding: '4px 16px', background: '#4f8cff', color: '#fff', borderRadius: 6, textDecoration: 'none', fontWeight: 600, margin: '0 4px' }}>
-          下载文件（{getFileNameFromUrl(href)}）
-        </a>
-      );
-    }
-    return (
-      <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
-    );
-  }
-};

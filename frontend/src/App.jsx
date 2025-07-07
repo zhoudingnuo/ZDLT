@@ -2178,16 +2178,31 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     // 渲染模式：根据智能体类型处理内容
     const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/');
     
+    // 新增：自动检测HTML内容
+    function isHtmlContent(text) {
+      if (typeof text !== 'string') return false;
+      return /<(html|body|div|table|img|iframe|span|p|a)[\s>]/i.test(text.trim());
+    }
+
+    if (outputMode === 'rendered' && typeof content === 'string' && isHtmlContent(content)) {
+      // 用iframe渲染html小页面
+      return (
+        <iframe
+          srcDoc={content}
+          style={{ width: '100%', minHeight: 400, border: 'none', borderRadius: 12, background: '#fff', margin: '12px 0' }}
+          sandbox="allow-scripts allow-same-origin"
+          title="HTML内容"
+        />
+      );
+    }
+
+    // Workflow类型：提取data.outputs中的内容
     if (isWorkflow) {
-      // Workflow类型：提取data.outputs中的内容
       if (content && typeof content === 'object') {
         const data = content.data || content;
         const outputs = data.outputs;
-        
         if (outputs) {
           let renderedContent = '';
-          
-          // 提取outputs中的各种字段
           if (outputs.result) {
             renderedContent += `结果：${outputs.result}\n\n`;
           }
@@ -2200,8 +2215,6 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
           if (outputs.answer) {
             renderedContent += `答案：${outputs.answer}\n\n`;
           }
-          
-          // 如果没有找到特定字段，遍历所有outputs内容
           if (!renderedContent) {
             for (const [key, value] of Object.entries(outputs)) {
               if (value && typeof value === 'string' && value.trim()) {
@@ -2209,31 +2222,28 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
               }
             }
           }
-          
-          return renderedContent.trim() || '处理完成，但未找到可显示的内容';
+          // markdown渲染
+          return <ReactMarkdown className="markdown-body" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(renderedContent.trim() || '处理完成，但未找到可显示的内容')}</ReactMarkdown>;
         }
       }
       return 'Workflow处理完成';
     } else {
       // Chat类型
       const isDialogue = agent?.inputType === 'dialogue';
-      
       if (isDialogue) {
-        // Dialogue类型：直接提取answer
         if (content && typeof content === 'object') {
-          return content.answer || content.data?.answer || '未找到答案内容';
+          return <ReactMarkdown className="markdown-body" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(content.answer || content.data?.answer || '未找到答案内容')}</ReactMarkdown>;
         }
-        return typeof content === 'string' ? content : '未找到答案内容';
+        return <ReactMarkdown className="markdown-body" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(typeof content === 'string' ? content : '未找到答案内容')}</ReactMarkdown>;
       } else {
-        // Parameter类型：先提取content，再提取answer
         if (content && typeof content === 'object') {
           const contentData = content.content || content.data?.content;
           if (contentData) {
-            return contentData.answer || contentData.data?.answer || '未找到答案内容';
+            return <ReactMarkdown className="markdown-body" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(contentData.answer || contentData.data?.answer || '未找到答案内容')}</ReactMarkdown>;
           }
-          return content.answer || content.data?.answer || '未找到答案内容';
+          return <ReactMarkdown className="markdown-body" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(content.answer || content.data?.answer || '未找到答案内容')}</ReactMarkdown>;
         }
-        return typeof content === 'string' ? content : '未找到答案内容';
+        return <ReactMarkdown className="markdown-body" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(typeof content === 'string' ? content : '未找到答案内容')}</ReactMarkdown>;
       }
     }
   };

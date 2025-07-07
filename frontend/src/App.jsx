@@ -2223,7 +2223,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
             }
           }
           // markdown渲染
-          return <ReactMarkdown className="markdown-body" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(renderedContent.trim() || '处理完成，但未找到可显示的内容')}</ReactMarkdown>;
+          return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(renderedContent.trim() || '处理完成，但未找到可显示的内容')}</ReactMarkdown>;
         }
       }
       return 'Workflow处理完成';
@@ -2232,18 +2232,18 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       const isDialogue = agent?.inputType === 'dialogue';
       if (isDialogue) {
         if (content && typeof content === 'object') {
-          return <ReactMarkdown className="markdown-body" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(content.answer || content.data?.answer || '未找到答案内容')}</ReactMarkdown>;
+          return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(content.answer || content.data?.answer || '未找到答案内容')}</ReactMarkdown>;
         }
-        return <ReactMarkdown className="markdown-body" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(typeof content === 'string' ? content : '未找到答案内容')}</ReactMarkdown>;
+        return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(typeof content === 'string' ? content : '未找到答案内容')}</ReactMarkdown>;
       } else {
         if (content && typeof content === 'object') {
           const contentData = content.content || content.data?.content;
           if (contentData) {
-            return <ReactMarkdown className="markdown-body" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(contentData.answer || contentData.data?.answer || '未找到答案内容')}</ReactMarkdown>;
+            return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(contentData.answer || contentData.data?.answer || '未找到答案内容')}</ReactMarkdown>;
           }
-          return <ReactMarkdown className="markdown-body" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(content.answer || content.data?.answer || '未找到答案内容')}</ReactMarkdown>;
+          return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(content.answer || content.data?.answer || '未找到答案内容')}</ReactMarkdown>;
         }
-        return <ReactMarkdown className="markdown-body" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(typeof content === 'string' ? content : '未找到答案内容')}</ReactMarkdown>;
+        return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(typeof content === 'string' ? content : '未找到答案内容')}</ReactMarkdown>;
       }
     }
   };

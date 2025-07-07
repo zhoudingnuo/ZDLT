@@ -3779,6 +3779,14 @@ function AgentConfigModal({ visible, onCancel, agents, onSave, editingAgent, set
   };
   const handleInputChange = (idx, key, value) => {
     const newInputs = [...inputs];
+    // 如果是修改name，且label等于旧name或label为空，则同步label
+    if (key === 'name') {
+      const oldName = newInputs[idx].name;
+      if (!newInputs[idx].label || newInputs[idx].label === oldName) {
+        newInputs[idx].label = value;
+      }
+    }
+    newInputs[idx].label = value;
     newInputs[idx][key] = value;
     setInputs(newInputs);
   };

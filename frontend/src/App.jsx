@@ -2147,8 +2147,9 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       return /<(html|body|div|table|img|iframe|span|p|a)[\s>]/i.test(text.trim());
     }
     // 默写批改P图分支
-    if (typeof content === 'string' && content.includes('oppo')) {
-      const parts = content.split('oppo');
+    if (typeof content === 'string' && content.includes('*op*po*')) {
+      console.log('检测到默写批改P图内容', content);
+      const parts = content.split('*op*po*');
       const textPart = parts[0]?.trim();
       const pText = parts[1]?.trim();
       const coordsStr = parts[2]?.trim();
@@ -2157,6 +2158,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       if (coordsStr) {
         const arr = coordsStr.replace(/\[|\]/g, '').split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
         if (arr.length % 4 === 0) waves = arr;
+        console.log('waves', waves);
       }
 
       let imgBase64 = '';

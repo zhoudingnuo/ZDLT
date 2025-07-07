@@ -314,10 +314,10 @@ export function processImageWithWavesAndText(img, waves, text) {
   ctx.strokeStyle = '#FF0000';
   ctx.lineWidth = 2;
       for (let i = 0; i < waves.length; i += 4) {
-      const top = waves[i];
+      const top = waves[i]-height;
       const left = waves[i + 1];
       const width = waves[i + 2];
-      const height = waves[i + 3] / 4; // 波浪线高度变为原来的1/4
+      const height = waves[i + 3] / 5; // 波浪线高度变为原来的1/4
       ctx.beginPath();
       for (let x = 0; x <= width; x++) {
         // 波浪算法：y = top + height/2 + 振幅 * sin(2πx/波长)
@@ -336,39 +336,33 @@ export function processImageWithWavesAndText(img, waves, text) {
     ctx.fillStyle = '#333';
     ctx.textBaseline = 'top';
     ctx.textAlign = 'left';
-    // 文字x坐标为拓展区左侧留边距，y坐标从顶部开始
-    const textX = img.width + 20; // 左侧留20px边距
-    const textY = 20; // 从顶部留20px边距开始
-    const maxWidth = expandWidth - 40; // 左右各留20px边距
-    
-    // 自动换行，每段开头空两格
-    const paragraphs = text.split('\n');
+    const textX = img.width + 20;
+    const textY = img.height/5;
+    const maxWidth = expandWidth - 40;
+    const paragraphs = String(text).split('\n');
     let y = textY;
     const lineHeight = 30;
-    
+
     for (let p = 0; p < paragraphs.length; p++) {
-      const paragraph = paragraphs[p].trim();
+      let paragraph = paragraphs[p].trim();
       if (!paragraph) {
-        y += lineHeight; // 空行
+        y += lineHeight;
         continue;
       }
-      
-      // 每段开头空两格
-      const words = '  ' + paragraph.split('');
+      // 每段开头空两格（全角空格）
+      paragraph = '　　' + paragraph;
       let line = '';
-      
-      for (let i = 0; i < words.length; i++) {
-        const testLine = line + words[i];
+      for (let i = 0; i < paragraph.length; i++) {
+        const testLine = line + paragraph[i];
         const metrics = ctx.measureText(testLine);
         if (metrics.width > maxWidth && line !== '') {
           ctx.fillText(line, textX, y);
-          line = words[i];
+          line = paragraph[i];
           y += lineHeight;
         } else {
           line = testLine;
         }
       }
-      // 绘制最后一行
       if (line) {
         ctx.fillText(line, textX, y);
         y += lineHeight;

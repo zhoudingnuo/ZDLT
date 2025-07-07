@@ -136,10 +136,4 @@ export const getAllUsersFromServer = async () => {
 // 新增：更新用户余额
 export const updateUserBalance = async (username, balance) => {
   await axios.post(`${API_BASE}/api/user/balance`, { username, balance });
-};
-
-// 统一管理智能体基础费用
-export function getAgentBaseFee(agentId) {
-  if (agentId === 'word-to-song') return 1.5;
-  return 0.005;
-} 
+}; 

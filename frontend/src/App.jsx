@@ -19,8 +19,7 @@ import {
   getUserFromServer,
   updateUserUsage,
   getAllUsersFromServer,
-  updateUserBalance,
-  getAgentBaseFee
+  updateUserBalance
 } from './utils/userUtils';
 import { convertImageToPng, convertImagesToPng, processImageWithWavesAndText } from './utils/imageUtils';
 import ReactMarkdown from 'react-markdown';
@@ -2850,18 +2849,6 @@ function ThemeSwitch({ theme, setTheme }) {
 function saveChatHistory(history, agentId) {
   const key = `chatHistory_${agentId}`;
   localStorage.setItem(key, JSON.stringify(history));
-  // 新增：对话归档时计入基础费用
-  try {
-    const baseFee = getAgentBaseFee(agentId);
-    let user = getUser();
-    if (user && baseFee > 0) {
-      user.usage_price = (user.usage_price || 0) + baseFee;
-      setUser(user);
-      updateUserUsage(user.username, user.usage_tokens || 0, user.usage_price || 0);
-    }
-  } catch (e) {
-    console.warn('基础费用计费失败', e);
-  }
 }
 function loadChatHistory(agentId) {
   const key = `chatHistory_${agentId}`;

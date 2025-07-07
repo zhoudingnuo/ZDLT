@@ -94,55 +94,6 @@ function initAdminUser() {
 }
 initAdminUser();
 
-// 强制桌面端布局样式
-const forceDesktopStyles = `
-  /* 强制桌面端布局 */
-  @media (max-width: 768px) {
-    body {
-      min-width: 1200px !important;
-      overflow-x: auto !important;
-      transform: scale(1) !important;
-    }
-    #root {
-      min-width: 1200px !important;
-    }
-    .ant-layout {
-      min-width: 1200px !important;
-    }
-    .ant-layout-sider {
-      width: 220px !important;
-      min-width: 220px !important;
-    }
-    .ant-layout-content {
-      min-width: 980px !important;
-    }
-    /* 强制所有组件保持桌面端尺寸 */
-    .ant-card {
-      min-width: 210px !important;
-    }
-    .ant-modal {
-      min-width: 600px !important;
-    }
-    .ant-drawer {
-      min-width: 400px !important;
-    }
-    .ant-form-item {
-      min-width: 200px !important;
-    }
-  }
-  
-  /* 强制横屏模式 */
-  @media (orientation: portrait) {
-    body {
-      transform: rotate(90deg) !important;
-      transform-origin: center center !important;
-      width: 100vh !important;
-      height: 100vw !important;
-      overflow-x: auto !important;
-    }
-  }
-`;
-
 // 全局深色主题样式
 const globalDarkStyles = `
   body[data-theme="dark"] {
@@ -3938,3 +3889,41 @@ const handleSave = async () => {
     </Modal>
   );
 }
+
+// 修改 forceDesktopStyles，只移除强制横屏部分，保留其它移动端适配CSS
+const forceDesktopStyles = `
+  /* 强制桌面端布局 */
+  @media (max-width: 768px) {
+    body {
+      min-width: 1200px !important;
+      overflow-x: auto !important;
+      transform: scale(1) !important;
+    }
+    #root {
+      min-width: 1200px !important;
+    }
+    .ant-layout {
+      min-width: 1200px !important;
+    }
+    .ant-layout-sider {
+      width: 220px !important;
+      min-width: 220px !important;
+    }
+    .ant-layout-content {
+      min-width: 980px !important;
+    }
+    /* 强制所有组件保持桌面端尺寸 */
+    .ant-card {
+      min-width: 210px !important;
+    }
+    .ant-modal {
+      min-width: 600px !important;
+    }
+    .ant-drawer {
+      min-width: 400px !important;
+    }
+    .ant-form-item {
+      min-width: 200px !important;
+    }
+  }
+`;

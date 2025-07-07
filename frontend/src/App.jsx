@@ -4021,3 +4021,30 @@ const forceDesktopStyles = `
     }
   }
 `;
+
+// 文件名提取函数
+function getFileNameFromUrl(url) {
+  try {
+    return decodeURIComponent(url.split('/').pop());
+  } catch {
+    return url;
+  }
+}
+
+// 自定义 a 标签渲染
+const markdownComponents = {
+  a: ({ href, children }) => {
+    const fileExts = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.zip', '.rar', '.7z', '.jpg', '.jpeg', '.png', '.gif', '.mp3', '.mp4', '.txt'];
+    const isFile = href && fileExts.some(ext => href.toLowerCase().endsWith(ext));
+    if (isFile) {
+      return (
+        <a href={href} download style={{ padding: '4px 16px', background: '#4f8cff', color: '#fff', borderRadius: 6, textDecoration: 'none', fontWeight: 600, margin: '0 4px' }}>
+          下载文件（{getFileNameFromUrl(href)}）
+        </a>
+      );
+    }
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
+    );
+  }
+};

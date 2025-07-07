@@ -2682,12 +2682,7 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
                               fontSize: 12,
                               padding: '2px 8px'
                             }}>
-                              金额: ¥{
-                                msg.role === 'assistant' && agent?.id ?
-                                  (Number(msg.price) + getAgentBaseFee(agent.id)).toFixed(4)
-                                  :
-                                  (msg.price !== null ? Number(msg.price).toFixed(4) : '--')
-                              }
+                              金额: ¥{msg.price !== null ? Number(msg.price).toFixed(4) : '--'}
                             </span>
                           )}
                         </div>

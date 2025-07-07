@@ -296,6 +296,17 @@ function fixMarkdownTable(md) {
   });
 }
 
+// 表格清洗函数，去除只包含 | 或空白的行
+function cleanTableMarkdown(md) {
+  return md.split('\n').filter(line => {
+    // 只包含 | 或空白
+    if (/^\s*\|\s*$/.test(line)) return false;
+    // 只包含空白
+    if (/^\s*$/.test(line)) return false;
+    return true;
+  }).join('\n');
+}
+
 function LoginModal({ visible, onCancel, onLogin, onRegister, theme }) {
   const [form] = Form.useForm();
   const [isRegister, setIsRegister] = useState(false);
@@ -2220,7 +2231,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
           }
           
           // markdown渲染
-          return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(finalContent)}</ReactMarkdown>;
+          return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{cleanTableMarkdown(fixMarkdownTable(finalContent))}</ReactMarkdown>;
         }
       }
       // 没有outputs时，直接返回原始content（如问候语）
@@ -2230,9 +2241,9 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       const isDialogue = agent?.inputType === 'dialogue';
       if (isDialogue) {
         if (content && typeof content === 'object') {
-          return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(content.answer || content.data?.answer || '未找到答案内容')}</ReactMarkdown>;
+          return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{cleanTableMarkdown(fixMarkdownTable(content.answer || content.data?.answer || '未找到答案内容'))}</ReactMarkdown>;
         }
-        return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(typeof content === 'string' ? content : '未找到答案内容')}</ReactMarkdown>;
+        return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{cleanTableMarkdown(fixMarkdownTable(typeof content === 'string' ? content : '未找到答案内容'))}</ReactMarkdown>;
       } else {
         if (typeof content.answer === 'string' && content.answer.includes('*op*po*')) {
           console.log('检测到默写批改P图内容', content);
@@ -2255,7 +2266,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     
           return (
             <div>
-              <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(textPart)}</ReactMarkdown>
+              <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{cleanTableMarkdown(fixMarkdownTable(textPart))}</ReactMarkdown>
               {imgBase64 && (
                 <div style={{ margin: '16px 0', textAlign: 'center' }}>
                   <img src={imgBase64} alt="默写批改" style={{ maxWidth: '100%' }} />
@@ -2267,11 +2278,11 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         if (content && typeof content === 'object') {
           const contentData = content.content || content.data?.content;
           if (contentData) {
-            return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(contentData.answer || contentData.data?.answer || '未找到答案内容')}</ReactMarkdown>;
+            return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{cleanTableMarkdown(fixMarkdownTable(contentData.answer || contentData.data?.answer || '未找到答案内容'))}</ReactMarkdown>;
           }
-          return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(content.answer || content.data?.answer || '未找到答案内容')}</ReactMarkdown>;
+          return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{cleanTableMarkdown(fixMarkdownTable(content.answer || content.data?.answer || '未找到答案内容'))}</ReactMarkdown>;
         }
-        return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(typeof content === 'string' ? content : '未找到答案内容')}</ReactMarkdown>;
+        return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{cleanTableMarkdown(fixMarkdownTable(typeof content === 'string' ? content : '未找到答案内容'))}</ReactMarkdown>;
       }
     }
   };

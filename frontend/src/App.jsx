@@ -2203,7 +2203,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
                     border: 'none',
                     boxShadow: '0 2px 8px 0 rgba(79,140,255,0.08)'
                   }}
-                  srcDoc={content}
+                  srcDoc={finalContent}
                   sandbox="allow-scripts allow-same-origin"
                   title="HTML内容"
                 />

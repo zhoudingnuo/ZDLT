@@ -337,7 +337,7 @@ export function processImageWithWavesAndText(img, waves, text) {
     ctx.textBaseline = 'top';
     ctx.textAlign = 'left';
     const textX = img.width + 20;
-    const textY = img.height/5;
+    const textY = Math.round(img.height * 0.2);
     const maxWidth = expandWidth - 40;
     const paragraphs = String(text).split('\n');
     let y = textY;

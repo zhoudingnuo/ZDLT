@@ -322,7 +322,7 @@ export function processImageWithWavesAndText(img, waves, text) {
       for (let x = 0; x <= width; x++) {
         // 波浪算法：y = top + height/2 + 振幅 * sin(2πx/波长)
         const amplitude = height / 2;
-        const wavelength = width / 2;
+        const wavelength = img.width / 50;
         const y = top + amplitude + amplitude * Math.sin((x / wavelength) * 2 * Math.PI);
         if (x === 0) ctx.moveTo(left + x, y);
         else ctx.lineTo(left + x, y);

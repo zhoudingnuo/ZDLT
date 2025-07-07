@@ -2140,48 +2140,6 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       console.log('检测到html内容，渲染iframe', text);
       return /<(html|body|div|table|img|iframe|span|p|a)[\s>]/i.test(text.trim());
     }
-
-    if (outputMode === 'rendered' && typeof content === 'string' && isHtmlContent(content)) {
-      // 优化iframe隔离渲染
-      console.log('检测到html内容，渲染iframe', content);
-      const bgColor = theme === 'dark' ? '#2f3136' : '#fff';
-      const iframeBgColor = theme === 'dark' ? '#2f3136' : '#fff';
-      return (
-        <div
-          style={{
-            width: '100%',
-            maxWidth: 900,
-            margin: '32px auto',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'flex-start',
-            minHeight: 500,
-            background: bgColor,
-            borderRadius: 18,
-            boxShadow: '0 4px 24px 0 rgba(79,140,255,0.10)',
-            overflow: 'hidden', // 只显示iframe内容，不让内容撑破主页面
-            padding: 0
-          }}
-        >
-          <iframe
-            style={{
-              width: '100%',
-              minHeight: 500,
-              background: iframeBgColor,
-              borderRadius: 18,
-              border: 'none',
-              boxShadow: '0 2px 8px 0 rgba(79,140,255,0.08)',
-              display: 'block',
-              overflow: 'auto'
-            }}
-            srcDoc={content}
-            sandbox="allow-scripts allow-same-origin"
-            title="HTML内容"
-          />
-        </div>
-      );
-    }
-
     // Workflow类型：提取data.outputs中的内容
     if (isWorkflow) {
       if (content && typeof content === 'object') {
@@ -2221,17 +2179,19 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
               <div
                 style={{
                   width: '100%',
-                  maxWidth: 900,
-                  margin: '32px auto',
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'flex-start',
                   minHeight: 500,
                   background: bgColor,
                   borderRadius: 18,
+                  margin: '32px 0',
                   boxShadow: '0 4px 24px 0 rgba(79,140,255,0.10)',
-                  overflow: 'hidden',
-                  padding: 0
+                  padding: 0,
+                  overflow: 'auto',
+                  maxWidth: 900,
+                  marginLeft: 'auto',
+                  marginRight: 'auto'
                 }}
               >
                 <iframe
@@ -2241,11 +2201,9 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
                     background: iframeBgColor,
                     borderRadius: 18,
                     border: 'none',
-                    boxShadow: '0 2px 8px 0 rgba(79,140,255,0.08)',
-                    display: 'block',
-                    overflow: 'auto'
+                    boxShadow: '0 2px 8px 0 rgba(79,140,255,0.08)'
                   }}
-                  srcDoc={finalContent}
+                  srcDoc={content}
                   sandbox="allow-scripts allow-same-origin"
                   title="HTML内容"
                 />

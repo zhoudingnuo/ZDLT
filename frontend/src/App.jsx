@@ -2153,26 +2153,29 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         const data = content.data || content;
         const outputs = data.outputs;
         if (outputs) {
+          // 调试输出workflow类型内容
+          console.log('[Workflow调试] outputs:', outputs);
           let renderedContent = '';
           if (outputs.result) {
-            renderedContent += `结果：${outputs.result}\n\n`;
+            renderedContent += `${outputs.result}\n\n`;
           }
           if (outputs.text) {
-            renderedContent += `文本：${outputs.text}\n\n`;
+            renderedContent += `${outputs.text}\n\n`;
           }
           if (outputs.file) {
-            renderedContent += `文件：${outputs.file}\n\n`;
+            renderedContent += `${outputs.file}\n\n`;
           }
           if (outputs.answer) {
-            renderedContent += `答案：${outputs.answer}\n\n`;
+            renderedContent += `${outputs.answer}\n\n`;
           }
           if (!renderedContent) {
             for (const [key, value] of Object.entries(outputs)) {
               if (value && typeof value === 'string' && value.trim()) {
-                renderedContent += `${key}：${value}\n\n`;
+                renderedContent += `${value}\n\n`;
               }
             }
           }
+          console.log('[Workflow调试] renderedContent:', renderedContent);
           // markdown渲染
           return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(renderedContent.trim() || '处理完成，但未找到可显示的内容')}</ReactMarkdown>;
         }

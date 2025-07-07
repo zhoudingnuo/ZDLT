@@ -2179,29 +2179,29 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
               <div
                 style={{
                   width: '100%',
+                  height: '100%',
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'flex-start',
                   minHeight: 500,
                   background: bgColor,
                   borderRadius: 18,
-                  margin: '32px 0',
                   boxShadow: '0 4px 24px 0 rgba(79,140,255,0.10)',
                   padding: 0,
-                  overflow: 'auto',
-                  maxWidth: 900,
-                  marginLeft: 'auto',
-                  marginRight: 'auto'
+                  overflow: 'hidden'
                 }}
               >
                 <iframe
                   style={{
                     width: '100%',
+                    height: '100%',
                     minHeight: 500,
                     background: iframeBgColor,
                     borderRadius: 18,
                     border: 'none',
-                    boxShadow: '0 2px 8px 0 rgba(79,140,255,0.08)'
+                    boxShadow: '0 2px 8px 0 rgba(79,140,255,0.08)',
+                    display: 'block',
+                    overflow: 'auto'
                   }}
                   srcDoc={finalContent}
                   sandbox="allow-scripts allow-same-origin"

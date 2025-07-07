@@ -2121,13 +2121,16 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
 
   // 新增：内容提取和渲染函数
   const extractAndRenderContent = (content) => {
+    const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/');
+    // 调试输出类型
+    console.log('[extractAndRenderContent] 当前类型:', isWorkflow ? 'workflow' : 'chat', 'agent:', agent);
     if (outputMode === 'json') {
       // JSON模式：直接返回原始内容
       return typeof content === 'string' ? content : JSON.stringify(content, null, 2);
     }
 
     // 渲染模式：根据智能体类型处理内容
-    const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/');
+    // const isWorkflow = agent?.workflow === true || agent?.apiUrl?.includes('/workflows/'); // 删除此行
     
     // 新增：自动检测HTML内容
     function isHtmlContent(text) {
@@ -2153,8 +2156,6 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         const data = content.data || content;
         const outputs = data.outputs;
         if (outputs) {
-          // 调试输出workflow类型内容
-          console.log('[Workflow调试] outputs:', outputs);
           let renderedContent = '';
           if (outputs.result) {
             renderedContent += `${outputs.result}\n\n`;
@@ -2175,7 +2176,6 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
               }
             }
           }
-          console.log('[Workflow调试] renderedContent:', renderedContent);
           // markdown渲染
           return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(renderedContent.trim() || '处理完成，但未找到可显示的内容')}</ReactMarkdown>;
         }

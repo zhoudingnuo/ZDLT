@@ -2146,6 +2146,35 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       console.log('检测到html内容，渲染iframe', text);
       return /<(html|body|div|table|img|iframe|span|p|a)[\s>]/i.test(text.trim());
     }
+    // 默写批改P图分支
+    if (typeof content === 'string' && content.includes('oppo')) {
+      const parts = content.split('oppo');
+      const textPart = parts[0]?.trim();
+      const pText = parts[1]?.trim();
+      const coordsStr = parts[2]?.trim();
+
+      let waves = [];
+      if (coordsStr) {
+        const arr = coordsStr.replace(/\[|\]/g, '').split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
+        if (arr.length % 4 === 0) waves = arr;
+      }
+
+      let imgBase64 = '';
+      if (window.lastUploadedImage && waves.length > 0) {
+        imgBase64 = processImageWithWavesAndText(window.lastUploadedImage, waves, pText);
+      }
+
+      return (
+        <div>
+          <pre style={{ whiteSpace: 'pre-wrap', fontSize: 16 }}>{textPart}</pre>
+          {imgBase64 && (
+            <div style={{ margin: '16px 0', textAlign: 'center' }}>
+              <img src={imgBase64} alt="默写批改" style={{ maxWidth: '100%' }} />
+            </div>
+          )}
+        </div>
+      );
+    }
     // Workflow类型：提取data.outputs中的内容
     if (isWorkflow) {
       if (content && typeof content === 'object') {
@@ -2252,35 +2281,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     }
   }, [user]);
 
-  // 默写批改P图分支
-  if (typeof content === 'string' && content.includes('oppo')) {
-    const parts = content.split('oppo');
-    const textPart = parts[0]?.trim();
-    const pText = parts[1]?.trim();
-    const coordsStr = parts[2]?.trim();
-
-    let waves = [];
-    if (coordsStr) {
-      const arr = coordsStr.replace(/\[|\]/g, '').split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
-      if (arr.length % 4 === 0) waves = arr;
-    }
-
-    let imgBase64 = '';
-    if (window.lastUploadedImage && waves.length > 0) {
-      imgBase64 = processImageWithWavesAndText(window.lastUploadedImage, waves, pText);
-    }
-
-    return (
-      <div>
-        <pre style={{ whiteSpace: 'pre-wrap', fontSize: 16 }}>{textPart}</pre>
-        {imgBase64 && (
-          <div style={{ margin: '16px 0', textAlign: 'center' }}>
-            <img src={imgBase64} alt="默写批改" style={{ maxWidth: '100%' }} />
-          </div>
-        )}
-      </div>
-    );
-  }
+  
 
   return (
     <Layout key={chatPageKey} style={{ minHeight: '100vh', fontFamily, background: theme === 'dark' ? '#18191c' : undefined, paddingTop: 20 }}>

@@ -1680,13 +1680,20 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       usage = res.data.metadata?.usage || res.data.data;
       if (usage && user) {
         const tokens = Number(usage.total_tokens) || 0;
+        const priceRaw = Number(usage.total_price) || 0;
+        const price = priceRaw === 0 ? 0.5 : priceRaw;
         let currentUser = getUser();
         currentUser.usage_tokens = (currentUser.usage_tokens || 0) + tokens;
+        currentUser.usage_price = (currentUser.usage_price || 0) + price;
+        // 调试输出
+        console.log('[消耗统计] 本次返回 tokens:', tokens, 'price:', price, '累计 tokens:', currentUser.usage_tokens, '累计 price:', currentUser.usage_price);
         setUser(currentUser);
-        await updateUserUsage(currentUser.username, currentUser.usage_tokens);
+        await updateUserUsage(currentUser.username, currentUser.usage_tokens, currentUser.usage_price);
       }
       setMessages(msgs => {
         const lastIdx = msgs.length - 1;
+        const priceRaw = Number(usage?.total_price) || 0;
+        const price = priceRaw === 0 ? 0.5 : priceRaw;
         if (msgs[lastIdx]?.isLoading) {
           clearInterval(aiTimerRef.current);
           setAiTimer(0);
@@ -1697,7 +1704,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
               content: answer,
               usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
               tokens: usage?.total_tokens,
-              price: usage?.total_price
+              price: price
             }
           ];
         } else {
@@ -1708,7 +1715,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
               content: answer,
               usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
               tokens: usage?.total_tokens,
-              price: usage?.total_price
+              price: price
             }
           ];
         }
@@ -1755,6 +1762,8 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       
       setMessages(msgs => {
         const lastIdx = msgs.length - 1;
+        const priceRaw = Number(usage?.total_price) || 0;
+        const price = priceRaw === 0 ? 0.5 : priceRaw;
         if (msgs[lastIdx]?.isLoading) {
           clearInterval(aiTimerRef.current);
           setAiTimer(0);
@@ -1765,7 +1774,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
               content: fullErrorMsg,
               usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
               tokens: usage?.total_tokens,
-              price: usage?.total_price
+              price: price
             }
           ];
         } else {
@@ -1776,7 +1785,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
               content: fullErrorMsg,
               usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
               tokens: usage?.total_tokens,
-              price: usage?.total_price
+              price: price
             }
           ];
         }
@@ -1854,15 +1863,22 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       // 累加token和价格消耗
       if (params.metadata?.usage && user) {
         const tokens = Number(params.metadata.usage.total_tokens) || 0;
+        const priceRaw = Number(params.metadata.usage.total_price) || 0;
+        const price = priceRaw === 0 ? 0.5 : priceRaw;
         let currentUser = getUser();
         currentUser.usage_tokens = (currentUser.usage_tokens || 0) + tokens;
+        currentUser.usage_price = (currentUser.usage_price || 0) + price;
+        // 调试输出
+        console.log('[消耗统计] 本次返回 tokens:', tokens, 'price:', price, '累计 tokens:', currentUser.usage_tokens, '累计 price:', currentUser.usage_price);
         setUser(currentUser);
-        await updateUserUsage(currentUser.username, currentUser.usage_tokens);
+        await updateUserUsage(currentUser.username, currentUser.usage_tokens, currentUser.usage_price);
       }
       
       // 更新最终结果，保持计时器运行
       setMessages(msgs => {
         const lastIdx = msgs.length - 1;
+        const priceRaw = Number(params.metadata?.usage?.total_price) || 0;
+        const price = priceRaw === 0 ? 0.5 : priceRaw;
         if (msgs[lastIdx]?.isLoading) {
           return [
             ...msgs.slice(0, lastIdx),
@@ -1871,7 +1887,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
               content: params,
               usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
               tokens: params.metadata?.usage?.total_tokens || params.data?.total_tokens,
-              price: params.metadata?.usage?.total_price
+              price: price
             }
           ];
         }
@@ -2221,6 +2237,13 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       }
     }
   };
+
+  // 监听user变化，非管理员强制锁定输出模式为'rendered'
+  useEffect(() => {
+    if (!user?.isAdmin && outputMode !== 'rendered') {
+      setOutputMode('rendered');
+    }
+  }, [user]);
 
   return (
     <Layout key={chatPageKey} style={{ minHeight: '100vh', fontFamily, background: theme === 'dark' ? '#18191c' : undefined, paddingTop: 20 }}>

@@ -314,7 +314,7 @@ export function processImageWithWavesAndText(img, waves, text) {
   ctx.strokeStyle = '#FF0000';
   ctx.lineWidth = 2;
       for (let i = 0; i < waves.length; i += 4) {
-      const top = waves[i]+waves[i + 3]+50;
+      const top = waves[i];
       const left = waves[i + 1];
       const width = waves[i + 2];
       const height = waves[i + 3] / 5; // 波浪线高度变为原来的1/4

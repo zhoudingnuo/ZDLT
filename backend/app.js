@@ -70,6 +70,7 @@ app.get('/api/agents/list', (req, res) => {
     status: a.status,
     inputs: a.inputs,
     inputType: a.inputType,
+    workflow: a.workflow
   });
   res.json(safeAgents);
 });

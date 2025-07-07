@@ -2139,14 +2139,42 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     }
 
     if (outputMode === 'rendered' && typeof content === 'string' && isHtmlContent(content)) {
-      // 用iframe渲染html小页面
+      // 优化：参考GameHtmlRenderer样式
+      const bgColor = theme === 'dark' ? '#2f3136' : '#fff';
+      const iframeBgColor = theme === 'dark' ? '#2f3136' : '#fff';
       return (
-        <iframe
-          srcDoc={content}
-          style={{ width: '100%', minHeight: 400, border: 'none', borderRadius: 12, background: '#fff', margin: '12px 0' }}
-          sandbox="allow-scripts allow-same-origin"
-          title="HTML内容"
-        />
+        <div
+          style={{
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+            minHeight: 500,
+            background: bgColor,
+            borderRadius: 18,
+            margin: '32px 0',
+            boxShadow: '0 4px 24px 0 rgba(79,140,255,0.10)',
+            padding: 0,
+            overflow: 'auto',
+            maxWidth: 900,
+            marginLeft: 'auto',
+            marginRight: 'auto'
+          }}
+        >
+          <iframe
+            style={{
+              width: '100%',
+              minHeight: 500,
+              background: iframeBgColor,
+              borderRadius: 18,
+              border: 'none',
+              boxShadow: '0 2px 8px 0 rgba(79,140,255,0.08)'
+            }}
+            srcDoc={content}
+            sandbox="allow-scripts allow-same-origin"
+            title="HTML内容"
+          />
+        </div>
       );
     }
 

@@ -2474,19 +2474,21 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
         <Header style={{ background: theme === 'dark' ? '#23262e' : '#f5f6fa', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: 64, marginTop: 0 }}>
           <span style={{ flex: 1, textAlign: 'center', fontWeight: 700, fontSize: 26, color: mainColorSolid, letterSpacing: 1 }}>{agent?.name || ''}</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            {/* 输出模式开关 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ color: theme === 'dark' ? '#eee' : '#333', fontSize: 14 }}>输出模式:</span>
-              <Select
-                value={outputMode}
-                onChange={setOutputMode}
-                size="small"
-                style={{ width: 100 }}
-              >
-                <Select.Option value="rendered">渲染模式</Select.Option>
-                <Select.Option value="json">JSON模式</Select.Option>
-              </Select>
-            </div>
+            {/* 输出模式开关（仅管理员可见） */}
+            {user?.isAdmin && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ color: theme === 'dark' ? '#eee' : '#333', fontSize: 14 }}>输出模式:</span>
+                <Select
+                  value={outputMode}
+                  onChange={setOutputMode}
+                  size="small"
+                  style={{ width: 100 }}
+                >
+                  <Select.Option value="rendered">渲染模式</Select.Option>
+                  <Select.Option value="json">JSON模式</Select.Option>
+                </Select>
+              </div>
+            )}
             <Tooltip title={user ? user.username : '未登录'}>
             <Dropdown 
               overlay={

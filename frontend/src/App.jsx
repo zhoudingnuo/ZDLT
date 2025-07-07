@@ -2142,7 +2142,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       // 优化iframe隔离渲染
       const bgColor = theme === 'dark' ? '#2f3136' : '#fff';
       const iframeBgColor = theme === 'dark' ? '#2f3136' : '#fff';
-      return content;
+      return "1";
     }
 
     // Workflow类型：提取data.outputs中的内容

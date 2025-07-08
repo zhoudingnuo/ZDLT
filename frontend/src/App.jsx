@@ -3273,7 +3273,7 @@ return (
                 }}
               >
                 <div className="agent-config-icon" style={{ fontSize: 32, marginBottom: 10 }}>⚙️</div>
-                <div style={{ fontWeight: 700, fontSize: 16, color: cardTitleColor, marginBottom: 10, textAlign: 'center' }}>智能体管理</div>
+                <div className="agent-config-title" style={{ fontWeight: 700, fontSize: 16, color: cardTitleColor, marginBottom: 10, textAlign: 'center' }}>智能体管理</div>
                 <Button
                   className="agent-config-btn"
                   type="primary"

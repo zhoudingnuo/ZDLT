@@ -214,4 +214,27 @@
   .agent-config-btn {
     margin-bottom: 6px !important;
   }
+  /* 隐藏首页搜索栏 */
+  .home-search-bar {
+    display: none !important;
+  }
+  /* 配置智能体标题缩小 */
+  .agent-config-title {
+    font-size: 13px !important;
+    margin-bottom: 4px !important;
+  }
+  /* 配置智能体图标和按钮缩小 */
+  .agent-config-icon {
+    font-size: 20px !important;
+    margin-bottom: 6px !important;
+    line-height: 1 !important;
+  }
+  .agent-config-btn,
+  .agent-create-btn {
+    font-size: 12px !important;
+    height: 26px !important;
+    padding: 0 6px !important;
+    margin-bottom: 4px !important;
+    border-radius: 8px !important;
+  }
 } 

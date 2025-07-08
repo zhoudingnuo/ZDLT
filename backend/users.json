@@ -60,5 +60,31 @@
     "usage_price": 0,
     "balance": 0,
     "phone": "18888888888"
+  },
+  {
+    "id": "1751976423182",
+    "username": "18108431035",
+    "phone": "18108431035",
+    "password": "",
+    "createTime": "2025-07-08T12:07:03.182Z",
+    "lastLoginTime": "2025-07-08T12:07:03.182Z",
+    "isAdmin": false,
+    "email": "",
+    "usage_tokens": 0,
+    "usage_price": 0,
+    "balance": 0
+  },
+  {
+    "id": "1751976483148",
+    "username": "18680289777",
+    "phone": "18680289777",
+    "password": "",
+    "createTime": "2025-07-08T12:08:03.148Z",
+    "lastLoginTime": "2025-07-08T12:08:03.148Z",
+    "isAdmin": false,
+    "email": "",
+    "usage_tokens": 0,
+    "usage_price": 0,
+    "balance": 0
   }
 ]

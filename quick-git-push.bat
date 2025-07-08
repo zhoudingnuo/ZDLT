@@ -2,24 +2,24 @@
 REM One-click commit, push to GitHub, and remote server git pull (manual password input required)
 
 echo.
-echo ====== 选择操作 ======
-echo 是否先下载 agents.json 文件？
-echo 输入 y 下载 agents.json 文件
-echo 输入 n 直接执行代码提交
+echo ====== Operation Selection ======
+echo Do you want to download agents.json file first?
+echo Enter y to download agents.json file
+echo Enter n to proceed with code commit directly
 echo.
-set /p choice=请输入选择 (y/n): 
+set /p choice=Please enter your choice (y/n): 
 
 if /i "%choice%"=="y" (
     echo.
-    echo ====== 开始下载 agents.json 文件 ======
+    echo ====== Starting agents.json download ======
     scp root@47.107.84.24:/root/ZDLT/backend/agents.json "C:\Users\AnlangZ\Desktop\Cursor\OT\backend\agents.json"
-    echo 文件下载完成！
+    echo File download completed!
     pause
     echo.
-    echo ====== 继续执行代码提交操作 ======
+    echo ====== Continuing with code commit operation ======
 ) else (
     echo.
-    echo ====== 直接执行代码提交操作 ======
+    echo ====== Proceeding with code commit operation directly ======
 )
 
 git add .

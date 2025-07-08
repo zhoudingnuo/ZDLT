@@ -170,7 +170,7 @@ export default function LoginPage({ setUser }) {
                       disabled={codeCountdown > 0}
                       loading={codeLoading}
                       onClick={async () => {
-                        const phone = document.querySelector('input[name=\"phone\"]')?.value;
+                        const phone = document.querySelector('input[name="phone"]')?.value;
                         await handleSendCode(phone);
                       }}
                     >

@@ -1275,12 +1275,13 @@ async function sendSms(phone, code) {
     accessKeySecret,
     endpoint: 'dysmsapi.aliyuncs.com'
   }));
-  const sendSmsRequest = {
+  // 修正：用 SDK 的类型创建 request 对象
+  const sendSmsRequest = new Dysmsapi20170525.SendSmsRequest({
     phoneNumbers: phone,
     signName: '深圳智大蓝图科技',
     templateCode: 'SMS_322315120',
     templateParam: JSON.stringify({ code })
-  };
+  });
   const runtime = new RuntimeOptions({});
   const result = await client.sendSmsWithOptions(sendSmsRequest, runtime);
   return result.body;

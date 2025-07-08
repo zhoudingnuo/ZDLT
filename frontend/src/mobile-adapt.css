@@ -177,4 +177,33 @@
     margin-top: 0 !important;
     padding-top: 0 !important;
   }
+  .top-btn-group .ant-btn {
+    font-size: 12px !important;
+    height: 28px !important;
+    min-width: 40px !important;
+    padding: 0 8px !important;
+  }
+  .top-btn-group .ant-btn > span:first-child {
+    font-size: 14px !important;
+    margin-right: 2px !important;
+  }
+  .logo-title {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 60px !important;
+    padding: 0 !important;
+  }
+  .logo-title img {
+    display: block !important;
+    margin: 0 auto 2px auto !important;
+  }
+  .logo-title span {
+    display: block !important;
+    text-align: center !important;
+    width: 100%;
+    font-size: 12px !important;
+    line-height: 1.1 !important;
+  }
 } 

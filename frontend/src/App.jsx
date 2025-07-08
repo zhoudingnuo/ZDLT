@@ -2781,7 +2781,7 @@ function LogoTitle({ onClick, theme, marginTop = 0 }) {
   const textColor = theme === 'dark' ? '#eee' : '#888';
   
   return (
-    <div style={{ display: 'flex', alignItems: 'center', height: 64, padding: '0 16px', cursor: 'pointer', userSelect: 'none', marginTop }} onClick={onClick}>
+    <div className="logo-title" style={{ display: 'flex', alignItems: 'center', height: 64, padding: '0 16px', cursor: 'pointer', userSelect: 'none', marginTop }} onClick={onClick}>
       <img src="/logo-zeta-vista.png" alt="logo" style={{ height: 48, marginRight: 12 }} />
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <span style={{ fontWeight: 600, fontSize: 26, letterSpacing: 2, color: mainColorSolid, lineHeight: 1, textAlign: 'center', width: '100%' }}>智大蓝图</span>

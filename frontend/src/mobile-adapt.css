@@ -154,10 +154,10 @@
   .agent-config-btn,
   .agent-create-btn {
     font-size: 13px !important;
-    height: 2px !important;
+    height: 0px !important;
     padding: 0 1px !important;
     margin-bottom: 0px !important;
-    border-radius: 6px !important;
+    border-radius: 2px !important;
   }
   /* 顶部按钮图标更小，按钮间距更合适，高度更小，只显示第一个span（图标） */
   .top-btn-group .ant-btn {
@@ -207,7 +207,7 @@
   }
   /* 强制右侧容器靠右 */
   .ant-layout-header > div:last-child {
-    margin-left: auto !important;
+    margin-right: 20px !important;
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;

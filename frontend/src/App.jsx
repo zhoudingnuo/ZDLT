@@ -52,33 +52,6 @@ const fontFamily = 'PingFang SC, Microsoft YaHei, Arial, sans-serif';
 // 初始化默认用户
 initDefaultUsers();
 
-// 强制桌面端模式函数
-function forceDesktopMode() {
-  // 检测是否为移动设备
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  
-  if (isMobile) {
-    // 强制设置视口宽度
-    const viewport = document.querySelector('meta[name="viewport"]');
-    if (viewport) {
-      viewport.setAttribute('content', 'width=1200, initial-scale=1.0, user-scalable=no');
-    }
-    
-    // 强制设置body最小宽度
-    document.body.style.minWidth = '1200px';
-    document.body.style.overflowX = 'auto';
-    
-    // 强制设置root最小宽度
-    const root = document.getElementById('root');
-    if (root) {
-      root.style.minWidth = '1200px';
-    }
-  }
-}
-
-// 立即执行强制桌面端模式
-forceDesktopMode();
-
 // 初始化管理员账号
 function initAdminUser() {
   const users = getUsers();

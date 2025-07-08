@@ -3387,7 +3387,6 @@ return (
 function App() {
   // 强制桌面端模式
   useEffect(() => {
-    forceDesktopMode();
   }, []);
 
   const [page, setPage] = useState('home');

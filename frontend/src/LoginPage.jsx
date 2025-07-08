@@ -163,9 +163,9 @@ export default function LoginPage({ setUser }) {
               <Form.Item name="code" label={<span style={{ color: labelColor }}>验证码</span>} rules={[{ required: true, message: '请输入验证码' }]}> 
                 <Input
                   style={{
-                    background: theme === 'dark' ? '#23262e' : '#fff',
-                    color: theme === 'dark' ? '#eee' : '#222',
-                    borderColor: theme === 'dark' ? '#444' : '#d9d9d9',
+                    background: inputBg,
+                    color: fontColor,
+                    borderColor: inputBorder,
                     boxShadow: 'none',
                   }}
                   maxLength={6}
@@ -234,7 +234,7 @@ export default function LoginPage({ setUser }) {
         </div>
         {/* 右侧二维码 */}
         <div style={{
-          background: theme === 'dark' ? '#23262e' : '#f7f8fa',
+          background: cardBg,
           width: 320,
           display: 'flex',
           flexDirection: 'column',

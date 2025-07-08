@@ -10,6 +10,9 @@ const dotenv = require('dotenv');
 const winston = require('winston');
 const bcrypt = require('bcrypt');
 const { spawn } = require('child_process');
+const Dysmsapi20170525 = require('@alicloud/dysmsapi20170525');
+const { Config } = require('@alicloud/openapi-client');
+const { RuntimeOptions } = require('@alicloud/tea-util');
 // 短信验证码内存存储（可换成Redis/DB）
 const smsCodes = {};
 
@@ -1205,18 +1208,13 @@ app.post('/api/send-code', async (req, res) => {
   smsCodes[phone] = code;
   setTimeout(() => { delete smsCodes[phone]; }, 5 * 60 * 1000);
 
-  // 调用Java短信发送（假设SendSms.class已编译好，参数为手机号和验证码）
-  const java = spawn('java', ['-cp', './java_sms', 'demo.SendSms', phone, code]);
-  let javaOut = '';
-  java.stdout.on('data', (data) => { javaOut += data.toString(); });
-  java.stderr.on('data', (data) => { console.error('Java stderr:', data.toString()); });
-  java.on('close', (code_) => {
-    if (code_ === 0) {
-      res.json({ success: true, msg: '验证码已发送' });
-    } else {
-      res.status(500).json({ success: false, msg: '短信发送失败', detail: javaOut });
-    }
-  });
+  try {
+    await sendSms(phone, code);
+    res.json({ success: true, msg: '验证码已发送' });
+  } catch (err) {
+    console.error('短信发送失败:', err, err?.data, err?.message, err?.code);
+    res.status(500).json({ success: false, msg: '短信发送失败', detail: err && (err.data ? JSON.stringify(err.data) : err.message) });
+  }
 });
 
 // 验证码登录API
@@ -1253,6 +1251,25 @@ app.post('/api/code-login', async (req, res) => {
   delete smsCodes[phone];
   res.json({ success: true, user });
 });
+
+async function sendSms(phone, code) {
+  const accessKeyId = process.env.ALIBABA_CLOUD_ACCESS_KEY_ID;
+  const accessKeySecret = process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET;
+  const client = new Dysmsapi20170525.default(new Config({
+    accessKeyId,
+    accessKeySecret,
+    endpoint: 'dysmsapi.aliyuncs.com'
+  }));
+  const sendSmsRequest = {
+    phoneNumbers: phone,
+    signName: '深圳智大蓝图科技',
+    templateCode: 'SMS_322315120',
+    templateParam: JSON.stringify({ code })
+  };
+  const runtime = new RuntimeOptions({});
+  const result = await client.sendSmsWithOptions(sendSmsRequest, runtime);
+  return result.body;
+}
 
 const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0'; // 监听所有网络接口

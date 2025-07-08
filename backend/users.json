@@ -6,7 +6,8 @@
     "email": "admin@example.com",
     "usage_tokens": 104008,
     "isAdmin": true,
-    "balance": 0
+    "balance": 0,
+    "phone": "18888888888"
   },
   {
     "id": "1751358665016",
@@ -15,7 +16,8 @@
     "email": "admin@example.com",
     "usage_tokens": 43754,
     "isAdmin": false,
-    "balance": 100
+    "balance": 100,
+    "phone": "18888888888"
   },
   {
     "id": "1751363461645",
@@ -24,7 +26,8 @@
     "email": "1163155015@qq.com",
     "usage_tokens": 0,
     "usage_price": 0,
-    "balance": 100
+    "balance": 100,
+    "phone": "18888888888"
   },
   {
     "id": "1751363598268",
@@ -33,7 +36,8 @@
     "email": "1163155015@qq.com",
     "usage_tokens": 0,
     "usage_price": 0,
-    "balance": 152
+    "balance": 152,
+    "phone": "18888888888"
   },
   {
     "id": "1751368894466",
@@ -42,7 +46,8 @@
     "email": "1163155015@qq.com",
     "usage_tokens": 0,
     "usage_price": 0,
-    "balance": 0
+    "balance": 0,
+    "phone": "18888888888"
   },
   {
     "id": "1751423739859",
@@ -51,6 +56,7 @@
     "email": "1163155015@qq.com",
     "usage_tokens": 0,
     "usage_price": 0,
-    "balance": 0
+    "balance": 0,
+    "phone": "18888888888"
   }
 ]

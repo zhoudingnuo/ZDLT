@@ -152,7 +152,7 @@ export default function LoginPage({ setUser }) {
             <Tabs.TabPane tab={<span style={{ color: tab === 'pwd' ? tabActiveColor : tabColor }}>密码登录</span>} key="pwd" />
           </Tabs>
           <div style={{ color: theme === 'dark' ? '#bbb' : '#666', fontSize: 13, marginBottom: 18 }}>
-            仅支持手机号登录，或使用微信扫码登录。
+            支持手机号、用户名、邮箱登录，或使用微信扫码登录。
           </div>
           {tab === 'code' ? (
             <Form layout="vertical" onFinish={onCodeLogin} style={{ color: fontColor }}>
@@ -161,11 +161,10 @@ export default function LoginPage({ setUser }) {
               </Form.Item>
               <Form.Item name="code" label={<span style={{ color: labelColor }}>验证码</span>} rules={[{ required: true, message: '请输入验证码' }]}> 
                 <Input
-                  style={{ 
-                    background: inputBg, 
-                    color: fontColor, 
-                    borderColor: inputBorder, 
-                    // 让验证码输入框和其它输入框保持一致
+                  style={{
+                    background: theme === 'dark' ? '#23262e' : '#fff',
+                    color: theme === 'dark' ? '#eee' : '#222',
+                    borderColor: theme === 'dark' ? '#444' : '#d9d9d9',
                   }}
                   maxLength={6}
                   prefix={<LockOutlined />}
@@ -212,7 +211,7 @@ export default function LoginPage({ setUser }) {
             </Form>
           ) : (
             <Form layout="vertical" onFinish={onPwdLogin} style={{ color: fontColor }}>
-              <Form.Item name="username" label={<span style={{ color: labelColor }}>手机号/邮箱</span>} rules={[{ required: true, message: '请输入手机号或邮箱' }]}> 
+              <Form.Item name="username" label={<span style={{ color: labelColor }}>手机号/用户名/邮箱</span>} rules={[{ required: true, message: '请输入手机号、用户名或邮箱' }]}> 
                 <Input style={{ background: inputBg, color: fontColor, borderColor: inputBorder }} prefix={<UserOutlined />} />
               </Form.Item>
               <Form.Item name="password" label={<span style={{ color: labelColor }}>密码</span>} rules={[{ required: true, message: '请输入密码' }]}> 
@@ -263,7 +262,7 @@ export default function LoginPage({ setUser }) {
       </div>
       {/* 页脚 */}
       <div style={{ position: 'fixed', bottom: 18, left: 0, width: '100%', textAlign: 'center', color: theme === 'dark' ? '#888' : '#999', fontSize: 13 }}>
-        浙ICP备2023025841号 · <a href="#" style={{ color: '#4f8cff' }}>Contact us</a>
+        备案中 · <a href="#" style={{ color: '#4f8cff' }}>Contact us</a>
       </div>
     </div>
   );

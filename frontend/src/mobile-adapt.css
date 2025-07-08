@@ -48,22 +48,28 @@
     border-radius: 12px !important;
   }
   .ant-layout-header {
-    min-height: 48px !important;
-    padding: 0 8px !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    padding: 0 4px !important;
   }
   .ant-avatar, .theme-switch-btn {
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
-    max-width: 32px !important;
-    max-height: 32px !important;
-    font-size: 18px !important;
-    border-radius: 50% !important;
-    padding: 0 !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    max-width: 22px !important;
+    max-height: 22px !important;
+    font-size: 13px !important;
+    margin-left: 4px !important;
+  }
+  .theme-switch-btn {
+    margin-left: 2px !important;
+  }
+  .header-user-group {
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
+    gap: 2px !important;
+    margin-left: 4px !important;
   }
   /* 搜索栏移动端样式 */
   .home-search-bar {
@@ -148,11 +154,11 @@
   }
   .agent-config-btn,
   .agent-create-btn {
-    font-size: 11px !important;
-    height: 12px !important;
-    padding: 0 4px !important;
-    margin-bottom: 3px !important;
-    border-radius: 7px !important;
+    font-size: 9px !important;
+    height: 10px !important;
+    padding: 0 2px !important;
+    margin-bottom: 2px !important;
+    border-radius: 6px !important;
   }
   /* 顶部按钮图标更小，按钮间距更合适，高度更小，只显示第一个span（图标） */
   .top-btn-group .ant-btn {

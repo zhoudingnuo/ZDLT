@@ -121,7 +121,7 @@ export default function LoginPage({ setUser }) {
       />
       <div style={{
         display: 'flex',
-        background: 'transparent',
+        background: cardBg,
         borderRadius: 20,
         boxShadow: '0 4px 32px 0 rgba(0,0,0,0.22)',
         minWidth: 800,
@@ -131,7 +131,6 @@ export default function LoginPage({ setUser }) {
       }}>
         {/* 左侧登录表单 */}
         <div style={{
-          background: cardBg,
           padding: '48px 40px 32px 40px',
           width: 400,
           display: 'flex',
@@ -234,7 +233,6 @@ export default function LoginPage({ setUser }) {
         </div>
         {/* 右侧二维码 */}
         <div style={{
-          background: cardBg,
           width: 320,
           display: 'flex',
           flexDirection: 'column',

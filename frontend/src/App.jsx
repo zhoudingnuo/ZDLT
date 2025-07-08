@@ -2524,7 +2524,7 @@ body[data-theme="dark"] .markdown-body tr:nth-child(even) td {
         </div>
       </Sider>
       <Layout style={{ background: theme === 'dark' ? '#18191c' : undefined }}>
-        <Header style={{ background: theme === 'dark' ? '#23262e' : '#f5f6fa', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: 64, marginTop: 0 }}>
+        <Header style={{ background: theme === 'dark' ? '#202125' : '#f5f6fa', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: 64, marginTop: 0 }}>
           <span style={{ flex: 1, textAlign: 'center', fontWeight: 700, fontSize: 26, color: mainColorSolid, letterSpacing: 1 }}>{agent?.name || ''}</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {/* 输出模式开关（仅管理员可见） */}
@@ -3085,7 +3085,7 @@ return (
       </Menu>
     </Sider>
     <Layout style={{ background: mainBg }}>
-      <Header style={{ background: theme === 'dark' ? '#23262e' : '#f5f6fa', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: 64 }}>
+      <Header style={{ background: theme === 'dark' ? '#202125' : '#f5f6fa', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: 64 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <div className="home-search-bar" style={{
             display: 'flex',

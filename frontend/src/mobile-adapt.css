@@ -209,9 +209,23 @@
   .ant-layout-header {
     justify-content: space-between !important;
   }
+  /* 移动端隐藏搜索栏后，让按钮组也靠左，用户组完全靠右 */
+  .ant-layout-header > div:first-child {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
   /* 确保用户头像和主题按钮靠右且大小合适 */
   .ant-layout-header .ant-avatar,
   .ant-layout-header .theme-switch-btn {
     flex-shrink: 0 !important;
+  }
+  /* 移动端右侧用户组完全靠右 */
+  .ant-layout-header > div:last-child {
+    margin-left: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
   }
 } 

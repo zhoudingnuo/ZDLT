@@ -2816,6 +2816,7 @@ function getRandomSubset(arr, removeCount) {
 function ThemeSwitch({ theme, setTheme }) {
   return (
     <Button
+      className="theme-switch-btn"
       shape="circle"
       icon={theme === 'dark' ? <BulbOutlined /> : <MoonOutlined />}
       onClick={() => {
@@ -3117,7 +3118,7 @@ return (
             }}
           />
           </div>
-          <div style={{ display: 'flex', gap: 8, marginLeft: 32 }}>
+          <div className="top-btn-group" style={{ display: 'flex', gap: 8, marginLeft: 32 }}>
             <div style={{ display: 'flex', gap: 2 }}>
               {['首页', '知识库', '个人空间', '创建智能体'].map((text, idx) => (
                 <Button

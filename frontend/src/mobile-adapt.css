@@ -46,6 +46,18 @@
     font-size: 14px !important;
     padding: 0 8px !important;
     height: 36px !important;
+    flex-shrink: 0 !important;
+  }
+  .theme-switch-btn {
+    font-size: 18px !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
   /* 卡片自适应 */
   .card-title, .card-desc {

@@ -977,7 +977,7 @@ app.get('/api/pay/manual/status', (req, res) => {
 });
 
 // ====== 充值订单管理API ======
-// 获取所有充值订单（管理员用）
+// 获取所有充值订单（管理用）
 app.get('/api/admin/recharge-orders', (req, res) => {
   try {
     const orders = Object.values(manualPayOrders || {}).map(order => ({

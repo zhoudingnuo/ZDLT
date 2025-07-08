@@ -1,10 +1,10 @@
 @media (max-width: 768px) {
   .ant-layout-sider {
     display: block !important;
-    width: 48px !important;
-    min-width: 48px !important;
-    max-width: 60px !important;
-    flex: 0 0 48px !important;
+    width: 80px !important;
+    min-width: 80px !important;
+    max-width: 90px !important;
+    flex: 0 0 80px !important;
     transition: none !important;
     overflow-x: hidden !important;
   }
@@ -13,10 +13,10 @@
     padding: 0 !important;
   }
   .ant-layout-content, .main-content {
-    width: calc(100vw - 48px) !important;
+    width: calc(100vw - 80px) !important;
     padding: 8px !important;
     min-width: 0 !important;
-    margin-left: 48px !important;
+    margin-left: 80px !important;
   }
   .ant-modal {
     min-width: 100vw !important;
@@ -72,27 +72,43 @@
     flex-shrink: 0 !important;
   }
   .search-bar-wrap {
-    max-width: 48vw !important;
+    max-width: 90% !important;
     min-width: 0 !important;
-    flex: 1 1 48vw !important;
+    margin: 12px auto 8px auto !important;
+    padding: 0 !important;
+    display: block !important;
   }
-  /* 卡片自适应，一行三张 */
+  .search-bar-wrap input {
+    font-size: 14px !important;
+    height: 28px !important;
+    padding: 0 6px !important;
+  }
+  /* 卡片自适应，一行四张 */
   .ant-card, .custom-card {
-    width: 31vw !important;
+    width: 22vw !important;
     min-width: 0 !important;
-    max-width: 32vw !important;
-    margin: 0 1vw 10px 1vw !important;
-    padding: 6px !important;
+    max-width: 24vw !important;
+    margin: 0 1vw 8px 1vw !important;
+    padding: 4px !important;
     box-sizing: border-box;
     height: auto !important;
     display: inline-block !important;
     vertical-align: top !important;
   }
   .card-title, .card-desc {
-    font-size: 13px !important;
+    font-size: 12px !important;
   }
   .card-title {
     margin-bottom: 2px !important;
+  }
+  /* 配置卡片里的按钮同步缩小 */
+  .custom-card .ant-btn {
+    min-width: 40px !important;
+    font-size: 12px !important;
+    padding: 0 4px !important;
+    height: 28px !important;
+    border-radius: 8px !important;
+    margin-bottom: 4px !important;
   }
   /* 分类栏横向滚动 */
   .category-scrollbar {

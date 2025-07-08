@@ -158,19 +158,19 @@
   .agent-config-btn,
   .agent-create-btn {
     font-size: 13px !important;
-    height: 8px !important;
-    padding: 0 2px !important;
-    margin-bottom: 2px !important;
+    height: 2px !important;
+    padding: 0 1px !important;
+    margin-bottom: 0px !important;
     border-radius: 6px !important;
   }
   /* 顶部按钮图标更小，按钮间距更合适，高度更小，只显示第一个span（图标） */
   .top-btn-group .ant-btn {
-    min-width: 24px !important;
-    width: 24px !important;
+    min-width: 30px !important;
+    width: 30px !important;
     height: 16px !important;
     padding: 0 !important;
     justify-content: center !important;
-    margin-right: 12px !important;
+    margin-right: 16px !important;
     border-radius: 8px !important;
     display: flex !important;
     align-items: center !important;
@@ -189,8 +189,8 @@
   }
   .ant-layout-sider img,
   .logo-title img {
-    height: 32px !important;
-    max-width: 40px !important;
+    height: 40px !important;
+    max-width: 48px !important;
   }
   .category-scrollbar {
     margin-top: 0 !important;

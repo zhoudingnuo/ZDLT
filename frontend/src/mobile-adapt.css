@@ -70,6 +70,13 @@
     gap: 8px !important;
     margin-left: auto !important;
   }
+  .ant-layout-header > div:last-child {
+    margin-left: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding-right: 8px !important;
+  }
   /* 搜索栏移动端样式 */
   .home-search-bar {
     min-width: 160px !important;
@@ -178,14 +185,14 @@
     padding-top: 0 !important;
   }
   .top-btn-group .ant-btn {
-    font-size: 12px !important;
-    height: 28px !important;
-    min-width: 40px !important;
-    padding: 0 8px !important;
+    font-size: 10px !important;
+    height: 22px !important;
+    min-width: 28px !important;
+    padding: 0 4px !important;
   }
   .top-btn-group .ant-btn > span:first-child {
-    font-size: 14px !important;
-    margin-right: 2px !important;
+    font-size: 11px !important;
+    margin-right: 1px !important;
   }
   .logo-title {
     display: flex !important;

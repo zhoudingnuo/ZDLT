@@ -159,30 +159,6 @@
     margin-bottom: 2px !important;
     border-radius: 6px !important;
   }
-  /* 顶部按钮图标更小，按钮间距更合适，高度更小，只显示第一个span（图标） */
-  .top-btn-group .ant-btn {
-    min-width: 30px !important;
-    width: 30px !important;
-    height: 16px !important;
-    padding: 0 !important;
-    justify-content: center !important;
-    margin-right: 16px !important;
-    border-radius: 8px !important;
-    display: flex !important;
-    align-items: center !important;
-    font-size: unset !important;
-  }
-  .top-btn-group .ant-btn:last-child {
-    margin-right: 0 !important;
-  }
-  .top-btn-group .ant-btn > span:first-child {
-    font-size: 12px !important;
-    line-height: 1 !important;
-    margin-right: 0 !important;
-  }
-  .top-btn-group .ant-btn > span:not(:first-child) {
-    display: none !important;
-  }
   .ant-layout-sider img,
   .logo-title img {
     display: block !important;
@@ -200,25 +176,5 @@
   .ant-layout-content {
     margin-top: 0 !important;
     padding-top: 0 !important;
-  }
-
-  /* 确保用户头像和主题按钮靠右且大小合适 */
-  .ant-layout-header .ant-avatar,
-  .ant-layout-header .theme-switch-btn {
-    flex-shrink: 0 !important;
-  }
-  /* 强制右侧容器靠右 */
-  .ant-layout-header > div:last-child {
-    margin-right: 20px !important;
-    display: flex !important;
-    align-items: right !important;
-    gap: 8px !important;
-  }
-  /* 确保头像和按钮在右侧容器内靠右 */
-  .ant-layout-header .ant-avatar {
-    margin-right: 0 !important;
-  }
-  .ant-layout-header .theme-switch-btn {
-    margin-right: 8px !important;
   }
 } 

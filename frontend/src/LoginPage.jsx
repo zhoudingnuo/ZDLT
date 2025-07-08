@@ -161,7 +161,12 @@ export default function LoginPage({ setUser }) {
               </Form.Item>
               <Form.Item name="code" label={<span style={{ color: labelColor }}>验证码</span>} rules={[{ required: true, message: '请输入验证码' }]}> 
                 <Input
-                  style={{ background: inputBg, color: fontColor, borderColor: inputBorder }}
+                  style={{ 
+                    background: inputBg, 
+                    color: fontColor, 
+                    borderColor: inputBorder, 
+                    // 让验证码输入框和其它输入框保持一致
+                  }}
                   maxLength={6}
                   prefix={<LockOutlined />}
                   addonAfter={
@@ -172,6 +177,26 @@ export default function LoginPage({ setUser }) {
                       onClick={async () => {
                         const phone = document.querySelector('input[name="phone"]')?.value;
                         await handleSendCode(phone);
+                      }}
+                      style={{
+                        background: inputBg,
+                        color: '#4f8cff',
+                        border: `1.5px solid #4f8cff`,
+                        borderRadius: 6,
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        minWidth: 90,
+                        height: 32,
+                        padding: '0 8px',
+                        ...(theme === 'dark' ? {
+                          background: '#23262e',
+                          color: '#4f8cff',
+                          border: '1.5px solid #4f8cff',
+                        } : {
+                          background: '#fff',
+                          color: '#4f8cff',
+                          border: '1.5px solid #4f8cff',
+                        })
                       }}
                     >
                       {codeCountdown > 0 ? `${codeCountdown}s后重试` : '发送验证码'}
@@ -220,8 +245,16 @@ export default function LoginPage({ setUser }) {
           justifyContent: 'center',
           padding: '0 32px',
         }}>
-          <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 2px 12px 0 rgba(0,0,0,0.10)' }}>
-            <img src="/WeChat.jpg" alt="微信二维码" style={{ width: 180, height: 180 }} />
+          <div style={{ 
+            background: theme === 'dark' ? '#23262e' : '#fff',
+            borderRadius: 12, 
+            padding: 16, 
+            boxShadow: '0 2px 12px 0 rgba(0,0,0,0.10)',
+            width: 180, height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: '2px dashed #bbb',
+          }}>
+            {/* 灰色占位框 */}
+            <div style={{ width: 140, height: 140, background: '#bbb', borderRadius: 8, opacity: 0.18 }} />
           </div>
           <div style={{ color: '#4fef4f', fontSize: 16, marginTop: 18, display: 'flex', alignItems: 'center', gap: 6 }}>
             <span role="img" aria-label="wechat">🟩</span> 微信扫码登录

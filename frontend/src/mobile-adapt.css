@@ -159,18 +159,18 @@
     margin-bottom: 0px !important;
     border-radius: 6px !important;
   }
-  /* 顶部按钮移动端样式 */
+  /* 顶部按钮图标更小，按钮间距更合适，高度更小，只显示第一个span（图标） */
   .top-btn-group .ant-btn {
-    min-width: 32px !important;
-    width: 32px !important;
-    height: 28px !important;
-    padding: 4px !important;
+    min-width: 30px !important;
+    width: 30px !important;
+    height: 16px !important;
+    padding: 0 !important;
     justify-content: center !important;
-    margin-right: 8px !important;
+    margin-right: 16px !important;
     border-radius: 8px !important;
     display: flex !important;
     align-items: center !important;
-    font-size: 12px !important;
+    font-size: unset !important;
   }
   .top-btn-group .ant-btn:last-child {
     margin-right: 0 !important;
@@ -199,27 +199,19 @@
     margin-top: 0 !important;
     padding-top: 0 !important;
   }
-  /* 移动端头部布局优化 */
-  .ant-layout-header {
-    justify-content: space-between !important;
-  }
-  /* 移动端隐藏搜索栏后，让按钮组也靠左，用户组完全靠右 */
-  .ant-layout-header > div:first-child {
-    flex: 1 !important;
+  .header-user-group {
+    margin-left: auto !important;
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
+  }
+  /* 移动端头部布局优化 */
+  .ant-layout-header {
+    justify-content: space-between !important;
   }
   /* 确保用户头像和主题按钮靠右且大小合适 */
   .ant-layout-header .ant-avatar,
   .ant-layout-header .theme-switch-btn {
     flex-shrink: 0 !important;
-  }
-  /* 移动端右侧用户组完全靠右 */
-  .ant-layout-header > div:last-child {
-    margin-left: auto !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
   }
 } 

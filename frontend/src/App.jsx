@@ -33,6 +33,7 @@ import './category-tab.css';
 import API_BASE from './utils/apiConfig';
 import useIsMobile from './utils/useIsMobile';
 import './mobile-adapt.css';
+import LoginPage from './LoginPage';
 
 
 const { Header, Content, Sider } = Layout;
@@ -3533,6 +3534,11 @@ function App() {
   }, []);
 
   const isMobile = useIsMobile();
+
+  // 如果未登录，直接进入登录页
+  if (!user) {
+    return <LoginPage setUser={setUser} />;
+  }
 
   if (page === 'chat') {
     return <ChatPageWrapper theme={theme} setTheme={setTheme} user={user} setUser={setUser} />;

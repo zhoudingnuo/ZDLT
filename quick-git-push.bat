@@ -13,6 +13,7 @@ if /i "%choice%"=="y" (
     echo.
     echo ====== Starting agents.json download ======
     scp root@47.107.84.24:/root/ZDLT/backend/agents.json "C:\Users\AnlangZ\Desktop\Cursor\OT\backend\agents.json"
+    scp root@47.107.84.24:/root/ZDLT/backend/users.json "C:\Users\AnlangZ\Desktop\Cursor\OT\backend\users.json"
     echo File download completed!
     pause
     echo.

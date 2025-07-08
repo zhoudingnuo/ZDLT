@@ -7,7 +7,8 @@
     "usage_tokens": 104008,
     "isAdmin": true,
     "balance": 0,
-    "phone": "18888888888"
+    "phone": "18888888888",
+    "usage_price": 0
   },
   {
     "id": "1751358665016",
@@ -17,7 +18,8 @@
     "usage_tokens": 43754,
     "isAdmin": false,
     "balance": 100,
-    "phone": "18888888888"
+    "phone": "18888888888",
+    "usage_price": 0
   },
   {
     "id": "1751363461645",

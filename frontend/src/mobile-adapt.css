@@ -303,7 +303,7 @@
     padding: 0 !important;
     justify-content: center !important;
   }
-  /* 顶部按钮图标更小，按钮间距更合适，高度更小 */
+  /* 顶部按钮图标更小，按钮间距更合适，高度更小，只显示第一个span（图标） */
   .top-btn-group .ant-btn {
     min-width: 24px !important;
     width: 24px !important;
@@ -314,6 +314,7 @@
     border-radius: 8px !important;
     display: flex !important;
     align-items: center !important;
+    font-size: unset !important;
   }
   .top-btn-group .ant-btn:last-child {
     margin-right: 0 !important;

@@ -51,6 +51,9 @@
     min-height: 36px !important;
     height: 36px !important;
     padding: 0 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
   }
   .ant-avatar, .theme-switch-btn {
     width: 22px !important;
@@ -149,25 +152,25 @@
     line-height: 1 !important;
   }
   .agent-config-title {
-    font-size: 13px !important;
+    font-size: 14px !important;
     margin-bottom: 4px !important;
   }
   .agent-config-btn,
   .agent-create-btn {
-    font-size: 15px !important;
-    height: 10px !important;
+    font-size: 13px !important;
+    height: 8px !important;
     padding: 0 2px !important;
     margin-bottom: 2px !important;
-    border-radius: 4px !important;
+    border-radius: 6px !important;
   }
   /* 顶部按钮图标更小，按钮间距更合适，高度更小，只显示第一个span（图标） */
   .top-btn-group .ant-btn {
     min-width: 24px !important;
-    width: 30px !important;
-    height: 20px !important;
+    width: 24px !important;
+    height: 16px !important;
     padding: 0 !important;
     justify-content: center !important;
-    margin-right: 8px !important;
+    margin-right: 12px !important;
     border-radius: 8px !important;
     display: flex !important;
     align-items: center !important;
@@ -199,5 +202,11 @@
   .ant-layout-content {
     margin-top: 0 !important;
     padding-top: 0 !important;
+  }
+  .header-user-group {
+    margin-left: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 2px !important;
   }
 } 

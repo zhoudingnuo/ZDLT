@@ -1,6 +1,27 @@
 @echo off
 REM One-click commit, push to GitHub, and remote server git pull (manual password input required)
 
+echo.
+echo ====== 选择操作 ======
+echo 是否先下载 agents.json 文件？
+echo 输入 y 下载 agents.json 文件
+echo 输入 n 直接执行代码提交
+echo.
+set /p choice=请输入选择 (y/n): 
+
+if /i "%choice%"=="y" (
+    echo.
+    echo ====== 开始下载 agents.json 文件 ======
+    scp root@47.107.84.24:/root/ZDLT/backend/agents.json "C:\Users\AnlangZ\Desktop\Cursor\OT\backend\agents.json"
+    echo 文件下载完成！
+    pause
+    echo.
+    echo ====== 继续执行代码提交操作 ======
+) else (
+    echo.
+    echo ====== 直接执行代码提交操作 ======
+)
+
 git add .
 for /f "tokens=1-4 delims=/ " %%i in ("%date%") do set mydate=%%i-%%j-%%k
 for /f "tokens=1-2 delims=: " %%i in ("%time%") do set mytime=%%i-%%j

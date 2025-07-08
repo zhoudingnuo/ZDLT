@@ -1,4 +1,35 @@
 @media (max-width: 768px) {
+  html, body, #root {
+    width: 100vw !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  .ant-layout-header,
+  .ant-layout-header > div,
+  .ant-layout-header > .top-btn-group,
+  .top-btn-group {
+    width: 100vw !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: auto !important;
+  }
+  .category-scrollbar {
+    width: 100vw !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: auto !important;
+  }
+  .ant-layout-content,
+  .main-content {
+    width: 100vw !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
   .ant-layout-sider {
     display: block !important;
     width: 80px !important;
@@ -7,10 +38,6 @@
     flex: 0 0 80px !important;
     transition: none !important;
     overflow-x: hidden !important;
-  }
-  .ant-layout-content, .main-content {
-    width: calc(100vw - 80px) !important;
-    margin-left: 80px !important;
   }
   .ant-modal {
     min-width: 100vw !important;
@@ -241,7 +268,7 @@
   .agent-config-btn,
   .agent-create-btn {
     font-size: 11px !important;
-    height: 22px !important;
+    height: 16px !important;
     padding: 0 4px !important;
     margin-bottom: 3px !important;
     border-radius: 7px !important;
@@ -261,8 +288,8 @@
     min-width: 70px !important;
   }
 
-  /* 首页四个按钮只显示图标 */
-  .top-btn-group .ant-btn span:not(.anticon) {
+  /* 首页四个按钮只显示图标（更安全） */
+  .top-btn-group .ant-btn > span:not(:first-child) {
     display: none !important;
   }
   .top-btn-group .ant-btn .anticon {

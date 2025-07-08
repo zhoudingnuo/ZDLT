@@ -10,6 +10,7 @@ export default function LoginPage({ setUser }) {
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeCountdown, setCodeCountdown] = useState(0);
+  const [form] = Form.useForm(); // 新增form实例
 
   useEffect(() => {
     localStorage.setItem('theme', theme);
@@ -155,7 +156,7 @@ export default function LoginPage({ setUser }) {
             支持手机号、用户名、邮箱登录，或使用微信扫码登录。
           </div>
           {tab === 'code' ? (
-            <Form layout="vertical" onFinish={onCodeLogin} style={{ color: fontColor }}>
+            <Form form={form} layout="vertical" onFinish={onCodeLogin} style={{ color: fontColor }}>
               <Form.Item name="phone" label={<span style={{ color: labelColor }}>手机号</span>} rules={[{ required: true, message: '请输入手机号' }, { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确' }]}> 
                 <Input style={{ background: inputBg, color: fontColor, borderColor: inputBorder }} maxLength={11} prefix={<UserOutlined />} />
               </Form.Item>
@@ -165,6 +166,7 @@ export default function LoginPage({ setUser }) {
                     background: theme === 'dark' ? '#23262e' : '#fff',
                     color: theme === 'dark' ? '#eee' : '#222',
                     borderColor: theme === 'dark' ? '#444' : '#d9d9d9',
+                    boxShadow: 'none',
                   }}
                   maxLength={6}
                   prefix={<LockOutlined />}
@@ -174,28 +176,24 @@ export default function LoginPage({ setUser }) {
                       disabled={codeCountdown > 0}
                       loading={codeLoading}
                       onClick={async () => {
-                        const phone = document.querySelector('input[name="phone"]')?.value;
+                        const phone = form.getFieldValue('phone');
+                        if (!phone || !/^1[3-9]\d{9}$/.test(phone)) {
+                          message.error('请输入有效的手机号');
+                          return;
+                        }
                         await handleSendCode(phone);
                       }}
                       style={{
-                        background: inputBg,
+                        background: theme === 'dark' ? '#23262e' : '#fff',
                         color: '#4f8cff',
-                        border: `1.5px solid #4f8cff`,
+                        border: '1.5px solid #4f8cff',
                         borderRadius: 6,
                         fontWeight: 600,
                         boxShadow: 'none',
-                        minWidth: 90,
-                        height: 32,
-                        padding: '0 8px',
-                        ...(theme === 'dark' ? {
-                          background: '#23262e',
-                          color: '#4f8cff',
-                          border: '1.5px solid #4f8cff',
-                        } : {
-                          background: '#fff',
-                          color: '#4f8cff',
-                          border: '1.5px solid #4f8cff',
-                        })
+                        minWidth: 60,
+                        height: 28,
+                        fontSize: 12,
+                        padding: '0 4px',
                       }}
                     >
                       {codeCountdown > 0 ? `${codeCountdown}s后重试` : '发送验证码'}

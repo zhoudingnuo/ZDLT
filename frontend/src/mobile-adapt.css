@@ -94,12 +94,18 @@
   }
   /* 配置卡片里的按钮同步缩小 */
   .custom-card .ant-btn {
-    min-width: 40px !important;
+    min-width: 36px !important;
     font-size: 12px !important;
     padding: 0 4px !important;
-    height: 28px !important;
+    height: 26px !important;
     border-radius: 8px !important;
     margin-bottom: 4px !important;
+    line-height: 1.2 !important;
+  }
+  .custom-card .ant-btn .anticon,
+  .custom-card .ant-btn svg {
+    font-size: 14px !important;
+    vertical-align: middle !important;
   }
   /* 分类栏横向滚动 */
   .category-scrollbar {
@@ -125,5 +131,13 @@
   .ant-card, .custom-card {
     float: left !important;
     margin-left: 0 !important;
+  }
+  .search-bar-wrap.top-bar {
+    display: none !important;
+  }
+  .top-btn-group {
+    justify-content: flex-start !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
   }
 } 

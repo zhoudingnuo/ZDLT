@@ -959,9 +959,6 @@ app.post('/api/pay/manual', (req, res) => {
         if (idx !== -1) {
           users[idx].balance = (users[idx].balance || 0) + Number(amount);
           require('./userService').__writeUsers && require('./userService').__writeUsers(users);
-          manualPayOrders[orderId].status = 'approved';
-          manualPayOrders[orderId].paid = true;
-          manualPayOrders[orderId].approveTime = new Date().toISOString();
         }
       }
     } else {
@@ -1000,22 +997,23 @@ app.post('/api/admin/recharge-orders/:orderId/approve', (req, res) => {
   if (order.status !== 'pending') {
     return res.status(400).json({ error: '订单已处理' });
   }
-  
-  // 加余额
-  const users = require('./userService').__getUsers && require('./userService').__getUsers();
-  if (users) {
-    const idx = users.findIndex(u => u.username === order.username);
-    if (idx !== -1) {
-      users[idx].balance = (users[idx].balance || 0) + order.amount;
-      require('./userService').__writeUsers && require('./userService').__writeUsers(users);
-      order.status = 'approved';
-      order.approveTime = new Date().toISOString();
-      res.json({ success: true, message: '审核通过' });
-    } else {
-      res.status(404).json({ error: '用户不存在' });
-    }
+  // 直接读取和写入 users.json
+  const fs = require('fs');
+  const path = require('path');
+  const USERS_FILE = path.join(__dirname, 'users.json');
+  let users = [];
+  if (fs.existsSync(USERS_FILE)) {
+    users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
+  }
+  const idx = users.findIndex(u => u.username === order.username);
+  if (idx !== -1) {
+    users[idx].balance = (users[idx].balance || 0) + order.amount;
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8');
+    order.status = 'approved';
+    order.approveTime = new Date().toISOString();
+    res.json({ success: true, message: '审核通过' });
   } else {
-    res.status(500).json({ error: '用户数据读取失败' });
+    res.status(404).json({ error: '用户不存在' });
   }
 });
 

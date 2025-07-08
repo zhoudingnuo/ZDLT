@@ -555,10 +555,11 @@ function ProfileModal({ visible, onCancel, user, theme }) {
         <div style={{ 
           marginTop: 16, 
           padding: 12, 
-          background: theme === 'dark' ? '#3a3d42' : '#f6f8fa', 
+          background: theme === 'dark' ? '#23262e' : '#f6f8fa', 
           borderRadius: 6, 
           fontSize: 12, 
-          color: theme === 'dark' ? '#bbb' : '#666' 
+          color: theme === 'dark' ? '#bbb' : '#666',
+          border: theme === 'dark' ? '1px solid #444' : 'none'
         }}>
           <div style={{ fontWeight: 600, marginBottom: 4 }}>💡 账户信息</div>
           <div>• 用户ID: {currentUser?.id}</div>
@@ -587,11 +588,13 @@ function ProfileModal({ visible, onCancel, user, theme }) {
                   fontSize: 11, 
                   marginBottom: 4,
                   padding: '4px 6px',
-                  background: theme === 'dark' ? '#1e1e1e' : '#f0f0f0',
+                  background: theme === 'dark' ? '#18191c' : '#f0f0f0',
                   borderRadius: 4,
                   display: 'flex',
                   justifyContent: 'space-between',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  color: textColor,
+                  border: theme === 'dark' ? '1px solid #444' : 'none'
                 }}>
                   <span style={{ color: textColor }}>
                     ¥{order.amount.toFixed(2)} - {order.createTime ? new Date(order.createTime).toLocaleDateString() : '未知'}
@@ -768,10 +771,11 @@ function RechargeReviewModal({ visible, onCancel, theme, onRefreshUsers }) {
       <div style={{ 
         marginTop: 16, 
         padding: 12, 
-        background: theme === 'dark' ? '#3a3d42' : '#f6f8fa', 
+        background: theme === 'dark' ? '#23262e' : '#f6f8fa', 
         borderRadius: 6, 
         fontSize: 12, 
-        color: theme === 'dark' ? '#bbb' : '#666' 
+        color: theme === 'dark' ? '#bbb' : '#666',
+        border: theme === 'dark' ? '1px solid #444' : 'none'
       }}>
         <div style={{ fontWeight: 600, marginBottom: 4 }}>💡 充值审核说明</div>
         <div>• 显示所有用户的充值申请记录</div>
@@ -919,10 +923,11 @@ function UserListModal({ theme }) {
       <div style={{ 
         marginTop: 16, 
         padding: 12, 
-        background: theme === 'dark' ? '#3a3d42' : '#f6f8fa', 
+        background: theme === 'dark' ? '#23262e' : '#f6f8fa', 
         borderRadius: 6, 
         fontSize: 12, 
-        color: theme === 'dark' ? '#bbb' : '#666' 
+        color: theme === 'dark' ? '#bbb' : '#666',
+        border: theme === 'dark' ? '1px solid #444' : 'none'
       }}>
         <div style={{ fontWeight: 600, marginBottom: 4 }}>💡 功能说明</div>
         <div>• 显示所有注册用户的基本信息</div>

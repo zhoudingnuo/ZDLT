@@ -9,6 +9,9 @@ const readline = require('readline');
 const dotenv = require('dotenv');
 const winston = require('winston');
 const bcrypt = require('bcrypt');
+const { spawn } = require('child_process');
+// 短信验证码内存存储（可换成Redis/DB）
+const smsCodes = {};
 
 dotenv.config();
 
@@ -1188,6 +1191,67 @@ app.post('/api/admin/agents/:agentId/reject', (req, res) => {
   
   fs.writeFileSync(agentsPath, JSON.stringify(agents, null, 2), 'utf-8');
   res.json({ success: true, message: '已拒绝，智能体状态已重置' });
+});
+
+// 发送短信验证码API
+app.post('/api/send-code', async (req, res) => {
+  const { phone } = req.body;
+  if (!phone || !/^1[3-9]\d{9}$/.test(phone)) {
+    return res.status(400).json({ success: false, msg: '手机号格式不正确' });
+  }
+  // 生成6位验证码
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  // 保存到内存，有效期5分钟
+  smsCodes[phone] = code;
+  setTimeout(() => { delete smsCodes[phone]; }, 5 * 60 * 1000);
+
+  // 调用Java短信发送（假设SendSms.class已编译好，参数为手机号和验证码）
+  const java = spawn('java', ['-cp', './java_sms', 'demo.SendSms', phone, code]);
+  let javaOut = '';
+  java.stdout.on('data', (data) => { javaOut += data.toString(); });
+  java.stderr.on('data', (data) => { console.error('Java stderr:', data.toString()); });
+  java.on('close', (code_) => {
+    if (code_ === 0) {
+      res.json({ success: true, msg: '验证码已发送' });
+    } else {
+      res.status(500).json({ success: false, msg: '短信发送失败', detail: javaOut });
+    }
+  });
+});
+
+// 验证码登录API
+app.post('/api/code-login', async (req, res) => {
+  const { phone, code } = req.body;
+  if (!phone || !code) return res.status(400).json({ success: false, msg: '参数缺失' });
+  if (smsCodes[phone] !== code) return res.json({ success: false, msg: '验证码错误' });
+  // 验证通过，查找或注册用户
+  const usersPath = path.join(__dirname, 'users.json');
+  let users = [];
+  if (fs.existsSync(usersPath)) {
+    users = JSON.parse(fs.readFileSync(usersPath, 'utf-8'));
+  }
+  let user = users.find(u => u.phone === phone);
+  if (!user) {
+    // 自动注册
+    user = {
+      id: Date.now().toString(),
+      username: phone,
+      phone,
+      password: '',
+      createTime: new Date().toISOString(),
+      lastLoginTime: new Date().toISOString(),
+      isAdmin: false,
+      email: '',
+      usage_tokens: 0,
+      usage_price: 0,
+      balance: 0
+    };
+    users.push(user);
+    fs.writeFileSync(usersPath, JSON.stringify(users, null, 2), 'utf-8');
+  }
+  // 登录成功，返回用户信息
+  delete smsCodes[phone];
+  res.json({ success: true, user });
 });
 
 const PORT = process.env.PORT || 5000;

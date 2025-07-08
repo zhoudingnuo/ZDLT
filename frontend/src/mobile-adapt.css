@@ -102,9 +102,9 @@
   }
   /* 智能体卡片移动端样式 */
   .agent-card {
-    width: 160px !important;
+    width: 140px !important;
     height: 140px !important;
-    min-width: 160px !important;
+    min-width: 140px !important;
     min-height: 140px !important;
     padding: 10px !important;
     margin-bottom: 12px !important;
@@ -149,7 +149,7 @@
   .agent-config-btn,
   .agent-create-btn {
     font-size: 11px !important;
-    height: 14px !important;
+    height: 12px !important;
     padding: 0 4px !important;
     margin-bottom: 3px !important;
     border-radius: 7px !important;

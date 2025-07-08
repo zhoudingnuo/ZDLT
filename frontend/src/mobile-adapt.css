@@ -130,9 +130,9 @@
   }
   /* 智能体配置卡片移动端样式 */
   .agent-config-card {
-    width: 160px !important;
+    width: 140px !important;
     height: 140px !important;
-    min-width: 160px !important;
+    min-width: 140px !important;
     min-height: 140px !important;
     padding: 10px !important;
     margin-bottom: 12px !important;
@@ -149,7 +149,7 @@
   .agent-config-btn,
   .agent-create-btn {
     font-size: 11px !important;
-    height: 16px !important;
+    height: 14px !important;
     padding: 0 4px !important;
     margin-bottom: 3px !important;
     border-radius: 7px !important;
@@ -157,8 +157,8 @@
   /* 顶部按钮图标更小，按钮间距更合适，高度更小，只显示第一个span（图标） */
   .top-btn-group .ant-btn {
     min-width: 24px !important;
-    width: 24px !important;
-    height: 24px !important;
+    width: 30px !important;
+    height: 20px !important;
     padding: 0 !important;
     justify-content: center !important;
     margin-right: 8px !important;

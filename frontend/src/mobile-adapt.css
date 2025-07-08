@@ -15,13 +15,6 @@
     box-sizing: border-box !important;
     overflow-x: auto !important;
   }
-  .category-scrollbar {
-    width: 100vw !important;
-    min-width: 0 !important;
-    max-width: 100vw !important;
-    box-sizing: border-box !important;
-    overflow-x: auto !important;
-  }
   .ant-layout-content,
   .main-content {
     width: 100vw !important;
@@ -72,118 +65,41 @@
     align-items: center !important;
     justify-content: center !important;
   }
-  /* 顶部按钮组横向滚动和缩小 */
-  .top-btn-group {
-    max-width: 48vw !important;
-    min-width: 0 !important;
-    flex: 1 1 48vw !important;
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    gap: 6px !important;
-    padding: 0 4px !important;
-    box-sizing: border-box;
-  }
-  .top-btn-group .ant-btn {
-    min-width: 48px !important;
-    font-size: 13px !important;
-    padding: 0 6px !important;
-    height: 32px !important;
-    border-radius: 12px !important;
-    flex-shrink: 0 !important;
-  }
-  .search-bar-wrap {
-    max-width: 90% !important;
-    min-width: 0 !important;
-    margin: 12px auto 8px auto !important;
-    padding: 0 !important;
-    display: block !important;
-  }
-  .search-bar-wrap input {
-    font-size: 14px !important;
-    height: 28px !important;
-    padding: 0 6px !important;
-  }
-  /* 卡片自适应，一行四张 */
-  .ant-card, .custom-card {
-    width: 22vw !important;
-    min-width: 0 !important;
-    max-width: 24vw !important;
-    margin: 0 1vw 8px 1vw !important;
-    padding: 4px !important;
-    box-sizing: border-box;
-    height: auto !important;
-    display: inline-block !important;
-    vertical-align: top !important;
-  }
-  .card-title, .card-desc {
-    font-size: 12px !important;
-  }
-  .card-title {
-    margin-bottom: 2px !important;
-  }
-  /* 配置卡片里的按钮同步缩小 */
-  .custom-card .ant-btn {
-    min-width: 36px !important;
-    font-size: 12px !important;
-    padding: 0 4px !important;
-    height: 26px !important;
-    border-radius: 8px !important;
-    margin-bottom: 4px !important;
-    line-height: 1.2 !important;
-  }
-  .custom-card .ant-btn .anticon,
-  .custom-card .ant-btn svg {
-    font-size: 14px !important;
-    vertical-align: middle !important;
-  }
-  /* 分类栏横向滚动 */
-  .category-scrollbar {
-    overflow-x: auto !important;
-    white-space: nowrap !important;
-    width: 100vw !important;
-    box-sizing: border-box;
-    justify-content: flex-start !important;
-    text-align: left !important;
-    margin-left: 0 !important;
-    padding-left: 0 !important;
-  }
-  .category-tab {
-    display: inline-block !important;
-    min-width: 80px !important;
-    font-size: 15px !important;
-    padding: 10px 8px !important;
-    margin-right: 2px !important;
-  }
-  .search-bar-wrap.top-bar {
-    display: none !important;
-  }
-  .ant-card, .custom-card {
-    float: left !important;
-    margin-left: 0 !important;
-  }
-  .top-btn-group {
-    justify-content: flex-start !important;
-    margin-left: 0 !important;
-    padding-left: 0 !important;
-  }
-  
   /* 搜索栏移动端样式 */
   .home-search-bar {
     min-width: 160px !important;
     max-width: 200px !important;
     margin-right: 12px !important;
+    display: none !important;
   }
-  
   .home-search-icon {
     font-size: 14px !important;
     margin-right: 4px !important;
   }
-  
   .home-search-input {
     font-size: 13px !important;
   }
-  
+  /* 分类栏横向滚动和字体缩小 */
+  .category-scrollbar {
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    width: 100vw !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    font-size: 13px !important;
+  }
+  .category-tab {
+    display: inline-block !important;
+    min-width: 70px !important;
+    font-size: 12px !important;
+    padding: 7px 0 !important;
+    margin-right: 2px !important;
+  }
   /* 智能体卡片移动端样式 */
   .agent-card {
     width: 160px !important;
@@ -192,29 +108,26 @@
     min-height: 140px !important;
     padding: 10px !important;
     margin-bottom: 12px !important;
+    float: left !important;
+    margin-left: 0 !important;
   }
-  
   .agent-card-icon {
     font-size: 20px !important;
     margin-bottom: 8px !important;
   }
-  
   .agent-card-icon .anticon {
     font-size: 20px !important;
   }
-  
   .agent-card .card-title {
     font-size: 14px !important;
     margin-bottom: 4px !important;
   }
-  
   .agent-card .ant-tag {
     font-size: 10px !important;
     padding: 0 6px !important;
     height: 20px !important;
     line-height: 18px !important;
   }
-  
   /* 智能体配置卡片移动端样式 */
   .agent-config-card {
     width: 160px !important;
@@ -224,47 +137,15 @@
     padding: 10px !important;
     margin-bottom: 12px !important;
   }
-  
-  .agent-config-icon {
-    font-size: 24px !important;
-    margin-bottom: 8px !important;
-  }
-  
-  .agent-config-btn,
-  .agent-create-btn {
-    font-size: 12px !important;
-    height: 28px !important;
-    padding: 0 8px !important;
-    margin-bottom: 6px !important;
-  }
-  
-  .agent-config-btn {
-    margin-bottom: 6px !important;
-  }
-  /* 隐藏首页搜索栏 */
-  .home-search-bar {
-    display: none !important;
-  }
-  /* 配置智能体标题缩小 */
-  .agent-config-title {
-    font-size: 13px !important;
-    margin-bottom: 4px !important;
-  }
-  /* 配置智能体图标和按钮缩小 */
   .agent-config-icon {
     font-size: 20px !important;
     margin-bottom: 6px !important;
     line-height: 1 !important;
   }
-  .agent-config-btn,
-  .agent-create-btn {
-    font-size: 12px !important;
-    height: 26px !important;
-    padding: 0 6px !important;
+  .agent-config-title {
+    font-size: 13px !important;
     margin-bottom: 4px !important;
-    border-radius: 8px !important;
   }
-  /* 配置智能体按钮更小 */
   .agent-config-btn,
   .agent-create-btn {
     font-size: 11px !important;
@@ -272,36 +153,6 @@
     padding: 0 4px !important;
     margin-bottom: 3px !important;
     border-radius: 7px !important;
-  }
-
-  /* 分类栏横向滚动和字体缩小 */
-  .category-scrollbar {
-    overflow-x: auto !important;
-    width: 100vw !important;
-    max-width: 100vw !important;
-    font-size: 13px !important;
-    white-space: nowrap !important;
-  }
-  .category-tab {
-    font-size: 12px !important;
-    padding: 7px 0 !important;
-    min-width: 70px !important;
-  }
-
-  /* 首页四个按钮只显示图标（更安全） */
-  .top-btn-group .ant-btn > span:not(:first-child) {
-    display: none !important;
-  }
-  .top-btn-group .ant-btn .anticon {
-    margin-right: 0 !important;
-    font-size: 18px !important;
-  }
-  .top-btn-group .ant-btn {
-    min-width: 32px !important;
-    width: 32px !important;
-    height: 32px !important;
-    padding: 0 !important;
-    justify-content: center !important;
   }
   /* 顶部按钮图标更小，按钮间距更合适，高度更小，只显示第一个span（图标） */
   .top-btn-group .ant-btn {
@@ -323,5 +174,8 @@
     font-size: 15px !important;
     line-height: 1 !important;
     margin-right: 0 !important;
+  }
+  .top-btn-group .ant-btn > span:not(:first-child) {
+    display: none !important;
   }
 } 

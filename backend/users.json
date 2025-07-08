@@ -6,7 +6,7 @@
     "email": "admin@example.com",
     "usage_tokens": 104008,
     "isAdmin": true,
-    "balance": 0,
+    "balance": 60,
     "phone": "18888888888",
     "usage_price": 0
   },
@@ -72,7 +72,7 @@
     "email": "",
     "usage_tokens": 0,
     "usage_price": 0,
-    "balance": 0
+    "balance": 125
   },
   {
     "id": "1751976483148",

@@ -623,6 +623,7 @@ function ProfileModal({ visible, onCancel, user, theme }) {
 function RechargeReviewModal({ visible, onCancel, theme, onRefreshUsers }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [approvingOrderId, setApprovingOrderId] = useState(null); // 新增：记录正在审核的订单id
 
   // 根据theme动态设置颜色
   const modalBg = theme === 'dark' ? '#2f3136' : '#fff';
@@ -642,6 +643,8 @@ function RechargeReviewModal({ visible, onCancel, theme, onRefreshUsers }) {
   }, [visible]);
 
   const handleApprove = async (orderId) => {
+    if (approvingOrderId === orderId) return; // 防止重复点击
+    setApprovingOrderId(orderId);
     try {
       await axios.post(`${API_BASE}/api/admin/recharge-orders/${orderId}/approve`);
       message.success('审核通过');
@@ -651,6 +654,8 @@ function RechargeReviewModal({ visible, onCancel, theme, onRefreshUsers }) {
       if (onRefreshUsers) onRefreshUsers();
     } catch (error) {
       message.error('操作失败：' + (error.response?.data?.error || error.message));
+    } finally {
+      setTimeout(() => setApprovingOrderId(null), 1000); // 1秒后恢复可点击
     }
   };
 
@@ -737,6 +742,8 @@ function RechargeReviewModal({ visible, onCancel, theme, onRefreshUsers }) {
                             size="small" 
                             onClick={() => handleApprove(order.orderId)}
                             style={{ fontSize: 12 }}
+                            disabled={approvingOrderId === order.orderId}
+                            loading={approvingOrderId === order.orderId}
                           >
                             通过
                           </Button>

@@ -283,7 +283,7 @@
     "description": "智能批改数学作业",
     "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
     "apiKey": "app-da14kZfKmpClTYDCHqbXXZSg",
-    "status": "review",
+    "status": "configured",
     "inputs": [
       {
         "name": "image",
@@ -298,7 +298,8 @@
         "required": true
       }
     ],
-    "inputType": "parameter"
+    "inputType": "parameter",
+    "approveTime": "2025-07-08T13:02:08.854Z"
   },
   {
     "id": "english-dictation",

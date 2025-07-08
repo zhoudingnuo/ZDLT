@@ -1212,8 +1212,23 @@ app.post('/api/send-code', async (req, res) => {
     await sendSms(phone, code);
     res.json({ success: true, msg: '验证码已发送' });
   } catch (err) {
-    console.error('短信发送失败:', err, err?.data, err?.message, err?.code);
-    res.status(500).json({ success: false, msg: '短信发送失败', detail: err && (err.data ? JSON.stringify(err.data) : err.message) });
+    // 控制台详细打印
+    console.error('短信发送失败:', err);
+    if (err && err.data) {
+      console.error('阿里云返回:', JSON.stringify(err.data));
+    }
+    if (err && err.message) {
+      console.error('错误信息:', err.message);
+    }
+    if (err && err.code) {
+      console.error('错误码:', err.code);
+    }
+    // 返回给前端
+    res.status(500).json({
+      success: false,
+      msg: '短信发送失败',
+      detail: err && (err.data ? JSON.stringify(err.data) : err.message)
+    });
   }
 });
 

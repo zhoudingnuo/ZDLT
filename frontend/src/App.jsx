@@ -623,7 +623,8 @@ function ProfileModal({ visible, onCancel, user, theme }) {
 function RechargeReviewModal({ visible, onCancel, theme, onRefreshUsers }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [approvingOrderId, setApprovingOrderId] = useState(null); // 新增：记录正在审核的订单id
+  const [approvingOrderId, setApprovingOrderId] = useState(null);
+  const approveLock = useRef(false); // 新增Promise锁
 
   // 根据theme动态设置颜色
   const modalBg = theme === 'dark' ? '#2f3136' : '#fff';
@@ -642,8 +643,10 @@ function RechargeReviewModal({ visible, onCancel, theme, onRefreshUsers }) {
     }
   }, [visible]);
 
-  const handleApprove = async (orderId) => {
-    if (approvingOrderId === orderId) return; // 防止重复点击
+  const handleApprove = async (orderId, event) => {
+    if (event && event.stopPropagation) event.stopPropagation();
+    if (approveLock.current) return;
+    approveLock.current = true;
     setApprovingOrderId(orderId);
     try {
       await axios.post(`${API_BASE}/api/admin/recharge-orders/${orderId}/approve`);
@@ -655,7 +658,10 @@ function RechargeReviewModal({ visible, onCancel, theme, onRefreshUsers }) {
     } catch (error) {
       message.error('操作失败：' + (error.response?.data?.error || error.message));
     } finally {
-      setTimeout(() => setApprovingOrderId(null), 1000); // 1秒后恢复可点击
+      setTimeout(() => {
+        setApprovingOrderId(null);
+        approveLock.current = false;
+      }, 1000);
     }
   };
 
@@ -740,7 +746,7 @@ function RechargeReviewModal({ visible, onCancel, theme, onRefreshUsers }) {
                           <Button 
                             type="primary" 
                             size="small" 
-                            onClick={() => handleApprove(order.orderId)}
+                            onClick={e => handleApprove(order.orderId, e)}
                             style={{ fontSize: 12 }}
                             disabled={approvingOrderId === order.orderId}
                             loading={approvingOrderId === order.orderId}

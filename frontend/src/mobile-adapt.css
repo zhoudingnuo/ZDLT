@@ -25,10 +25,10 @@
   }
   .ant-layout-sider {
     display: block !important;
-    width: 80px !important;
-    min-width: 80px !important;
-    max-width: 90px !important;
-    flex: 0 0 80px !important;
+    width: 60px !important;
+    min-width: 60px !important;
+    max-width: 60px !important;
+    flex: 0 0 60px !important;
     transition: none !important;
     overflow-x: hidden !important;
   }
@@ -177,5 +177,10 @@
   }
   .top-btn-group .ant-btn > span:not(:first-child) {
     display: none !important;
+  }
+  .ant-layout-sider img,
+  .logo-title img {
+    height: 32px !important;
+    max-width: 40px !important;
   }
 } 

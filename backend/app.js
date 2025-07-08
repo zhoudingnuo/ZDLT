@@ -1270,6 +1270,8 @@ app.post('/api/code-login', async (req, res) => {
 async function sendSms(phone, code) {
   const accessKeyId = process.env.ALIBABA_CLOUD_ACCESS_KEY_ID;
   const accessKeySecret = process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET;
+  console.log('AccessKeyId:', accessKeyId);
+  console.log('AccessKeySecret:', accessKeySecret);
   const client = new Dysmsapi20170525.default(new Config({
     accessKeyId,
     accessKeySecret,

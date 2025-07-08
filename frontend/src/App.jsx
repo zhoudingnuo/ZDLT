@@ -3277,7 +3277,6 @@ return (
                 <Button
                   className="agent-config-btn"
                   type="primary"
-                  size="small"
                   style={{ width: '90%', marginBottom: 8, borderRadius: 8, fontWeight: 600 }}
                   onClick={() => {
                     if (!user) {

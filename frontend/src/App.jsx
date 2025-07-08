@@ -31,6 +31,8 @@ import { UserListProvider, useUserList } from './contexts/UserListContext';
 import './nav-btn.css';
 import './category-tab.css';
 import API_BASE from './utils/apiConfig';
+import useIsMobile from './utils/useIsMobile';
+import './mobile-adapt.css';
 
 
 const { Header, Content, Sider } = Layout;
@@ -3552,6 +3554,7 @@ function App() {
     return () => document.removeEventListener('focusin', handler, true);
   }, []);
 
+  const isMobile = useIsMobile();
 
   if (page === 'chat') {
     return <ChatPageWrapper theme={theme} setTheme={setTheme} user={user} setUser={setUser} />;

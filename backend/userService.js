@@ -78,10 +78,21 @@ router.post('/user/usage', (req, res) => {
   let users = readJson(USERS_FILE);
   const idx = users.findIndex(u => u.username === username);
   if (idx !== -1) {
+    // 新增：余额判断与扣费
+    if (users[idx].balance === undefined) users[idx].balance = 0;
+    if (usage_price > 0) {
+      if (users[idx].balance < usage_price) {
+        const result = { success: false, error: 'Insufficient balance. Please recharge.' };
+        console.log('[用户API][更新消耗-余额不足] 请求:', req.body, '响应:', result);
+        return res.status(400).json(result);
+      } else {
+        users[idx].balance -= usage_price;
+      }
+    }
     users[idx].usage_tokens = usage_tokens;
     users[idx].usage_price = usage_price;
     writeJson(USERS_FILE, users);
-    const result = { success: true };
+    const result = { success: true, balance: users[idx].balance };
     console.log('[用户API][更新消耗] 请求:', req.body, '响应:', result);
     res.json(result);
   } else {

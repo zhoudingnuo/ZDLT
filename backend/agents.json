@@ -282,16 +282,63 @@
     "name": "数学批改",
     "description": "智能批改数学作业",
     "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
-    "apiKey": "app-DAkWwoX6O95LqCRPxFhHqrab",
-    "status": "pending"
+    "apiKey": "app-da14kZfKmpClTYDCHqbXXZSg",
+    "status": "review",
+    "inputs": [
+      {
+        "name": "image",
+        "type": "file",
+        "label": "image",
+        "required": true
+      },
+      {
+        "name": "question",
+        "type": "file",
+        "label": "question",
+        "required": true
+      }
+    ],
+    "inputType": "parameter"
   },
   {
     "id": "english-dictation",
     "name": "英语课文默写批改",
     "description": "英语课文默写内容智能批改",
     "apiUrl": "http://118.145.74.50:24131/v1/chat-messages",
-    "apiKey": "app-a2bq2coFVbnGAvIEQjYEdpLT",
-    "status": "pending"
+    "apiKey": "app-LKxKLLBOPbKTpgxB5nRINZwv",
+    "status": "configured",
+    "inputs": [
+      {
+        "name": "image",
+        "type": "file",
+        "label": "image",
+        "required": true
+      },
+      {
+        "name": "text",
+        "type": "text",
+        "label": "text",
+        "required": true
+      },
+      {
+        "name": "mode",
+        "type": "select",
+        "label": "mode",
+        "required": true,
+        "options": [
+          {
+            "value": "开启",
+            "label": "开启"
+          },
+          {
+            "value": "关闭",
+            "label": "关闭"
+          }
+        ]
+      }
+    ],
+    "inputType": "parameter",
+    "approveTime": "2025-07-08T02:18:03.059Z"
   },
   {
     "id": "dream-career",

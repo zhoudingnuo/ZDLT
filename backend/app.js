@@ -979,12 +979,17 @@ app.get('/api/pay/manual/status', (req, res) => {
 // ====== 充值订单管理API ======
 // 获取所有充值订单（管理员用）
 app.get('/api/admin/recharge-orders', (req, res) => {
-  const orders = Object.values(manualPayOrders).map(order => ({
-    ...order,
-    statusText: order.status === 'pending' ? '待审核' : 
-                order.status === 'approved' ? '已通过' : '已拒绝'
-  }));
-  res.json(orders);
+  try {
+    const orders = Object.values(manualPayOrders || {}).map(order => ({
+      ...order,
+      statusText: order.status === 'pending' ? '待审核' : 
+                  order.status === 'approved' ? '已通过' : '已拒绝'
+    }));
+    res.json(orders);
+  } catch (err) {
+    console.error('获取充值订单列表失败:', err);
+    res.status(500).json({ error: '获取充值订单列表失败', details: err.message });
+  }
 });
 
 // 审核充值订单（管理员用）

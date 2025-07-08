@@ -1597,9 +1597,18 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       message.error('请先登录');
       return;
     }
-    if (!currentUser.isAdmin && currentUser.balance !== undefined && currentUser.balance < 0.01) {
-      message.error('余额不足，请充值后再试！');
-      return;
+    // 新增：workflow类型默认扣费逻辑
+    if (agent?.workflow === true || agent?.apiUrl?.includes('/workflows/')) {
+      // workflow类型，默认消耗
+      if (!currentUser.isAdmin && (currentUser.balance === undefined || currentUser.balance < 0.05)) {
+        message.error('余额不足，workflow类型最低需0.05元，请充值后再试！');
+        return;
+      }
+    } else {
+      if (!currentUser.isAdmin && currentUser.balance !== undefined && currentUser.balance < 0.01) {
+        message.error('余额不足，请充值后再试！');
+        return;
+      }
     }
     aiStartTimeRef.current = Date.now();
     setAiTimer(0);
@@ -1630,54 +1639,24 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       
       // 累加token和价格消耗
       usage = res.data.metadata?.usage || res.data.data;
-      if (usage && user) {
-        const tokens = Number(usage.total_tokens) || 0;
-        const priceRaw = Number(usage.total_price) || 0;
-        let price = priceRaw === 0 ? 0.005 : priceRaw;
-        if (agent?.id === 'word-to-song') {
-          price += 1.5;
-        }
-        let currentUser = getUser();
-        currentUser.usage_tokens = (currentUser.usage_tokens || 0) + tokens;
-        currentUser.usage_price = (currentUser.usage_price || 0) + price;
-        // 调试输出
-        console.log('[消耗统计] 本次返回 tokens:', tokens, 'price:', price, '累计 tokens:', currentUser.usage_tokens, '累计 price:', currentUser.usage_price);
-        setUser(currentUser);
-        await updateUserUsage(currentUser.username, currentUser.usage_tokens, currentUser.usage_price);
+      // 新增：workflow类型无usage时默认扣费
+      let tokens = Number(usage?.total_tokens) || 0;
+      let priceRaw = Number(usage?.total_price) || 0;
+      if ((agent?.workflow === true || agent?.apiUrl?.includes('/workflows/')) && (tokens === 0 || priceRaw === 0)) {
+        tokens = 1000;
+        priceRaw = 0.05;
       }
-      setMessages(msgs => {
-        const lastIdx = msgs.length - 1;
-        const priceRaw = Number(usage?.total_price) || 0;
-        let price = priceRaw === 0 ? 0.005 : priceRaw;
-        if (agent?.id === 'word-to-song') {
-          price += 1.5;
-        }
-        if (msgs[lastIdx]?.isLoading) {
-          clearInterval(aiTimerRef.current);
-          setAiTimer(0);
-          return [
-            ...msgs.slice(0, lastIdx),
-            {
-              role: 'assistant',
-              content: answer,
-              usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
-              tokens: usage?.total_tokens,
-              price: price
-            }
-          ];
-        } else {
-          return [
-            ...msgs,
-            {
-              role: 'assistant',
-              content: answer,
-              usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
-              tokens: usage?.total_tokens,
-              price: price
-            }
-          ];
-        }
-      });
+      let price = priceRaw === 0 ? 0.005 : priceRaw;
+      if (agent?.id === 'word-to-song') {
+        price += 1.5;
+      }
+      let currentUser = getUser();
+      currentUser.usage_tokens = (currentUser.usage_tokens || 0) + tokens;
+      currentUser.usage_price = (currentUser.usage_price || 0) + price;
+      // 调试输出
+      console.log('[消耗统计] 本次返回 tokens:', tokens, 'price:', price, '累计 tokens:', currentUser.usage_tokens, '累计 price:', currentUser.usage_price);
+      setUser(currentUser);
+      await updateUserUsage(currentUser.username, currentUser.usage_tokens, currentUser.usage_price);
     } catch (e) {
       console.error('普通消息调用失败详细信息:', {
         message: e.message,
@@ -1823,8 +1802,12 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     if (params.answer || params.content) {
       // 累加token和价格消耗
       if (params.metadata?.usage && user) {
-        const tokens = Number(params.metadata.usage.total_tokens) || 0;
-        const priceRaw = Number(params.metadata.usage.total_price) || 0;
+        let tokens = Number(params.metadata.usage.total_tokens) || 0;
+        let priceRaw = Number(params.metadata.usage.total_price) || 0;
+        if ((agent?.workflow === true || agent?.apiUrl?.includes('/workflows/')) && (tokens === 0 || priceRaw === 0)) {
+          tokens = 1000;
+          priceRaw = 0.05;
+        }
         let price = priceRaw === 0 ? 0.005 : priceRaw;
         if (agent?.id === 'word-to-song') {
           price += 1.5;

@@ -26,9 +26,51 @@
     min-height: 48px !important;
     padding: 0 8px !important;
   }
-  .ant-avatar {
-    width: 32px !important;
-    height: 32px !important;
-    font-size: 18px !important;
+  .ant-avatar, .theme-switch-btn {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 16px !important;
+  }
+  /* 顶部按钮组横向滚动和缩小 */
+  .top-btn-group {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 6px !important;
+    padding: 0 4px !important;
+    width: 100vw !important;
+    box-sizing: border-box;
+  }
+  .top-btn-group .ant-btn {
+    min-width: 60px !important;
+    font-size: 14px !important;
+    padding: 0 8px !important;
+    height: 36px !important;
+  }
+  /* 卡片自适应 */
+  .card-title, .card-desc {
+    font-size: 15px !important;
+  }
+  .ant-card, .custom-card {
+    width: 96vw !important;
+    min-width: 0 !important;
+    max-width: 98vw !important;
+    margin: 0 auto 12px auto !important;
+    padding: 10px !important;
+    box-sizing: border-box;
+  }
+  /* 分类栏横向滚动 */
+  .category-scrollbar {
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    width: 100vw !important;
+    box-sizing: border-box;
+  }
+  .category-tab {
+    display: inline-block !important;
+    min-width: 80px !important;
+    font-size: 15px !important;
+    padding: 10px 8px !important;
+    margin-right: 2px !important;
   }
 } 

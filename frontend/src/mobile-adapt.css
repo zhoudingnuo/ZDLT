@@ -42,27 +42,14 @@
     box-sizing: border-box;
   }
   .top-btn-group .ant-btn {
-    min-width: 60px !important;
-    font-size: 14px !important;
-    padding: 0 8px !important;
-    height: 36px !important;
+    min-width: 48px !important;
+    font-size: 13px !important;
+    padding: 0 6px !important;
+    height: 32px !important;
+    border-radius: 12px !important;
     flex-shrink: 0 !important;
   }
-  .theme-switch-btn {
-    font-size: 18px !important;
-    width: 36px !important;
-    height: 36px !important;
-    border-radius: 50% !important;
-    padding: 0 !important;
-    min-width: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
   /* 卡片自适应 */
-  .card-title, .card-desc {
-    font-size: 15px !important;
-  }
   .ant-card, .custom-card {
     width: 96vw !important;
     min-width: 0 !important;
@@ -70,6 +57,10 @@
     margin: 0 auto 12px auto !important;
     padding: 10px !important;
     box-sizing: border-box;
+    height: auto !important;
+  }
+  .card-title, .card-desc {
+    font-size: 15px !important;
   }
   /* 分类栏横向滚动 */
   .category-scrollbar {
@@ -84,5 +75,20 @@
     font-size: 15px !important;
     padding: 10px 8px !important;
     margin-right: 2px !important;
+  }
+  /* 深色模式按钮标准圆形修正 */
+  .theme-switch-btn {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    font-size: 18px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 } 

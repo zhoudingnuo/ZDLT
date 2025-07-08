@@ -1,11 +1,22 @@
 @media (max-width: 768px) {
   .ant-layout-sider {
-    display: none !important;
+    display: block !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 60px !important;
+    flex: 0 0 48px !important;
+    transition: none !important;
+    overflow-x: hidden !important;
+  }
+  .ant-layout-sider .ant-menu {
+    font-size: 12px !important;
+    padding: 0 !important;
   }
   .ant-layout-content, .main-content {
-    width: 100vw !important;
+    width: calc(100vw - 48px) !important;
     padding: 8px !important;
     min-width: 0 !important;
+    margin-left: 48px !important;
   }
   .ant-modal {
     min-width: 100vw !important;
@@ -27,18 +38,29 @@
     padding: 0 8px !important;
   }
   .ant-avatar, .theme-switch-btn {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 16px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    max-width: 32px !important;
+    max-height: 32px !important;
+    font-size: 18px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
   /* 顶部按钮组横向滚动和缩小 */
   .top-btn-group {
+    max-width: 48vw !important;
+    min-width: 0 !important;
+    flex: 1 1 48vw !important;
     display: flex !important;
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
     gap: 6px !important;
     padding: 0 4px !important;
-    width: 100vw !important;
     box-sizing: border-box;
   }
   .top-btn-group .ant-btn {
@@ -49,18 +71,28 @@
     border-radius: 12px !important;
     flex-shrink: 0 !important;
   }
-  /* 卡片自适应 */
-  .ant-card, .custom-card {
-    width: 96vw !important;
+  .search-bar-wrap {
+    max-width: 48vw !important;
     min-width: 0 !important;
-    max-width: 98vw !important;
-    margin: 0 auto 12px auto !important;
-    padding: 10px !important;
+    flex: 1 1 48vw !important;
+  }
+  /* 卡片自适应，一行三张 */
+  .ant-card, .custom-card {
+    width: 31vw !important;
+    min-width: 0 !important;
+    max-width: 32vw !important;
+    margin: 0 1vw 10px 1vw !important;
+    padding: 6px !important;
     box-sizing: border-box;
     height: auto !important;
+    display: inline-block !important;
+    vertical-align: top !important;
   }
   .card-title, .card-desc {
-    font-size: 15px !important;
+    font-size: 13px !important;
+  }
+  .card-title {
+    margin-bottom: 2px !important;
   }
   /* 分类栏横向滚动 */
   .category-scrollbar {
@@ -75,20 +107,5 @@
     font-size: 15px !important;
     padding: 10px 8px !important;
     margin-right: 2px !important;
-  }
-  /* 深色模式按钮标准圆形修正 */
-  .theme-switch-btn {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
-    max-width: 36px !important;
-    max-height: 36px !important;
-    font-size: 18px !important;
-    border-radius: 50% !important;
-    padding: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
   }
 } 

@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Card, Tabs, message } from 'antd';
-import { BulbOutlined, MoonOutlined } from '@ant-design/icons';
-import { loginUser, registerUser } from './utils/userUtils';
+import { BulbOutlined, MoonOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
+import { loginUser } from './utils/userUtils';
+import axios from 'axios';
 
 export default function LoginPage({ setUser }) {
-  const [tab, setTab] = useState('login');
+  const [tab, setTab] = useState('code');
   const [loading, setLoading] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [codeCountdown, setCodeCountdown] = useState(0);
 
   useEffect(() => {
     localStorage.setItem('theme', theme);
@@ -19,40 +22,79 @@ export default function LoginPage({ setUser }) {
     }
   }, [theme]);
 
-  const onFinish = async (values) => {
-    setLoading(true);
-    try {
-      if (tab === 'login') {
-        const user = await loginUser(values.username, values.password);
-        if (user) {
-          setUser(user);
-          localStorage.setItem('user', JSON.stringify(user));
-          message.success('登录成功');
-        } else {
-          message.error('用户名或密码错误');
-        }
-      } else {
-        const user = await registerUser(values.username, values.password, values.email);
-        setUser(user);
-        localStorage.setItem('user', JSON.stringify(user));
-        message.success('注册成功');
-      }
-    } catch (e) {
-      message.error('操作失败，请重试');
+  useEffect(() => {
+    if (codeCountdown > 0) {
+      const timer = setTimeout(() => setCodeCountdown(codeCountdown - 1), 1000);
+      return () => clearTimeout(timer);
     }
-    setLoading(false);
-  };
+  }, [codeCountdown]);
 
   // 主题相关颜色
   const bgColor = theme === 'dark' ? '#18191c' : '#f7f8fa';
   const cardBg = theme === 'dark' ? '#23262e' : '#fff';
   const fontColor = theme === 'dark' ? '#eee' : '#222';
   const labelColor = theme === 'dark' ? '#eee' : '#333';
-  const inputBg = theme === 'dark' ? '#262a32' : '#fff';
+  const inputBg = theme === 'dark' ? '#23262e' : '#fff';
   const inputBorder = theme === 'dark' ? '#444' : '#d9d9d9';
   const tabColor = theme === 'dark' ? '#eee' : '#333';
   const tabActiveColor = '#4f8cff';
   const btnBg = 'linear-gradient(90deg, #4f8cff 0%, #6f6fff 100%)';
+
+  // 发送验证码
+  const handleSendCode = async (phone) => {
+    if (!phone || !/^1[3-9]\d{9}$/.test(phone)) {
+      message.error('请输入有效的手机号');
+      return;
+    }
+    setCodeLoading(true);
+    try {
+      await axios.post('/api/send-code', { phone });
+      message.success('验证码已发送');
+      setCodeCountdown(60);
+    } catch (e) {
+      message.error('验证码发送失败');
+    }
+    setCodeLoading(false);
+  };
+
+  // 验证码登录
+  const onCodeLogin = async (values) => {
+    setLoading(true);
+    try {
+      const res = await axios.post('/api/code-login', {
+        phone: values.phone,
+        code: values.code
+      });
+      if (res.data && res.data.user) {
+        setUser(res.data.user);
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+        message.success('登录成功');
+      } else {
+        message.error(res.data?.msg || '验证码错误');
+      }
+    } catch (e) {
+      message.error('登录失败，请重试');
+    }
+    setLoading(false);
+  };
+
+  // 密码登录
+  const onPwdLogin = async (values) => {
+    setLoading(true);
+    try {
+      const user = await loginUser(values.username, values.password);
+      if (user) {
+        setUser(user);
+        localStorage.setItem('user', JSON.stringify(user));
+        message.success('登录成功');
+      } else {
+        message.error('用户名或密码错误');
+      }
+    } catch (e) {
+      message.error('登录失败，请重试');
+    }
+    setLoading(false);
+  };
 
   return (
     <div style={{
@@ -76,43 +118,120 @@ export default function LoginPage({ setUser }) {
         }}
         title={theme === 'dark' ? '切换为浅色模式' : '切换为深色模式'}
       />
-      <Card style={{ width: 420, borderRadius: 16, boxShadow: '0 4px 32px 0 rgba(0,0,0,0.22)', background: cardBg, border: 'none', color: fontColor }}>
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <img src="/logo-zeta-vista.png" alt="logo" style={{ height: 48 }} />
-          <div style={{ fontWeight: 700, fontSize: 24, color: '#4f8cff', marginTop: 8 }}>智大蓝图</div>
-        </div>
-        <Tabs
-          activeKey={tab}
-          onChange={setTab}
-          centered
-          style={{ marginBottom: 24, color: tabColor }}
-          tabBarStyle={{ color: tabColor }}
-        >
-          <Tabs.TabPane tab={<span style={{ color: tab === 'login' ? tabActiveColor : tabColor }}>登录</span>} key="login" />
-          <Tabs.TabPane tab={<span style={{ color: tab === 'register' ? tabActiveColor : tabColor }}>注册</span>} key="register" />
-        </Tabs>
-        <Form layout="vertical" onFinish={onFinish} style={{ color: fontColor }}>
-          <Form.Item name="username" label={<span style={{ color: labelColor }}>用户名</span>} rules={[{ required: true, message: '请输入用户名' }]}> 
-            <Input style={{ background: inputBg, color: fontColor, borderColor: inputBorder }} />
-          </Form.Item>
-          <Form.Item name="password" label={<span style={{ color: labelColor }}>密码</span>} rules={[{ required: true, message: '请输入密码' }]}> 
-            <Input.Password style={{ background: inputBg, color: fontColor, borderColor: inputBorder }} />
-          </Form.Item>
-          {tab === 'register' && (
-            <Form.Item name="email" label={<span style={{ color: labelColor }}>邮箱</span>} rules={[{ required: true, message: '请输入邮箱' }, { type: 'email', message: '邮箱格式不正确' }]}> 
-              <Input style={{ background: inputBg, color: fontColor, borderColor: inputBorder }} />
-            </Form.Item>
+      <div style={{
+        display: 'flex',
+        background: 'transparent',
+        borderRadius: 20,
+        boxShadow: '0 4px 32px 0 rgba(0,0,0,0.22)',
+        minWidth: 800,
+        minHeight: 420,
+        alignItems: 'stretch',
+        overflow: 'hidden',
+      }}>
+        {/* 左侧登录表单 */}
+        <div style={{
+          background: cardBg,
+          padding: '48px 40px 32px 40px',
+          width: 400,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+            <img src="/logo-zeta-vista.png" alt="logo" style={{ height: 48 }} />
+            <div style={{ fontWeight: 700, fontSize: 24, color: '#4f8cff', marginTop: 8 }}>智大蓝图</div>
+          </div>
+          <Tabs
+            activeKey={tab}
+            onChange={setTab}
+            centered
+            style={{ marginBottom: 24, color: tabColor }}
+            tabBarStyle={{ color: tabColor }}
+          >
+            <Tabs.TabPane tab={<span style={{ color: tab === 'code' ? tabActiveColor : tabColor }}>验证码登录</span>} key="code" />
+            <Tabs.TabPane tab={<span style={{ color: tab === 'pwd' ? tabActiveColor : tabColor }}>密码登录</span>} key="pwd" />
+          </Tabs>
+          <div style={{ color: theme === 'dark' ? '#bbb' : '#666', fontSize: 13, marginBottom: 18 }}>
+            仅支持手机号登录，或使用微信扫码登录。
+          </div>
+          {tab === 'code' ? (
+            <Form layout="vertical" onFinish={onCodeLogin} style={{ color: fontColor }}>
+              <Form.Item name="phone" label={<span style={{ color: labelColor }}>手机号</span>} rules={[{ required: true, message: '请输入手机号' }, { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确' }]}> 
+                <Input style={{ background: inputBg, color: fontColor, borderColor: inputBorder }} maxLength={11} prefix={<UserOutlined />} />
+              </Form.Item>
+              <Form.Item name="code" label={<span style={{ color: labelColor }}>验证码</span>} rules={[{ required: true, message: '请输入验证码' }]}> 
+                <Input
+                  style={{ background: inputBg, color: fontColor, borderColor: inputBorder }}
+                  maxLength={6}
+                  prefix={<LockOutlined />}
+                  addonAfter={
+                    <Button
+                      size="small"
+                      disabled={codeCountdown > 0}
+                      loading={codeLoading}
+                      onClick={async () => {
+                        const phone = document.querySelector('input[name=\"phone\"]')?.value;
+                        await handleSendCode(phone);
+                      }}
+                    >
+                      {codeCountdown > 0 ? `${codeCountdown}s后重试` : '发送验证码'}
+                    </Button>
+                  }
+                />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit" block loading={loading} style={{ background: btnBg, border: 'none', fontWeight: 600, borderRadius: 8 }}>
+                  登录
+                </Button>
+              </Form.Item>
+            </Form>
+          ) : (
+            <Form layout="vertical" onFinish={onPwdLogin} style={{ color: fontColor }}>
+              <Form.Item name="username" label={<span style={{ color: labelColor }}>手机号/邮箱</span>} rules={[{ required: true, message: '请输入手机号或邮箱' }]}> 
+                <Input style={{ background: inputBg, color: fontColor, borderColor: inputBorder }} prefix={<UserOutlined />} />
+              </Form.Item>
+              <Form.Item name="password" label={<span style={{ color: labelColor }}>密码</span>} rules={[{ required: true, message: '请输入密码' }]}> 
+                <Input.Password style={{ background: inputBg, color: fontColor, borderColor: inputBorder }} prefix={<LockOutlined />} />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit" block loading={loading} style={{ background: btnBg, border: 'none', fontWeight: 600, borderRadius: 8 }}>
+                  登录
+                </Button>
+              </Form.Item>
+            </Form>
           )}
-          <Form.Item>
-            <Button type="primary" htmlType="submit" block loading={loading} style={{ background: btnBg, border: 'none', fontWeight: 600, borderRadius: 8 }}>
-              {tab === 'login' ? '登录' : '注册'}
-            </Button>
-          </Form.Item>
-        </Form>
-        <div style={{ color: theme === 'dark' ? '#888' : '#666', fontSize: 12, textAlign: 'center', marginTop: 12 }}>
-          登录即代表同意 <a href="#" style={{ color: '#4f8cff' }}>服务条款</a> 和 <a href="#" style={{ color: '#4f8cff' }}>隐私政策</a>
+          {/* 忘记密码和注册 */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
+            <a href="#" style={{ color: '#4f8cff', fontSize: 13 }}>忘记密码？</a>
+            <a href="#" style={{ color: '#4f8cff', fontSize: 13 }}>注册</a>
+          </div>
+          {/* 协议说明 */}
+          <div style={{ color: theme === 'dark' ? '#888' : '#666', fontSize: 12, textAlign: 'center', marginTop: 18 }}>
+            登录即代表同意 <a href="#" style={{ color: '#4f8cff' }}>服务条款</a> 和 <a href="#" style={{ color: '#4f8cff' }}>隐私政策</a>
+          </div>
         </div>
-      </Card>
+        {/* 右侧二维码 */}
+        <div style={{
+          background: theme === 'dark' ? '#23262e' : '#f7f8fa',
+          width: 320,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '0 32px',
+        }}>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 2px 12px 0 rgba(0,0,0,0.10)' }}>
+            <img src="/WeChat.jpg" alt="微信二维码" style={{ width: 180, height: 180 }} />
+          </div>
+          <div style={{ color: '#4fef4f', fontSize: 16, marginTop: 18, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span role="img" aria-label="wechat">🟩</span> 微信扫码登录
+          </div>
+        </div>
+      </div>
+      {/* 页脚 */}
+      <div style={{ position: 'fixed', bottom: 18, left: 0, width: '100%', textAlign: 'center', color: theme === 'dark' ? '#888' : '#999', fontSize: 13 }}>
+        浙ICP备2023025841号 · <a href="#" style={{ color: '#4f8cff' }}>Contact us</a>
+      </div>
     </div>
   );
 } 

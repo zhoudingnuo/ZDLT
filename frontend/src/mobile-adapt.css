@@ -140,4 +140,78 @@
     margin-left: 0 !important;
     padding-left: 0 !important;
   }
+  
+  /* 搜索栏移动端样式 */
+  .home-search-bar {
+    min-width: 160px !important;
+    max-width: 200px !important;
+    margin-right: 12px !important;
+  }
+  
+  .home-search-icon {
+    font-size: 14px !important;
+    margin-right: 4px !important;
+  }
+  
+  .home-search-input {
+    font-size: 13px !important;
+  }
+  
+  /* 智能体卡片移动端样式 */
+  .agent-card {
+    width: 160px !important;
+    height: 140px !important;
+    min-width: 160px !important;
+    min-height: 140px !important;
+    padding: 10px !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .agent-card-icon {
+    font-size: 20px !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .agent-card-icon .anticon {
+    font-size: 20px !important;
+  }
+  
+  .agent-card .card-title {
+    font-size: 14px !important;
+    margin-bottom: 4px !important;
+  }
+  
+  .agent-card .ant-tag {
+    font-size: 10px !important;
+    padding: 0 6px !important;
+    height: 20px !important;
+    line-height: 18px !important;
+  }
+  
+  /* 智能体配置卡片移动端样式 */
+  .agent-config-card {
+    width: 160px !important;
+    height: 140px !important;
+    min-width: 160px !important;
+    min-height: 140px !important;
+    padding: 10px !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .agent-config-icon {
+    font-size: 24px !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .agent-config-btn,
+  .agent-create-btn {
+    font-size: 12px !important;
+    height: 28px !important;
+    padding: 0 8px !important;
+    margin-bottom: 6px !important;
+  }
+  
+  .agent-config-btn {
+    margin-bottom: 6px !important;
+  }
 } 

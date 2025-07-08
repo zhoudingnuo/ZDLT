@@ -3087,7 +3087,7 @@ return (
     <Layout style={{ background: mainBg }}>
       <Header style={{ background: theme === 'dark' ? '#23262e' : '#f5f6fa', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: 64 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{
+          <div className="home-search-bar" style={{
             display: 'flex',
             alignItems: 'center',
             height: 36,
@@ -3102,8 +3102,9 @@ return (
             boxSizing: 'border-box',
             boxShadow: 'none',
           }}>
-            <SearchOutlined style={{ color: theme === 'dark' ? '#888' : '#bbb', fontSize: 16, marginRight: 6 }} />
+            <SearchOutlined className="home-search-icon" style={{ color: theme === 'dark' ? '#888' : '#bbb', fontSize: 16, marginRight: 6 }} />
             <input
+              className="home-search-input"
               type="text"
               placeholder="搜索智能体"
               value={search}
@@ -3251,6 +3252,7 @@ return (
                   }}>
               {/* 新增：最左上角自定义卡片 */}
               <div
+                className="agent-config-card"
                 style={{
                   background: cardBg,
                   border: `2px dashed ${mainColorSolid}`,
@@ -3270,9 +3272,10 @@ return (
                   minHeight: 180
                 }}
               >
-                <div style={{ fontSize: 32, marginBottom: 10 }}>⚙️</div>
+                <div className="agent-config-icon" style={{ fontSize: 32, marginBottom: 10 }}>⚙️</div>
                 <div style={{ fontWeight: 700, fontSize: 16, color: cardTitleColor, marginBottom: 10, textAlign: 'center' }}>智能体管理</div>
                 <Button
+                  className="agent-config-btn"
                   type="primary"
                   style={{ width: '90%', marginBottom: 8, borderRadius: 8, fontWeight: 600 }}
                   onClick={() => {
@@ -3287,6 +3290,7 @@ return (
                   }}
                 >配置智能体</Button>
                 <Button
+                  className="agent-create-btn"
                   style={{ width: '90%', borderRadius: 8, fontWeight: 600 }}
                   onClick={() => {
                     if (!user) {
@@ -3303,6 +3307,7 @@ return (
                       .map((agent, i) => (
                         <div
                           key={agent.id}
+                          className="agent-card"
                           style={{
                             background: cardBg,
                             border: agent.isConfigured === false
@@ -3336,7 +3341,7 @@ return (
                             e.currentTarget.querySelector('.card-title').style.color = cardTitleColor;
                           }}
                         >
-                          <div style={{ marginBottom: 12 }}>{cardIcons[i % cardIcons.length]}</div>
+                          <div className="agent-card-icon" style={{ marginBottom: 12 }}>{cardIcons[i % cardIcons.length]}</div>
                           <div className="card-title" style={{ fontWeight: 700, fontSize: 16, color: cardTitleColor, marginBottom: 6, textAlign: 'center' }}>{agent.name}</div>
                           <div style={{ color: descColor, fontSize: 13, textAlign: 'center', marginBottom: 4, height: 40, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: '20px', wordBreak: 'break-all' }}>{agent.description}</div>
                           {agent.isConfigured !== undefined && (

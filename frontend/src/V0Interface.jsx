@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Input, Tag } from 'antd';
+import { Button, Input, Tag, Avatar, Dropdown, Menu, message } from 'antd';
 import {
   SearchOutlined,
   FolderOutlined,
@@ -12,11 +12,20 @@ import {
   MessageOutlined,
   UserOutlined,
   CloseOutlined,
+  LogoutOutlined,
+  SettingOutlined,
+  TeamOutlined as UserManageOutlined,
 } from '@ant-design/icons';
 
 function V0Interface() {
   const [collapsed, setCollapsed] = useState(window.innerWidth < 900);
   const sidebarWidth = collapsed ? 56 : 256;
+  
+  // 用户状态管理
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
   // 响应式自动收起/展开
   useEffect(() => {
@@ -27,6 +36,43 @@ function V0Interface() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [collapsed]);
+
+  // 退出登录
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    message.success('已退出登录');
+    // 刷新页面返回到登录页
+    window.location.reload();
+  };
+
+  // 用户管理
+  const handleUserManage = () => {
+    message.info('用户管理功能开发中');
+  };
+
+  // 个人中心
+  const handleProfile = () => {
+    message.info('个人中心功能开发中');
+  };
+
+  // 用户菜单
+  const userMenu = (
+    <Menu>
+      <Menu.Item key="profile" icon={<UserOutlined />} onClick={handleProfile}>
+        个人中心
+      </Menu.Item>
+      {user?.isAdmin && (
+        <Menu.Item key="userManage" icon={<UserManageOutlined />} onClick={handleUserManage}>
+          用户管理
+        </Menu.Item>
+      )}
+      <Menu.Divider />
+      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
+        退出登录
+      </Menu.Item>
+    </Menu>
+  );
 
   // 导航项配置
   const navs = [
@@ -186,10 +232,26 @@ function V0Interface() {
       {/* 主内容区 */}
       <div style={{ flex: 1, marginLeft: sidebarWidth, transition: 'margin-left 0.2s', display: 'flex', flexDirection: 'column' }}>
         {/* 顶部栏 */}
-        <div style={{ borderBottom: '1px solid #222', padding: 16, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 16 }}>
-          <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent' }}>升级</Button>
-          <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent' }}>反馈</Button>
-          <div style={{ width: 32, height: 32, background: '#52c41a', borderRadius: '50%' }}></div>
+        <div style={{ borderBottom: '1px solid #222', padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent' }}>升级</Button>
+            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent' }}>反馈</Button>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ color: '#bbb', fontSize: 14 }}>{user?.username || '用户'}</span>
+            <Dropdown overlay={userMenu} placement="bottomRight" trigger={['click']}>
+              <Avatar
+                icon={<UserOutlined />}
+                style={{
+                  cursor: 'pointer',
+                  background: '#52c41a',
+                  color: '#fff',
+                  width: 32,
+                  height: 32,
+                }}
+              />
+            </Dropdown>
+          </div>
         </div>
         {/* 主内容区域 */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32 }}>

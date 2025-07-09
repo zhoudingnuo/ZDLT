@@ -6,6 +6,7 @@ import {
   Clock,
   Users,
   ChevronRight,
+  ChevronLeft,
   ChevronDown,
   Star,
   Plus,

@@ -129,7 +129,7 @@ export default function LoginPage({ setUser }) {
           智大蓝图
         </span>
       </div>
-      {/* 右上角主题切换1按钮 */}
+      {/* 右上角主题切换按钮 */}
       <Button
         shape="circle"
         icon={theme === 'dark' ? <BulbOutlined /> : <MoonOutlined />}

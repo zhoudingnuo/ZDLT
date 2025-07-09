@@ -114,11 +114,11 @@ export default function LoginPage({ setUser }) {
         <img
           src="/logo-zeta-vista.png"
           alt="logo"
-          style={{ height: 48, marginRight: 16 }}
+          style={{ height: 60, marginRight: 20 }}
         />
         <span
           style={{
-            fontSize: 36,
+            fontSize: 44,
             fontWeight: 700,
             color: '#4f8cff',
             letterSpacing: 2,
@@ -151,22 +151,18 @@ export default function LoginPage({ setUser }) {
         borderRadius: 20,
         boxShadow: '0 4px 32px 0 rgba(0,0,0,0.22)',
         minWidth: 800,
-        minHeight: 420,
+        minHeight: 340,
         alignItems: 'stretch',
         overflow: 'hidden',
       }}>
         {/* 左侧登录表单 */}
         <div style={{
-          padding: '48px 40px 32px 40px',
+          padding: '32px 40px 24px 40px',
           width: 400,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
         }}>
-          <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <img src="/logo-zeta-vista.png" alt="logo" style={{ height: 48 }} />
-            <div style={{ fontWeight: 700, fontSize: 24, color: '#4f8cff', marginTop: 8 }}>智大蓝图</div>
-          </div>
           <Tabs
             activeKey={tab}
             onChange={setTab}
@@ -183,7 +179,16 @@ export default function LoginPage({ setUser }) {
           {tab === 'code' ? (
             <Form form={form} layout="vertical" onFinish={onCodeLogin} style={{ color: fontColor }}>
               <Form.Item name="phone" label={<span style={{ color: labelColor }}>手机号</span>} rules={[{ required: true, message: '请输入手机号' }, { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确' }]}> 
-                <Input style={{ background: inputBg, color: fontColor, borderColor: inputBorder }} maxLength={11} prefix={<UserOutlined />} />
+                <Input 
+                  style={{ 
+                    background: inputBg, 
+                    color: fontColor, 
+                    borderColor: inputBorder, 
+                    borderRadius: 8, 
+                  }} 
+                  maxLength={11} 
+                  prefix={<UserOutlined />} 
+                />
               </Form.Item>
               <Form.Item name="code" label={<span style={{ color: labelColor }}>验证码</span>} rules={[{ required: true, message: '请输入验证码' }]}> 
                 <Input
@@ -192,6 +197,7 @@ export default function LoginPage({ setUser }) {
                     color: fontColor,
                     borderColor: inputBorder,
                     boxShadow: 'none',
+                    borderRadius: 8,
                   }}
                   maxLength={6}
                   prefix={<LockOutlined />}

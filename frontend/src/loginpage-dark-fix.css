@@ -1,0 +1,21 @@
+body[data-theme="dark"] .ant-input-group,
+body[data-theme="dark"] .ant-input-group .ant-input,
+body[data-theme="dark"] .ant-input-group-addon,
+body[data-theme="dark"] .ant-input-group .ant-input-group-addon,
+body[data-theme="dark"] .ant-input-group .ant-btn {
+  background: #23262e !important;
+  color: #eee !important;
+  border-color: #444 !important;
+}
+body[data-theme="dark"] .ant-input-group .ant-input {
+  border-radius: 8px 0 0 8px !important;
+}
+body[data-theme="dark"] .ant-input-group .ant-input-group-addon,
+body[data-theme="dark"] .ant-input-group .ant-btn {
+  border-radius: 0 8px 8px 0 !important;
+}
+body[data-theme="dark"] .ant-input-group .ant-btn[disabled] {
+  background: #23262e !important;
+  color: #888 !important;
+  border-color: #444 !important;
+} 

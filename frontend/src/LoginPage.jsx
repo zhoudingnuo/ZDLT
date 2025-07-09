@@ -3,6 +3,7 @@ import { Form, Input, Button, Card, Tabs, message } from 'antd';
 import { BulbOutlined, MoonOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
 import { loginUser } from './utils/userUtils';
 import axios from 'axios';
+import './loginpage-dark-fix.css';
 
 export default function LoginPage({ setUser }) {
   const [tab, setTab] = useState('code');

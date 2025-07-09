@@ -9,6 +9,9 @@ const readline = require('readline');
 const dotenv = require('dotenv');
 const winston = require('winston');
 const bcrypt = require('bcrypt');
+const multer = require('multer');
+const upload = multer();
+const FormData = require('form-data');
 
 dotenv.config();
 
@@ -51,15 +54,29 @@ if (process.env.NODE_ENV !== 'production') {
 
 // 获取智能体列表（用于前端渲染）
 app.get('/api/agents/list', (req, res) => {
-  res.json(agents)
-  // 假设 req.user.isAdmin 表示管理员1
-  // if (req.user && req.user.isAdmin) {
-  //   res.json(agents); // 管理员返回全部
-  // } else {
-  //   // 普通用户不返回apiKey
-  //   const safeAgents = agents.map(({ apiKey, ...rest }) => rest);
-  //   res.json(safeAgents);
-  // }
+  let agentsList = agents;
+  // 获取用户名
+  const username = req.query.username;
+  // 读取用户信息
+  let users = [];
+  const usersPath = path.join(__dirname, 'users.json');
+  if (fs.existsSync(usersPath)) {
+    users = JSON.parse(fs.readFileSync(usersPath, 'utf-8'));
+  }
+  const user = users.find(u => u.username === username);
+  // 判断是否管理员
+  const isAdmin = user && user.isAdmin;
+  console.log('isAdmin', isAdmin);
+  // 管理员返回全部，普通用户只返回安全字段
+  const safeAgents = agentsList.map(a => isAdmin ? a : {
+    id: a.id,
+    name: a.name,
+    description: a.description,
+    status: a.status,
+    inputs: a.inputs,
+    inputType: a.inputType,
+  });
+  res.json(safeAgents);
 });
 
 // 转发到Dify智能体
@@ -133,7 +150,7 @@ app.post('/api/upload-image', async (req, res) => {
 });
 
 // 新的 Dify 文件上传代理接口（支持 agentId 动态 key）
-app.post('/api/upload-dify-file', async (req, res) => {
+app.post('/api/agent/upload', async (req, res) => {
   const form = new formidable.IncomingForm({ multiples: false });
   form.parse(req, async (err, fields, files) => {
     if (err) return res.status(400).json({ error: '文件解析失败' });
@@ -145,23 +162,14 @@ app.post('/api/upload-dify-file', async (req, res) => {
     }
     if (Array.isArray(user)) user = user[0];
     const file = Array.isArray(files.file) ? files.file[0] : files.file;
-    // 日志输出，便于排查
-    console.log('fields:', fields);
-    console.log('自动补全后 agentId:', agentId, '可用id:', agents.map(a=>a.id));
     if (!user || !file || !agentId) return res.status(400).json({ error: '缺少user、file或agentId' });
-
-    // 动态获取apiKey
     const agent = agents.find(a => a.id === agentId);
     if (!agent) return res.status(400).json({ error: '无效的agentId' });
     const DIFy_TOKEN = agent.apiKey;
-
-    const FormData = require('form-data');
     const fd = new FormData();
     fd.append('file', require('fs').createReadStream(file.filepath), file.originalFilename);
     fd.append('user', user);
-
     try {
-      // 使用智能体配置的API URL，如果没有则使用默认值
       const baseUrl = agent.apiUrl ? agent.apiUrl.replace('/v1/chat-messages', '') : 'http://118.145.74.50:24131';
       const DIFy_API = `${baseUrl}/v1/files/upload`;
       const response = await axios.post(DIFy_API, fd, {
@@ -255,8 +263,8 @@ app.post('/api/user/usage', (req, res) => {
   let users = readJson(USERS_FILE);
   const idx = users.findIndex(u => u.username === username);
   if (idx !== -1) {
-    users[idx].usage_tokens = usage_tokens;
-    users[idx].usage_price = usage_price;
+    users[idx].usage_tokens = Number(usage_tokens) || 0;
+    users[idx].usage_price = Number(usage_price) || 0;
     writeJson(USERS_FILE, users);
     res.json({ success: true });
   } else {
@@ -270,7 +278,7 @@ app.post('/api/user/balance', (req, res) => {
   let users = readJson(USERS_FILE);
   const idx = users.findIndex(u => u.username === username);
   if (idx !== -1) {
-    users[idx].balance = balance;
+    users[idx].balance = Number(balance) || 0;
     writeJson(USERS_FILE, users);
     res.json({ success: true });
   } else {
@@ -586,17 +594,78 @@ app.post('/api/admin/agents/:agentId/reject', (req, res) => {
   res.json({ success: true, message: '已拒绝，智能体状态已重置' });
 });
 
+const AGENTS_FILE = path.join(__dirname, 'agents.json');
+async function uploadFileToDify(file, user, agent) {
+  const fd = new FormData();
+  fd.append('file', fs.createReadStream(file.filepath), file.originalFilename);
+  fd.append('user', user || 'guest');
+  const DIFy_API = agent.apiUrl.replace('/v1/chat-messages', '') + '/v1/files/upload';
+  const res = await axios.post(DIFy_API, fd, {
+    headers: {
+      ...fd.getHeaders(),
+      'Authorization': `Bearer ${agent.apiKey}`
+    },
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity
+  });
+  return res.data;
+}
+
+app.post('/api/agent/invoke', async (req, res) => {
+  const form = new formidable.IncomingForm({ multiples: true });
+  form.parse(req, async (err, fields, files) => {
+    if (err) return res.status(400).json({ error: 'Parse error' });
+    const agentId = fields.agentId;
+    const query = fields.query;
+    let inputs = {};
+    try {
+      inputs = JSON.parse(fields.inputs || '{}');
+    } catch {
+      return res.status(400).json({ error: 'Invalid inputs' });
+    }
+    const agents = readJson(AGENTS_FILE);
+    const agent = agents.find(a => a.id === agentId);
+    if (!agent) return res.status(404).json({ error: 'Agent not found' });
+    // 处理文件参数
+    for (const key in files) {
+      const file = Array.isArray(files[key]) ? files[key][0] : files[key];
+      const fileInfo = await uploadFileToDify(file, fields.user, agent);
+      inputs[key] = {
+        type: 'document',
+        transfer_method: 'local_file',
+        upload_file_id: fileInfo.id,
+        url: fileInfo.preview_url || ''
+      };
+    }
+    const data = {
+      inputs,
+      query,
+      response_mode: 'blocking',
+      conversation_id: '',
+      user: fields.user || 'guest'
+    };
+    try {
+      const response = await axios.post(agent.apiUrl, data, {
+        headers: {
+          'Authorization': `Bearer ${agent.apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      res.json(response.data);
+    } catch (e) {
+      res.status(500).json({ error: e.message, detail: e.response?.data });
+    }
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0'; // 监听所有网络接口
-
-// const PORT = 45262;
-// const HOST = 'http://29367ir756de.vicp.fun'; // 监听所有网络接口
 
 app.listen(PORT, HOST, () => {
   logger.info(`Server running on port ${PORT}`);
   console.log(`Server running on port ${PORT}`);
   console.log(`Local access: http://localhost:${PORT}`);
-  console.log(`Network access: http://[your-ip]:${PORT}`);
+  console.log(`Network access: http://47.107.84.24:${PORT}`);
 });
 
 // 统一错误处理中间件

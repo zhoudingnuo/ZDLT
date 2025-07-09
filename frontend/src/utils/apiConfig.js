@@ -3,8 +3,8 @@ let API_BASE = '';
 if (process.env.REACT_APP_API_BASE) {
   // 去掉结尾所有 / 和 /api
   API_BASE = process.env.REACT_APP_API_BASE.replace(/\/?api\/?$/, '');
-} else if (typeof window !== 'undefined' && window.location.host.includes('45262')) {
-  API_BASE = 'http://29367ri756dev.vicp.fun:45262';
+} else if (typeof window !== 'undefined' && window.location.host.includes('47.107.84.24')) {
+  API_BASE = 'http://47.107.84.24:5000';
 } else {
   API_BASE = '';
 }

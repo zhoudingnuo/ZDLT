@@ -30,7 +30,6 @@ import { UserListProvider, useUserList } from './contexts/UserListContext';
 import './nav-btn.css';
 import './category-tab.css';
 import API_BASE from './utils/apiConfig';
-import { hashPassword } from './utils/passwordUtils';
 
 const { Header, Content, Sider } = Layout;
 const { Search } = Input;
@@ -57,7 +56,7 @@ function initAdminUser() {
       id: Date.now().toString(),
       username: 'ZDLT',
       email: 'admin@zdltaiplatform.com',
-      password: hashPassword('Administrator2025'),
+      password: 'Administrator2025',
       createTime: new Date().toISOString(),
       lastLoginTime: null,
       isAdmin: true
@@ -1775,13 +1774,15 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       });
       
       // 使用fetch处理SSE流式响应
-      const response = await fetch(agent.apiUrl, {
+      const response = await fetch('/api/agent/invoke', {
         method: 'POST',
+        body: JSON.stringify({
+          agentId: agent.id,
+          params, // 或 query/inputs等
+        }),
         headers: {
-          'Authorization': `Bearer ${agent.apiKey}`,
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(params)
+        }
       });
 
       if (!response.ok) {

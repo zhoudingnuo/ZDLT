@@ -1,21 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Input, Tag } from 'antd';
-// import { SearchOutlined, AppstoreOutlined, ClockCircleOutlined, TeamOutlined, DownOutlined, RightOutlined, StarOutlined, CameraOutlined, UploadOutlined, FileTextOutlined, UserAddOutlined, CloseOutlined } from '@ant-design/icons';
+import {
+  Search,
+  Grid3X3,
+  Clock,
+  Users,
+  ChevronRight,
+  ChevronDown,
+  Star,
+  Plus,
+  MessageSquare,
+  Folder,
+  UserPlus,
+  X,
+} from 'lucide-react';
 
 export default function V0Interface() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(window.innerWidth < 900);
   const sidebarWidth = collapsed ? 56 : 256;
+
+  // 响应式自动收起/展开
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 900 && !collapsed) setCollapsed(true);
+      if (window.innerWidth >= 900 && collapsed) setCollapsed(false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [collapsed]);
+
   // 导航项配置
   const navs = [
-    { icon: '🔍', label: '搜索' },
-    { icon: '📁', label: '项目' },
-    { icon: '🕒', label: '最近' },
-    { icon: '👥', label: '社区' },
+    { icon: <Search size={20} />, label: '搜索' },
+    { icon: <Folder size={20} />, label: '项目' },
+    { icon: <Clock size={20} />, label: '最近' },
+    { icon: <Users size={20} />, label: '社区' },
   ];
   const favs = [
-    { icon: '⭐', label: '收藏项目' },
-    { icon: '⭐', label: '收藏对话' },
-    { icon: '🕒', label: '最近' },
+    { icon: <Star size={20} />, label: '收藏项目' },
+    { icon: <MessageSquare size={20} />, label: '收藏对话' },
+    { icon: <Clock size={20} />, label: '最近' },
   ];
   return (
     <div style={{ display: 'flex', height: '100vh', background: '#000', color: '#fff' }}>
@@ -38,12 +62,9 @@ export default function V0Interface() {
         {/* 头部+收起按钮 */}
         <div style={{ padding: 16, borderBottom: '1px solid #222', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 24, height: 24, background: '#fff', borderRadius: 6, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: 14, marginRight: collapsed ? 0 : 8 }}>v0</div>
+            <img src="/logo-zeta-vista.png" alt="logo" style={{ width: 28, height: 28, borderRadius: 6, marginRight: collapsed ? 0 : 8, objectFit: 'cover' }} />
             {!collapsed && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 8, height: 8, background: '#52c41a', borderRadius: '50%' }}></div>
-                <span style={{ fontSize: 14 }}>个人</span>
-              </div>
+              <span style={{ fontWeight: 700, fontSize: 18, color: '#4f8cff', letterSpacing: 2 }}>智大蓝图</span>
             )}
           </div>
           <Button
@@ -51,12 +72,35 @@ export default function V0Interface() {
             style={{ background: 'none', border: 'none', color: '#bbb', fontSize: 18, width: 28, height: 28, padding: 0 }}
             onClick={() => setCollapsed(c => !c)}
             title={collapsed ? '展开' : '收起'}
+            icon={collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           >
-            {collapsed ? '»' : '«'}
+            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </Button>
         </div>
         {/* 新建对话按钮 */}
-        {!collapsed && <Button block style={{ background: '#222', color: '#fff', borderColor: '#333', margin: 16, marginTop: 0 }}>新建对话</Button>}
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: collapsed ? '12px 0' : '16px 0 0 0' }}>
+          <Button
+            type="primary"
+            shape="circle"
+            icon={<Plus size={20} />}
+            style={{
+              width: collapsed ? 36 : 160,
+              height: 36,
+              borderRadius: 18,
+              background: '#222',
+              color: '#fff',
+              borderColor: '#333',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 600,
+              fontSize: 16,
+              transition: 'width 0.2s',
+            }}
+          >
+            {!collapsed && <span style={{ marginLeft: 8 }}>新建对话</span>}
+          </Button>
+        </div>
         {/* 导航 */}
         <div style={{ flex: 1, padding: collapsed ? 8 : 16 }}>
           {navs.map((item, idx) => (
@@ -76,7 +120,7 @@ export default function V0Interface() {
                 justifyContent: collapsed ? 'center' : 'flex-start',
               }}
             >
-              <span>{item.icon}</span>
+              {item.icon}
               {!collapsed && <span style={{ fontSize: 15 }}>{item.label}</span>}
             </div>
           ))}
@@ -96,7 +140,7 @@ export default function V0Interface() {
                   justifyContent: collapsed ? 'center' : 'flex-start',
                 }}
               >
-                <span>{item.icon}</span>
+                {item.icon}
                 {!collapsed && <span style={{ fontSize: 15 }}>{item.label}</span>}
               </div>
             ))}

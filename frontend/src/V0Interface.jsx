@@ -1,76 +1,128 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button, Input, Tag } from 'antd';
 // import { SearchOutlined, AppstoreOutlined, ClockCircleOutlined, TeamOutlined, DownOutlined, RightOutlined, StarOutlined, CameraOutlined, UploadOutlined, FileTextOutlined, UserAddOutlined, CloseOutlined } from '@ant-design/icons';
 
 export default function V0Interface() {
+  const [collapsed, setCollapsed] = useState(false);
+  const sidebarWidth = collapsed ? 56 : 256;
+  // 导航项配置
+  const navs = [
+    { icon: '🔍', label: '搜索' },
+    { icon: '📁', label: '项目' },
+    { icon: '🕒', label: '最近' },
+    { icon: '👥', label: '社区' },
+  ];
+  const favs = [
+    { icon: '⭐', label: '收藏项目' },
+    { icon: '⭐', label: '收藏对话' },
+    { icon: '🕒', label: '最近' },
+  ];
   return (
     <div style={{ display: 'flex', height: '100vh', background: '#000', color: '#fff' }}>
       {/* 侧边栏 */}
-      <div style={{ width: 256, background: '#1a1a1a', borderRight: '1px solid #222', display: 'flex', flexDirection: 'column' }}>
-        {/* 头部 */}
-        <div style={{ padding: 16, borderBottom: '1px solid #222' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <div style={{ width: 24, height: 24, background: '#fff', borderRadius: 6, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: 14 }}>v0</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ width: 8, height: 8, background: '#52c41a', borderRadius: '50%' }}></div>
-              <span style={{ fontSize: 14 }}>个人</span>
-              {/* <DownOutlined style={{ fontSize: 14 }} /> */}
-            </div>
+      <div
+        style={{
+          width: sidebarWidth,
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          height: '100vh',
+          background: '#1a1a1a',
+          borderRight: '1px solid #222',
+          display: 'flex',
+          flexDirection: 'column',
+          zIndex: 100,
+          transition: 'width 0.2s',
+        }}
+      >
+        {/* 头部+收起按钮 */}
+        <div style={{ padding: 16, borderBottom: '1px solid #222', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 24, height: 24, background: '#fff', borderRadius: 6, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: 14, marginRight: collapsed ? 0 : 8 }}>v0</div>
+            {!collapsed && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 8, height: 8, background: '#52c41a', borderRadius: '50%' }}></div>
+                <span style={{ fontSize: 14 }}>个人</span>
+              </div>
+            )}
           </div>
-          <Button block style={{ background: '#222', color: '#fff', borderColor: '#333' }}>新建对话</Button>
+          <Button
+            size="small"
+            style={{ background: 'none', border: 'none', color: '#bbb', fontSize: 18, width: 28, height: 28, padding: 0 }}
+            onClick={() => setCollapsed(c => !c)}
+            title={collapsed ? '展开' : '收起'}
+          >
+            {collapsed ? '»' : '«'}
+          </Button>
         </div>
+        {/* 新建对话按钮 */}
+        {!collapsed && <Button block style={{ background: '#222', color: '#fff', borderColor: '#333', margin: 16, marginTop: 0 }}>新建对话</Button>}
         {/* 导航 */}
-        <div style={{ flex: 1, padding: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 8, color: '#bbb', borderRadius: 6, cursor: 'pointer', marginBottom: 4, transition: 'background 0.2s' }}>
-            {/* <SearchOutlined /> */}
-            <span>搜索</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 8, color: '#bbb', borderRadius: 6, cursor: 'pointer', marginBottom: 4, transition: 'background 0.2s' }}>
-            {/* <AppstoreOutlined /> */}
-            <span>项目</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 8, color: '#bbb', borderRadius: 6, cursor: 'pointer', marginBottom: 4, transition: 'background 0.2s' }}>
-            {/* <ClockCircleOutlined /> */}
-            <span>最近</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 8, color: '#bbb', borderRadius: 6, cursor: 'pointer', marginBottom: 4, transition: 'background 0.2s' }}>
-            {/* <TeamOutlined /> */}
-            <span>社区</span>
-          </div>
+        <div style={{ flex: 1, padding: collapsed ? 8 : 16 }}>
+          {navs.map((item, idx) => (
+            <div
+              key={item.label}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: collapsed ? 0 : 12,
+                padding: 8,
+                color: '#bbb',
+                borderRadius: 6,
+                cursor: 'pointer',
+                marginBottom: 4,
+                fontSize: 18,
+                transition: 'background 0.2s',
+                justifyContent: collapsed ? 'center' : 'flex-start',
+              }}
+            >
+              <span>{item.icon}</span>
+              {!collapsed && <span style={{ fontSize: 15 }}>{item.label}</span>}
+            </div>
+          ))}
           {/* 可折叠分区 */}
-          <div style={{ paddingTop: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 8, color: '#888', cursor: 'pointer' }}>
-              {/* <RightOutlined /> */}
-              <span>收藏项目</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 8, color: '#888', cursor: 'pointer' }}>
-              {/* <RightOutlined /> */}
-              <span>收藏对话</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 8, color: '#888', cursor: 'pointer' }}>
-              {/* <DownOutlined /> */}
-              <span>最近</span>
-            </div>
+          <div style={{ paddingTop: collapsed ? 8 : 16 }}>
+            {favs.map((item, idx) => (
+              <div
+                key={item.label}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: collapsed ? 0 : 8,
+                  padding: 8,
+                  color: '#888',
+                  cursor: 'pointer',
+                  fontSize: 18,
+                  justifyContent: collapsed ? 'center' : 'flex-start',
+                }}
+              >
+                <span>{item.icon}</span>
+                {!collapsed && <span style={{ fontSize: 15 }}>{item.label}</span>}
+              </div>
+            ))}
           </div>
           {/* 空状态 */}
-          <div style={{ paddingTop: 32, textAlign: 'center', color: '#666', fontSize: 13 }}>
-            <p>你还没有创建任何</p>
-            <p>对话。</p>
-          </div>
+          {!collapsed && (
+            <div style={{ paddingTop: 32, textAlign: 'center', color: '#666', fontSize: 13 }}>
+              <p>你还没有创建任何</p>
+              <p>对话。</p>
+            </div>
+          )}
         </div>
         {/* 新功能横幅 */}
-        <div style={{ padding: 16, borderTop: '1px solid #222' }}>
-          <div style={{ background: '#222', borderRadius: 10, padding: 12, position: 'relative' }}>
-            {/* <Button size="small" style={{ position: 'absolute', top: 4, right: 4, color: '#888', background: 'none', border: 'none' }} icon={<CloseOutlined />} /> */}
-            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>新功能</div>
-            <div style={{ color: '#aaa', fontSize: 12, lineHeight: 1.6 }}>
-              v0 现在支持多标签页和多浏览器同步消息流
+        {!collapsed && (
+          <div style={{ padding: 16, borderTop: '1px solid #222' }}>
+            <div style={{ background: '#222', borderRadius: 10, padding: 12, position: 'relative' }}>
+              <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>新功能</div>
+              <div style={{ color: '#aaa', fontSize: 12, lineHeight: 1.6 }}>
+                v0 现在支持多标签页和多浏览器同步消息流
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
       {/* 主内容区 */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, marginLeft: sidebarWidth, transition: 'margin-left 0.2s', display: 'flex', flexDirection: 'column' }}>
         {/* 顶部栏 */}
         <div style={{ borderBottom: '1px solid #222', padding: 16, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 16 }}>
           <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent' }}>升级</Button>
@@ -84,7 +136,6 @@ export default function V0Interface() {
             <Tag color="green" style={{ fontSize: 12, background: '#52c41a', color: '#fff', border: 'none' }}>新</Tag>
             <span style={{ fontSize: 14 }}>将你的生成内容同步到 GitHub</span>
             <span style={{ color: '#40a9ff', fontSize: 14, cursor: 'pointer' }}>立即体验</span>
-            {/* <RightOutlined style={{ color: '#888' }} /> */}
           </div>
           {/* 主标题 */}
           <h1 style={{ fontSize: 48, fontWeight: 700, marginBottom: 48, textAlign: 'center' }}>我可以帮你做什么？</h1>
@@ -102,7 +153,6 @@ export default function V0Interface() {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, color: '#888', fontSize: 13 }}>
               <span>v0-1.5-md</span>
-              {/* <DownOutlined style={{ fontSize: 14 }} /> */}
             </div>
           </div>
           {/* 快捷操作 */}

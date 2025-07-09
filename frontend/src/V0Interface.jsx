@@ -74,33 +74,52 @@ export default function V0Interface() {
             onClick={() => setCollapsed(c => !c)}
             title={collapsed ? '展开' : '收起'}
             icon={collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-          >
-            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-          </Button>
+          />
         </div>
         {/* 新建对话按钮 */}
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: collapsed ? '12px 0' : '16px 0 0 0' }}>
-          <Button
-            type="primary"
-            shape="circle"
-            icon={<Plus size={20} />}
-            style={{
-              width: collapsed ? 36 : 160,
-              height: 36,
-              borderRadius: 18,
-              background: '#222',
-              color: '#fff',
-              borderColor: '#333',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 600,
-              fontSize: 16,
-              transition: 'width 0.2s',
-            }}
-          >
-            {!collapsed && <span style={{ marginLeft: 8 }}>新建对话</span>}
-          </Button>
+          {collapsed ? (
+            <Button
+              type="primary"
+              shape="circle"
+              icon={<Plus size={20} />}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                background: '#222',
+                color: '#fff',
+                borderColor: '#333',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 600,
+                fontSize: 16,
+                transition: 'width 0.2s',
+              }}
+            />
+          ) : (
+            <Button
+              type="primary"
+              icon={<Plus size={20} />}
+              style={{
+                width: 160,
+                height: 36,
+                borderRadius: 18,
+                background: '#222',
+                color: '#fff',
+                borderColor: '#333',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 600,
+                fontSize: 16,
+                transition: 'width 0.2s',
+              }}
+            >
+              <span style={{ marginLeft: 8 }}>新建对话</span>
+            </Button>
+          )}
         </div>
         {/* 导航 */}
         <div style={{ flex: 1, padding: collapsed ? 8 : 16 }}>
@@ -122,7 +141,7 @@ export default function V0Interface() {
               }}
             >
               {item.icon}
-              {!collapsed && <span style={{ fontSize: 15 }}>{item.label}</span>}
+              {collapsed ? null : <span style={{ fontSize: 15 }}>{item.label}</span>}
             </div>
           ))}
           {/* 可折叠分区 */}
@@ -142,7 +161,7 @@ export default function V0Interface() {
                 }}
               >
                 {item.icon}
-                {!collapsed && <span style={{ fontSize: 15 }}>{item.label}</span>}
+                {collapsed ? null : <span style={{ fontSize: 15 }}>{item.label}</span>}
               </div>
             ))}
           </div>

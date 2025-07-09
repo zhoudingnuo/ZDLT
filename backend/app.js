@@ -823,11 +823,23 @@ app.post('/api/user/usage', (req, res) => {
   let users = readJson(USERS_FILE);
   const idx = users.findIndex(u => u.username === username);
   if (idx !== -1) {
+    // 新增：余额判断与扣费
+    if (users[idx].balance === undefined) users[idx].balance = 0;
+    if (usage_price > 0) {
+      if (users[idx].balance < usage_price) {
+        const result = { success: false, error: 'Insufficient balance. Please recharge.' };
+        console.log('[后端] 更新消耗-余额不足] 请求:', req.body, '响应:', result);
+        return res.status(400).json(result);
+      } else {
+        users[idx].balance -= usage_price;
+      }
+    }
     users[idx].usage_tokens = usage_tokens;
     users[idx].usage_price = usage_price;
     writeJson(USERS_FILE, users);
-    console.log('[后端] 消耗更新成功:', { username, usage_tokens, usage_price });
-    res.json({ success: true });
+    const result = { success: true, balance: users[idx].balance };
+    console.log('[后端] 消耗更新成功:', { username, usage_tokens, usage_price, balance: users[idx].balance });
+    res.json(result);
   } else {
     console.log('[后端] 用户不存在:', username);
     res.status(404).json({ error: '用户不存在' });

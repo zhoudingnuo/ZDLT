@@ -1656,7 +1656,13 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
       // 调试输出
       console.log('[消耗统计] 本次返回 tokens:', tokens, 'price:', price, '累计 tokens:', currentUser.usage_tokens, '累计 price:', currentUser.usage_price);
       setUser(currentUser);
-      await updateUserUsage(currentUser.username, currentUser.usage_tokens, currentUser.usage_price);
+      const usageResponse = await updateUserUsage(currentUser.username, currentUser.usage_tokens, currentUser.usage_price);
+      // 更新本地用户余额信息
+      if (usageResponse.success && usageResponse.balance !== undefined) {
+        currentUser.balance = usageResponse.balance;
+        setUser(currentUser);
+        console.log('[余额更新] 更新后余额:', usageResponse.balance);
+      }
     } catch (e) {
       console.error('普通消息调用失败详细信息:', {
         message: e.message,
@@ -1818,7 +1824,13 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         // 调试输出
         console.log('[消耗统计] 本次返回 tokens:', tokens, 'price:', price, '累计 tokens:', currentUser.usage_tokens, '累计 price:', currentUser.usage_price);
         setUser(currentUser);
-        await updateUserUsage(currentUser.username, currentUser.usage_tokens, currentUser.usage_price);
+        const usageResponse = await updateUserUsage(currentUser.username, currentUser.usage_tokens, currentUser.usage_price);
+        // 更新本地用户余额信息
+        if (usageResponse.success && usageResponse.balance !== undefined) {
+          currentUser.balance = usageResponse.balance;
+          setUser(currentUser);
+          console.log('[余额更新] 更新后余额:', usageResponse.balance);
+        }
       }
       
       // 更新最终结果，保持计时器运行

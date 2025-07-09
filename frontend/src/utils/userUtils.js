@@ -22,13 +22,14 @@ export const registerUser = async (username, password, email) => {
 
 // 获取用户
 export const getUserFromServer = async (username) => {
-  const res = await axios.get(`${API_BASE}/user/${username}`);
+  const res = await axios.get(`${API_BASE}/api/user/${username}`);
   return res.data;
 };
 
 // 更新消耗
 export const updateUserUsage = async (username, usage_tokens, usage_price) => {
-  await axios.post(`${API_BASE}/api/user/usage`, { username, usage_tokens, usage_price });
+  const res = await axios.post(`${API_BASE}/api/user/usage`, { username, usage_tokens, usage_price });
+  return res.data; // 返回响应数据，包含更新后的余额信息
 };
 
 // 用户信息本地存储

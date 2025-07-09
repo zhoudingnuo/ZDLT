@@ -1663,6 +1663,25 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         setUser(currentUser);
         console.log('[余额更新] 更新后余额:', usageResponse.balance);
       }
+      // === 修复点：AI回复后替换最后一条 isLoading assistant 消息 ===
+      setMessages(msgs => {
+        const lastIdx = msgs.length - 1;
+        if (msgs[lastIdx]?.isLoading) {
+          clearInterval(aiTimerRef.current);
+          setAiTimer(0);
+          return [
+            ...msgs.slice(0, lastIdx),
+            {
+              role: 'assistant',
+              content: answer, // 这里用AI返回内容
+              usedTime: ((Date.now() - aiStartTimeRef.current) / 1000).toFixed(1),
+              tokens: usage?.total_tokens,
+              price: price
+            }
+          ];
+        }
+        return msgs;
+      });
     } catch (e) {
       console.error('普通消息调用失败详细信息:', {
         message: e.message,

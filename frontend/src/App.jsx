@@ -2186,8 +2186,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
             outputs.files.forEach(file => {
               if (file.url || file.remote_url) {
                 // 渲染audio播放器
-                renderedContent += `<audio controls src=\"${file.url || file.remote_url}\">您的浏览器不支持音频播放</audio>\n\n`;
-                // 渲染下载链接
+                renderedContent += `<audio controls src="${file.url || file.remote_url}">您的浏览器不支持音频播放</audio>\n\n`;
                 renderedContent += `[下载音频文件：${file.filename || file.extension || '文件'}](${file.url || file.remote_url})\n\n`;
               }
             });

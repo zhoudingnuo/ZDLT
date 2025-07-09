@@ -2177,26 +2177,21 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
         const outputs = data.outputs;
         if (outputs) {
           let renderedContent = '';
-          if (outputs.result) {
-            renderedContent += `${outputs.result}\n\n`;
-          }
-          if (outputs.text) {
-            renderedContent += `${outputs.text}\n\n`;
-          }
-          if (outputs.file) {
-            renderedContent += `${outputs.file}\n\n`;
-          }
-          if (outputs.answer) {
-            renderedContent += `${outputs.answer}\n\n`;
-          }
-          if (!renderedContent) {
-            for (const [key, value] of Object.entries(outputs)) {
-              if (value && typeof value === 'string' && value.trim()) {
-                renderedContent += `${value}\n\n`;
+          if (outputs.result) renderedContent += `${outputs.result}\n\n`;
+          if (outputs.text) renderedContent += `${outputs.text}\n\n`;
+          if (outputs.file) renderedContent += `${outputs.file}\n\n`;
+          if (outputs.answer) renderedContent += `${outputs.answer}\n\n`;
+          // 新增：处理文件数组，渲染音频播放器和下载链接
+          if (outputs.files && Array.isArray(outputs.files)) {
+            outputs.files.forEach(file => {
+              if (file.url || file.remote_url) {
+                // 渲染audio播放器
+                renderedContent += `<audio controls src=\"${file.url || file.remote_url}\">您的浏览器不支持音频播放</audio>\n\n`;
+                // 渲染下载链接
+                renderedContent += `[下载音频文件：${file.filename || file.extension || '文件'}](${file.url || file.remote_url})\n\n`;
               }
-            }
+            });
           }
-          
           const finalContent = renderedContent.trim() || '处理完成，但未找到可显示的内容';
           console.log('Workflow提取的内容:', finalContent);
           

@@ -201,7 +201,7 @@ export default function V0Interface() {
             <span style={{ fontSize: 14 }}>将你的生成内容同步到 GitHub</span>
             <span style={{ color: '#40a9ff', fontSize: 14, cursor: 'pointer' }}>立即体验</span>
           </div>
-          {/* 主标题 */}
+          {/* 主标题1 */}
           <h1 style={{ fontSize: 48, fontWeight: 700, marginBottom: 48, textAlign: 'center' }}>我可以帮你做什么？</h1>
           {/* 输入区 */}
           <div style={{ width: '100%', maxWidth: 640, marginBottom: 32 }}>
@@ -211,8 +211,12 @@ export default function V0Interface() {
                 style={{ width: '100%', background: '#1a1a1a', borderColor: '#333', color: '#fff', height: 48, paddingRight: 120 }}
               />
               <div style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: 8 }}>
-                <Button size="small" style={{ color: '#bbb', background: 'none', border: 'none' }}>✨</Button>
-                <Button size="small" style={{ color: '#bbb', background: 'none', border: 'none' }}>⬆️</Button>
+                <Button size="small" style={{ color: '#bbb', background: 'none', border: 'none' }}>
+                  <span>✨</span>
+                </Button>
+                <Button size="small" style={{ color: '#bbb', background: 'none', border: 'none' }}>
+                  <span>⬆️</span>
+                </Button>
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, color: '#888', fontSize: 13 }}>
@@ -221,11 +225,26 @@ export default function V0Interface() {
           </div>
           {/* 快捷操作 */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 64, justifyContent: 'center' }}>
-            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8 }}>📷 克隆截图</Button>
-            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8 }}>📄 从 Figma 导入</Button>
-            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8 }}>⬆️ 上传项目</Button>
-            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8 }}>📄 着陆页</Button>
-            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8 }}>➕ 注册表单</Button>
+            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span>📷</span>
+              <span>克隆截图</span>
+            </Button>
+            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span>📄</span>
+              <span>从 Figma 导入</span>
+            </Button>
+            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span>⬆️</span>
+              <span>上传项目</span>
+            </Button>
+            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span>📄</span>
+              <span>着陆页</span>
+            </Button>
+            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span>➕</span>
+              <span>注册表单</span>
+            </Button>
           </div>
           {/* 社区内容区 */}
           <div style={{ width: '100%', maxWidth: 1200 }}>

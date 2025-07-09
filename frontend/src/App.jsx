@@ -34,6 +34,7 @@ import API_BASE from './utils/apiConfig';
 import useIsMobile from './utils/useIsMobile';
 import './mobile-adapt.css';
 import LoginPage from './LoginPage';
+import V0Interface from './V0Interface';
 
 
 const { Header, Content, Sider } = Layout;
@@ -3564,6 +3565,10 @@ function App() {
   // 如果未登录，直接进入登录页
   if (!user) {
     return <LoginPage setUser={setUser} />;
+  }
+
+  if (user && !user.isAdmin) {
+    return <V0Interface />;
   }
 
   if (page === 'chat') {

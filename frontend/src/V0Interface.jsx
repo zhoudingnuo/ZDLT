@@ -16,7 +16,7 @@ import {
   X,
 } from 'lucide-react';
 
-export default function V0Interface() {
+function V0Interface() {
   const [collapsed, setCollapsed] = useState(window.innerWidth < 900);
   const sidebarWidth = collapsed ? 56 : 256;
 
@@ -141,7 +141,7 @@ export default function V0Interface() {
               }}
             >
               {item.icon}
-              {collapsed ? null : <span style={{ fontSize: 15 }}>{item.label}</span>}
+              {collapsed ? null : <span style={{ fontSize: 15 }}>{typeof item.label === 'string' ? item.label : ''}</span>}
             </div>
           ))}
           {/* 可折叠分区 */}
@@ -161,7 +161,7 @@ export default function V0Interface() {
                 }}
               >
                 {item.icon}
-                {collapsed ? null : <span style={{ fontSize: 15 }}>{item.label}</span>}
+                {collapsed ? null : <span style={{ fontSize: 15 }}>{typeof item.label === 'string' ? item.label : ''}</span>}
               </div>
             ))}
           </div>
@@ -314,4 +314,6 @@ export default function V0Interface() {
       </div>
     </div>
   );
-} 
+}
+// 已修复 React child 报错，所有 children 均为字符串或 React 元素
+export default V0Interface; 

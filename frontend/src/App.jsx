@@ -1617,7 +1617,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
     }, 100);
     setLoading(true);
     const newMessages = [...messages, { role: 'user', content: input }];
-    // 立即插入AI loading气泡，显示思考消息
+    // 立即插入AI loading气泡，显示思考消息。
     setMessages([...newMessages, { role: 'assistant', content: 'AI正在思考🤔', isLoading: true }]);
     setInput('');
     try {

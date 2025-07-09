@@ -30,7 +30,7 @@ export default function LoginPage({ setUser }) {
     }
   }, [codeCountdown]);
 
-  // 主题相关颜色
+  // 主题相关颜色1
   const bgColor = theme === 'dark' ? '#18191c' : '#f7f8fa';
   const cardBg = theme === 'dark' ? '#23262e' : '#fff';
   const fontColor = theme === 'dark' ? '#eee' : '#222';
@@ -99,9 +99,35 @@ export default function LoginPage({ setUser }) {
 
   return (
     <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       background: bgColor, transition: 'background 0.2s'
     }}>
+      {/* LOGO横向排列区域 */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 40
+        }}
+      >
+        <img
+          src="/logo-zeta-vista.png"
+          alt="logo"
+          style={{ height: 48, marginRight: 16 }}
+        />
+        <span
+          style={{
+            fontSize: 36,
+            fontWeight: 700,
+            color: '#4f8cff',
+            letterSpacing: 2,
+            fontFamily: 'PingFang SC, Microsoft YaHei, Arial, sans-serif'
+          }}
+        >
+          智大蓝图
+        </span>
+      </div>
       {/* 右上角主题切换按钮 */}
       <Button
         shape="circle"

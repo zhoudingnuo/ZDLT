@@ -2240,7 +2240,7 @@ function ChatPage({ onBack, agent, theme, setTheme, chatId, navigate, user, setU
           return <ReactMarkdown rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>{fixMarkdownTable(finalContent)}</ReactMarkdown>;
         }
       }
-      // 没有outputs时，直接返回原始content（如问候语）
+      // 没有outputs时，直接返回原始content（如问候语）1
       return typeof content === 'string' ? content : '';
     } else {
       // Chat类型

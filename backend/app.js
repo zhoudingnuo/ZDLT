@@ -13,14 +13,14 @@ const { spawn } = require('child_process');
 const Dysmsapi20170525 = require('@alicloud/dysmsapi20170525');
 const { Config } = require('@alicloud/openapi-client');
 const { RuntimeOptions } = require('@alicloud/tea-util');
-// 短信验证码内存存储（可换成Redis/DB）
+// 短信验证码内存存储（可换成Redis/DB1）
 const smsCodes = {};
 
 dotenv.config();
 
 const app = express();
 
-// 配置CORS，允许局域网访问
+// 配置CORS，允许局域网访问1
 app.use(cors({
   origin: true, // 允许所有来源
   credentials: true,

@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Input, Tag } from 'antd';
 import {
-  Search,
-  Grid3X3,
-  Clock,
-  Users,
-  ChevronRight,
-  ChevronLeft,
-  ChevronDown,
-  Star,
-  Plus,
-  MessageSquare,
-  Folder,
-  UserPlus,
-  X,
-} from 'lucide-react';
+  SearchOutlined,
+  FolderOutlined,
+  ClockCircleOutlined,
+  TeamOutlined,
+  RightOutlined,
+  LeftOutlined,
+  StarOutlined,
+  PlusOutlined,
+  MessageOutlined,
+  UserOutlined,
+  CloseOutlined,
+} from '@ant-design/icons';
 
 function V0Interface() {
   const [collapsed, setCollapsed] = useState(window.innerWidth < 900);
@@ -32,15 +30,15 @@ function V0Interface() {
 
   // 导航项配置
   const navs = [
-    { icon: <Search size={20} />, label: '搜索' },
-    { icon: <Folder size={20} />, label: '项目' },
-    { icon: <Clock size={20} />, label: '最近' },
-    { icon: <Users size={20} />, label: '社区' },
+    { icon: <SearchOutlined style={{ fontSize: 20 }} />, label: '搜索' },
+    { icon: <FolderOutlined style={{ fontSize: 20 }} />, label: '项目' },
+    { icon: <ClockCircleOutlined style={{ fontSize: 20 }} />, label: '最近' },
+    { icon: <TeamOutlined style={{ fontSize: 20 }} />, label: '社区' },
   ];
   const favs = [
-    { icon: <Star size={20} />, label: '收藏项目' },
-    { icon: <MessageSquare size={20} />, label: '收藏对话' },
-    { icon: <Clock size={20} />, label: '最近' },
+    { icon: <StarOutlined style={{ fontSize: 20 }} />, label: '收藏项目' },
+    { icon: <MessageOutlined style={{ fontSize: 20 }} />, label: '收藏对话' },
+    { icon: <ClockCircleOutlined style={{ fontSize: 20 }} />, label: '最近' },
   ];
   return (
     <div style={{ display: 'flex', height: '100vh', background: '#000', color: '#fff' }}>
@@ -73,7 +71,7 @@ function V0Interface() {
             style={{ background: 'none', border: 'none', color: '#bbb', fontSize: 18, width: 28, height: 28, padding: 0 }}
             onClick={() => setCollapsed(c => !c)}
             title={collapsed ? '展开' : '收起'}
-            icon={collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+            icon={collapsed ? <RightOutlined style={{ fontSize: 18 }} /> : <LeftOutlined style={{ fontSize: 18 }} />}
           />
         </div>
         {/* 新建对话按钮 */}
@@ -82,7 +80,7 @@ function V0Interface() {
             <Button
               type="primary"
               shape="circle"
-              icon={<Plus size={20} />}
+              icon={<PlusOutlined style={{ fontSize: 20 }} />}
               style={{
                 width: 36,
                 height: 36,
@@ -101,7 +99,7 @@ function V0Interface() {
           ) : (
             <Button
               type="primary"
-              icon={<Plus size={20} />}
+              icon={<PlusOutlined style={{ fontSize: 20 }} />}
               style={{
                 width: 160,
                 height: 36,

@@ -1,266 +1,177 @@
-import {
-  Search,
-  Grid3X3,
-  Clock,
-  Users,
-  ChevronRight,
-  ChevronDown,
-  Sparkles,
-  Camera,
-  Upload,
-  FileText,
-  UserPlus,
-  X,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+import React from 'react';
+import { Button, Input, Tag } from 'antd';
+// import { SearchOutlined, AppstoreOutlined, ClockCircleOutlined, TeamOutlined, DownOutlined, RightOutlined, StarOutlined, CameraOutlined, UploadOutlined, FileTextOutlined, UserAddOutlined, CloseOutlined } from '@ant-design/icons';
 
 export default function V0Interface() {
   return (
-    <div className="flex h-screen bg-black text-white">
-      {/* Sidebar */}
-      <div className="w-64 bg-gray-900 border-r border-gray-800 flex flex-col">
-        {/* Header */}
-        <div className="p-4 border-b border-gray-800">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-6 h-6 bg-white rounded text-black flex items-center justify-center text-sm font-bold">
-              v0
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm">Personal</span>
-              <ChevronDown className="w-4 h-4" />
+    <div style={{ display: 'flex', height: '100vh', background: '#000', color: '#fff' }}>
+      {/* 侧边栏 */}
+      <div style={{ width: 256, background: '#1a1a1a', borderRight: '1px solid #222', display: 'flex', flexDirection: 'column' }}>
+        {/* 头部 */}
+        <div style={{ padding: 16, borderBottom: '1px solid #222' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+            <div style={{ width: 24, height: 24, background: '#fff', borderRadius: 6, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: 14 }}>v0</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 8, height: 8, background: '#52c41a', borderRadius: '50%' }}></div>
+              <span style={{ fontSize: 14 }}>个人</span>
+              {/* <DownOutlined style={{ fontSize: 14 }} /> */}
             </div>
           </div>
-          <Button className="w-full bg-gray-800 hover:bg-gray-700 text-white border-gray-700">New Chat</Button>
+          <Button block style={{ background: '#222', color: '#fff', borderColor: '#333' }}>新建对话</Button>
         </div>
-
-        {/* Navigation */}
-        <div className="flex-1 p-4 space-y-2">
-          <div className="flex items-center gap-3 p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded cursor-pointer">
-            <Search className="w-4 h-4" />
-            <span className="text-sm">Search</span>
+        {/* 导航 */}
+        <div style={{ flex: 1, padding: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 8, color: '#bbb', borderRadius: 6, cursor: 'pointer', marginBottom: 4, transition: 'background 0.2s' }}>
+            {/* <SearchOutlined /> */}
+            <span>搜索</span>
           </div>
-          <div className="flex items-center gap-3 p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded cursor-pointer">
-            <Grid3X3 className="w-4 h-4" />
-            <span className="text-sm">Projects</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 8, color: '#bbb', borderRadius: 6, cursor: 'pointer', marginBottom: 4, transition: 'background 0.2s' }}>
+            {/* <AppstoreOutlined /> */}
+            <span>项目</span>
           </div>
-          <div className="flex items-center gap-3 p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded cursor-pointer">
-            <Clock className="w-4 h-4" />
-            <span className="text-sm">Recents</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 8, color: '#bbb', borderRadius: 6, cursor: 'pointer', marginBottom: 4, transition: 'background 0.2s' }}>
+            {/* <ClockCircleOutlined /> */}
+            <span>最近</span>
           </div>
-          <div className="flex items-center gap-3 p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded cursor-pointer">
-            <Users className="w-4 h-4" />
-            <span className="text-sm">Community</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 8, color: '#bbb', borderRadius: 6, cursor: 'pointer', marginBottom: 4, transition: 'background 0.2s' }}>
+            {/* <TeamOutlined /> */}
+            <span>社区</span>
           </div>
-
-          {/* Collapsible Sections */}
-          <div className="pt-4 space-y-2">
-            <div className="flex items-center gap-2 p-2 text-gray-400 hover:text-white cursor-pointer">
-              <ChevronRight className="w-4 h-4" />
-              <span className="text-sm">Favorite Projects</span>
+          {/* 可折叠分区 */}
+          <div style={{ paddingTop: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 8, color: '#888', cursor: 'pointer' }}>
+              {/* <RightOutlined /> */}
+              <span>收藏项目</span>
             </div>
-            <div className="flex items-center gap-2 p-2 text-gray-400 hover:text-white cursor-pointer">
-              <ChevronRight className="w-4 h-4" />
-              <span className="text-sm">Favorite Chats</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 8, color: '#888', cursor: 'pointer' }}>
+              {/* <RightOutlined /> */}
+              <span>收藏对话</span>
             </div>
-            <div className="flex items-center gap-2 p-2 text-gray-400 hover:text-white cursor-pointer">
-              <ChevronDown className="w-4 h-4" />
-              <span className="text-sm">Recents</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 8, color: '#888', cursor: 'pointer' }}>
+              {/* <DownOutlined /> */}
+              <span>最近</span>
             </div>
           </div>
-
-          {/* Empty State */}
-          <div className="pt-8 text-center text-gray-500 text-sm">
-            <p>You haven't created any</p>
-            <p>chats yet.</p>
+          {/* 空状态 */}
+          <div style={{ paddingTop: 32, textAlign: 'center', color: '#666', fontSize: 13 }}>
+            <p>你还没有创建任何</p>
+            <p>对话。</p>
           </div>
         </div>
-
-        {/* New Feature Banner */}
-        <div className="p-4 border-t border-gray-800">
-          <div className="bg-gray-800 rounded-lg p-3 relative">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute top-1 right-1 h-6 w-6 p-0 text-gray-400 hover:text-white"
-            >
-              <X className="w-3 h-3" />
-            </Button>
-            <div className="text-sm">
-              <div className="font-medium mb-1">New Feature</div>
-              <div className="text-gray-400 text-xs leading-relaxed">
-                v0 will now sync across tabs and browsers while messages stream in
-              </div>
+        {/* 新功能横幅 */}
+        <div style={{ padding: 16, borderTop: '1px solid #222' }}>
+          <div style={{ background: '#222', borderRadius: 10, padding: 12, position: 'relative' }}>
+            {/* <Button size="small" style={{ position: 'absolute', top: 4, right: 4, color: '#888', background: 'none', border: 'none' }} icon={<CloseOutlined />} /> */}
+            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>新功能</div>
+            <div style={{ color: '#aaa', fontSize: 12, lineHeight: 1.6 }}>
+              v0 现在支持多标签页和多浏览器同步消息流
             </div>
           </div>
         </div>
       </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Top Bar */}
-        <div className="border-b border-gray-800 p-4 flex justify-between items-center">
-          <div></div>
-          <div className="flex items-center gap-4">
-            <Button variant="outline" className="border-gray-700 text-white hover:bg-gray-800 bg-transparent">
-              Upgrade
-            </Button>
-            <Button variant="outline" className="border-gray-700 text-white hover:bg-gray-800 bg-transparent">
-              Feedback
-            </Button>
-            <div className="w-8 h-8 bg-green-500 rounded-full"></div>
-          </div>
+      {/* 主内容区 */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* 顶部栏 */}
+        <div style={{ borderBottom: '1px solid #222', padding: 16, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 16 }}>
+          <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent' }}>升级</Button>
+          <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent' }}>反馈</Button>
+          <div style={{ width: 32, height: 32, background: '#52c41a', borderRadius: '50%' }}></div>
         </div>
-
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col items-center justify-center p-8">
-          {/* GitHub Sync Banner */}
-          <div className="mb-12 flex items-center gap-2 bg-gray-900 border border-gray-700 rounded-full px-4 py-2">
-            <Badge variant="secondary" className="bg-green-600 text-white text-xs">
-              New
-            </Badge>
-            <span className="text-sm">Sync your generation with GitHub</span>
-            <span className="text-blue-400 text-sm cursor-pointer hover:underline">Try it now</span>
-            <ChevronRight className="w-4 h-4 text-gray-400" />
+        {/* 主内容区域 */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+          {/* GitHub 同步横幅 */}
+          <div style={{ marginBottom: 48, display: 'flex', alignItems: 'center', gap: 8, background: '#1a1a1a', border: '1px solid #333', borderRadius: 999, padding: '8px 24px' }}>
+            <Tag color="green" style={{ fontSize: 12, background: '#52c41a', color: '#fff', border: 'none' }}>新</Tag>
+            <span style={{ fontSize: 14 }}>将你的生成内容同步到 GitHub</span>
+            <span style={{ color: '#40a9ff', fontSize: 14, cursor: 'pointer' }}>立即体验</span>
+            {/* <RightOutlined style={{ color: '#888' }} /> */}
           </div>
-
-          {/* Main Heading */}
-          <h1 className="text-5xl font-bold mb-12 text-center">What can I help you build?</h1>
-
-          {/* Input Area */}
-          <div className="w-full max-w-2xl mb-8">
-            <div className="relative">
+          {/* 主标题 */}
+          <h1 style={{ fontSize: 48, fontWeight: 700, marginBottom: 48, textAlign: 'center' }}>我可以帮你做什么？</h1>
+          {/* 输入区 */}
+          <div style={{ width: '100%', maxWidth: 640, marginBottom: 32 }}>
+            <div style={{ position: 'relative' }}>
               <Input
-                placeholder="Ask v0 to build..."
-                className="w-full bg-gray-900 border-gray-700 text-white placeholder-gray-400 h-12 pr-20"
+                placeholder="请输入你想让 v0 帮你做什么..."
+                style={{ width: '100%', background: '#1a1a1a', borderColor: '#333', color: '#fff', height: 48, paddingRight: 120 }}
               />
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-                <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-1">
-                  <Sparkles className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-1">
-                  <Upload className="w-4 h-4" />
-                </Button>
+              <div style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: 8 }}>
+                <Button size="small" style={{ color: '#bbb', background: 'none', border: 'none' }}>✨</Button>
+                <Button size="small" style={{ color: '#bbb', background: 'none', border: 'none' }}>⬆️</Button>
               </div>
             </div>
-            <div className="flex items-center gap-2 mt-2 text-sm text-gray-400">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, color: '#888', fontSize: 13 }}>
               <span>v0-1.5-md</span>
-              <ChevronDown className="w-4 h-4" />
+              {/* <DownOutlined style={{ fontSize: 14 }} /> */}
             </div>
           </div>
-
-          {/* Quick Actions */}
-          <div className="flex flex-wrap gap-3 mb-16 justify-center">
-            <Button
-              variant="outline"
-              className="border-gray-700 text-white hover:bg-gray-800 flex items-center gap-2 bg-transparent"
-            >
-              <Camera className="w-4 h-4" />
-              Clone a Screenshot
-            </Button>
-            <Button
-              variant="outline"
-              className="border-gray-700 text-white hover:bg-gray-800 flex items-center gap-2 bg-transparent"
-            >
-              <FileText className="w-4 h-4" />
-              Import from Figma
-            </Button>
-            <Button
-              variant="outline"
-              className="border-gray-700 text-white hover:bg-gray-800 flex items-center gap-2 bg-transparent"
-            >
-              <Upload className="w-4 h-4" />
-              Upload a Project
-            </Button>
-            <Button
-              variant="outline"
-              className="border-gray-700 text-white hover:bg-gray-800 flex items-center gap-2 bg-transparent"
-            >
-              <FileText className="w-4 h-4" />
-              Landing Page
-            </Button>
-            <Button
-              variant="outline"
-              className="border-gray-700 text-white hover:bg-gray-800 flex items-center gap-2 bg-transparent"
-            >
-              <UserPlus className="w-4 h-4" />
-              Sign Up Form
-            </Button>
+          {/* 快捷操作 */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 64, justifyContent: 'center' }}>
+            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8 }}>📷 克隆截图</Button>
+            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8 }}>📄 从 Figma 导入</Button>
+            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8 }}>⬆️ 上传项目</Button>
+            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8 }}>📄 着陆页</Button>
+            <Button style={{ borderColor: '#333', color: '#fff', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8 }}>➕ 注册表单</Button>
           </div>
-
-          {/* Community Section */}
-          <div className="w-full max-w-6xl">
-            <div className="flex justify-between items-center mb-6">
+          {/* 社区内容区 */}
+          <div style={{ width: '100%', maxWidth: 1200 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
               <div>
-                <h2 className="text-xl font-semibold mb-1">From the Community</h2>
-                <p className="text-gray-400 text-sm">Explore what the community is building with v0.</p>
+                <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>来自社区的灵感</h2>
+                <p style={{ color: '#888', fontSize: 13 }}>探索社区正在用 v0 构建什么。</p>
               </div>
-              <Button variant="ghost" className="text-gray-400 hover:text-white flex items-center gap-1">
-                Browse All
-                <ChevronRight className="w-4 h-4" />
-              </Button>
+              <Button type="link" style={{ color: '#bbb', display: 'flex', alignItems: 'center', gap: 4, fontSize: 14, padding: 0 }}>浏览全部</Button>
             </div>
-
-            {/* Community Projects Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Project 1 - Cyberpunk Dashboard */}
-              <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800 hover:border-gray-700 transition-colors cursor-pointer">
-                <div className="aspect-video bg-gradient-to-br from-orange-500 to-red-600 relative">
-                  <div className="absolute inset-0 bg-black/20"></div>
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <div className="text-xs text-white/80 mb-1">DASHBOARD</div>
-                    <div className="text-sm text-white font-medium">Cyberpunk-style interface</div>
+            {/* 社区项目网格 */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24 }}>
+              {/* 项目1 */}
+              <div style={{ background: '#1a1a1a', borderRadius: 12, overflow: 'hidden', border: '1px solid #222', cursor: 'pointer', transition: 'border 0.2s' }}>
+                <div style={{ aspectRatio: '16/9', background: 'linear-gradient(135deg, #fa8c16 0%, #f5222d 100%)', position: 'relative' }}>
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.18)' }}></div>
+                  <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', marginBottom: 4 }}>仪表盘</div>
+                    <div style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>赛博朋克风格界面</div>
                   </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-medium mb-2">Cyberpunk dashboard design</h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center text-xs font-bold text-white">
-                      E
-                    </div>
-                    <span>2.1K Forks</span>
+                <div style={{ padding: 16 }}>
+                  <h3 style={{ fontWeight: 500, marginBottom: 8 }}>赛博朋克仪表盘设计</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#888' }}>
+                    <div style={{ width: 20, height: 20, background: '#fa8c16', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 'bold', color: '#fff' }}>E</div>
+                    <span>2.1K 分叉</span>
                   </div>
                 </div>
               </div>
-
-              {/* Project 2 - Financial Dashboard */}
-              <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800 hover:border-gray-700 transition-colors cursor-pointer">
-                <div className="aspect-video bg-gradient-to-br from-blue-600 to-purple-600 relative">
-                  <div className="absolute inset-0 bg-black/20"></div>
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <div className="text-xs text-white/80 mb-1">ANALYTICS</div>
-                    <div className="text-sm text-white font-medium">Financial data visualization</div>
+              {/* 项目2 */}
+              <div style={{ background: '#1a1a1a', borderRadius: 12, overflow: 'hidden', border: '1px solid #222', cursor: 'pointer', transition: 'border 0.2s' }}>
+                <div style={{ aspectRatio: '16/9', background: 'linear-gradient(135deg, #1890ff 0%, #722ed1 100%)', position: 'relative' }}>
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.18)' }}></div>
+                  <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', marginBottom: 4 }}>分析</div>
+                    <div style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>金融数据可视化</div>
                   </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-medium mb-2">Financial Dashboard</h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-xs font-bold text-white">
-                      F
-                    </div>
-                    <span>2.02K Forks</span>
+                <div style={{ padding: 16 }}>
+                  <h3 style={{ fontWeight: 500, marginBottom: 8 }}>金融仪表盘</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#888' }}>
+                    <div style={{ width: 20, height: 20, background: '#52c41a', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 'bold', color: '#fff' }}>F</div>
+                    <span>2.02K 分叉</span>
                   </div>
                 </div>
               </div>
-
-              {/* Project 3 - Login Card */}
-              <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800 hover:border-gray-700 transition-colors cursor-pointer">
-                <div className="aspect-video bg-gradient-to-br from-gray-600 to-gray-800 relative">
-                  <div className="absolute inset-0 bg-black/20"></div>
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <div className="text-xs text-white/80 mb-1">AUTHENTICATION</div>
-                    <div className="text-sm text-white font-medium">Clean login interface</div>
+              {/* 项目3 */}
+              <div style={{ background: '#1a1a1a', borderRadius: 12, overflow: 'hidden', border: '1px solid #222', cursor: 'pointer', transition: 'border 0.2s' }}>
+                <div style={{ aspectRatio: '16/9', background: 'linear-gradient(135deg, #595959 0%, #1a1a1a 100%)', position: 'relative' }}>
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.18)' }}></div>
+                  <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', marginBottom: 4 }}>认证</div>
+                    <div style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>简洁登录界面</div>
                   </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-medium mb-2">Two-column Login Card</h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center text-xs font-bold text-white">
-                      T
-                    </div>
-                    <span>7.3K Forks</span>
+                <div style={{ padding: 16 }}>
+                  <h3 style={{ fontWeight: 500, marginBottom: 8 }}>双栏登录卡片</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#888' }}>
+                    <div style={{ width: 20, height: 20, background: '#1890ff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 'bold', color: '#fff' }}>T</div>
+                    <span>7.3K 分叉</span>
                   </div>
                 </div>
               </div>
@@ -269,5 +180,5 @@ export default function V0Interface() {
         </div>
       </div>
     </div>
-  )
+  );
 } 
